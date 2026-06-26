@@ -1,0 +1,1977 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <base target="_top">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>자율동아리 통합관리</title>
+  <style>
+    /* ===== CSS 변수 ===== */
+    :root {
+      --bg: #f4f6fb;
+      --panel: rgba(255,255,255,0.92);
+      --ink: #111827;
+      --muted: #6b7280;
+      --line: rgba(17,24,39,0.08);
+      --blue: #2563eb;
+      --accent: #00a3ff;
+      --accent2: #8b5cf6;
+      --tint: rgba(37,99,235,0.08);
+      --ring: rgba(37,99,235,0.18);
+      --green: #16a34a;
+      --yellow: #f59e0b;
+      --red: #ef4444;
+      --hero: linear-gradient(145deg,rgba(255,255,255,.95),rgba(235,244,255,.96) 44%,rgba(230,250,255,.92));
+      --soft-panel: rgba(255,255,255,0.82);
+      --shadow: 0 18px 46px rgba(15,23,42,.10);
+      --one-radius: 26px;
+      --one-radius-sm: 18px;
+      /* 전술판 역할 색상 */
+      --role-front:#e5484d; --role-mid:#3478f6; --role-back:#2fa84f;
+      --role-setter:#9b51e0; --role-attacker:#ff9416; --role-neutral:#5c6bc0;
+      --empty-zone:rgba(255,214,0,.38); --empty-border:rgba(217,164,0,.9);
+      --mv-arrow:rgba(40,44,52,.45); --atk-arrow:rgba(220,38,38,.75); --srv-arrow:rgba(52,120,246,.75);
+      --band-f:rgba(229,72,77,.10); --band-m:rgba(52,120,246,.09); --band-b:rgba(47,168,79,.10);
+    }
+    body.theme-sporty {
+      --bg:#edf7ff; --blue:#0284c7; --accent:#22c55e; --accent2:#38bdf8;
+      --hero:linear-gradient(145deg,rgba(255,255,255,.96),rgba(219,242,255,.96) 48%,rgba(220,252,231,.92));
+      --tint:rgba(14,165,233,.10); --ring:rgba(14,165,233,.20);
+    }
+    body.theme-soft {
+      --bg:#fff4fa; --blue:#db2777; --accent:#8b5cf6; --accent2:#14b8a6;
+      --hero:linear-gradient(145deg,rgba(255,255,255,.96),rgba(253,231,242,.96) 50%,rgba(237,233,254,.94));
+      --tint:rgba(219,39,119,.10); --ring:rgba(219,39,119,.20);
+    }
+    body.theme-fresh {
+      --bg:#f2fbf7; --blue:#2563eb; --accent:#10b981; --accent2:#06b6d4;
+      --hero:linear-gradient(145deg,rgba(255,255,255,.96),rgba(232,247,255,.96) 46%,rgba(220,252,231,.92));
+      --tint:rgba(16,185,129,.11); --ring:rgba(16,185,129,.20);
+    }
+
+    *{box-sizing:border-box;}
+    body {
+      margin:0;
+      font-family:-apple-system,BlinkMacSystemFont,"Segoe UI","Noto Sans KR",sans-serif;
+      background:
+        radial-gradient(circle at 14% 0%,rgba(37,99,235,.10),transparent 28%),
+        radial-gradient(circle at 90% 12%,rgba(16,185,129,.12),transparent 24%),
+        var(--bg);
+      color:var(--ink);
+      -webkit-tap-highlight-color:transparent;
+    }
+    button,input,select,textarea{font:inherit;}
+    button{border:0;cursor:pointer;touch-action:manipulation;transition:transform 120ms ease,box-shadow 120ms ease,background 120ms ease;}
+    button:active{transform:scale(.97);}
+
+    .app{max-width:980px;margin:0 auto;padding:18px 16px 34px;}
+
+    /* 상단 바 */
+    .topbar{
+      position:sticky;top:8px;z-index:5;
+      display:flex;justify-content:space-between;align-items:center;gap:12px;
+      padding:12px 14px;margin-bottom:10px;
+      border:1px solid rgba(255,255,255,.72);border-radius:999px;
+      background:rgba(255,255,255,.72);box-shadow:0 12px 30px rgba(15,23,42,.08);
+      backdrop-filter:blur(22px) saturate(1.45);
+    }
+    .brand strong{font-size:18px;font-weight:950;}
+    .brand span{color:var(--muted);font-size:12px;}
+
+    /* 패널 & 히어로 */
+    .panel{
+      background:var(--soft-panel);border:1px solid rgba(255,255,255,.76);
+      border-radius:var(--one-radius);box-shadow:var(--shadow);
+      padding:18px;margin-bottom:14px;backdrop-filter:blur(18px) saturate(1.35);
+    }
+    .hero{
+      position:relative;overflow:hidden;background:var(--hero);
+      border:1px solid rgba(255,255,255,.76);border-radius:var(--one-radius);
+      box-shadow:var(--shadow);padding:24px 22px;margin-bottom:14px;
+      backdrop-filter:blur(18px) saturate(1.35);
+    }
+    .hero::after{
+      content:"";position:absolute;right:-38px;top:-42px;
+      width:142px;height:142px;border-radius:50%;
+      background:linear-gradient(135deg,rgba(37,99,235,.20),rgba(16,185,129,.16));
+      filter:blur(1px);z-index:0;
+    }
+    .hero h1{position:relative;margin:0 0 8px;font-size:30px;font-weight:950;letter-spacing:-.7px;z-index:1;}
+    .hero p{position:relative;margin:0;color:#475569;line-height:1.5;font-size:14px;max-width:720px;z-index:1;}
+
+    .screen{display:none;} .screen.active{display:block;}
+    .grid{display:grid;gap:12px;} .grid.two{grid-template-columns:repeat(2,minmax(0,1fr));}
+
+    label{display:grid;gap:6px;color:var(--muted);font-size:13px;font-weight:700;}
+    input,select,textarea{
+      width:100%;border:0;border-radius:18px;min-height:48px;padding:12px;
+      background:rgba(255,255,255,.88);box-shadow:inset 0 0 0 1px rgba(17,24,39,.08);
+      color:var(--ink);outline:none;
+    }
+    textarea{min-height:84px;resize:vertical;}
+    input:focus,select:focus,textarea:focus{box-shadow:0 0 0 4px var(--ring),inset 0 0 0 1px var(--blue);}
+
+    .btn{
+      min-height:44px;border-radius:999px;padding:0 14px;
+      background:linear-gradient(135deg,var(--blue),var(--accent));
+      color:white;font-weight:950;box-shadow:0 12px 24px rgba(37,99,235,.18);
+    }
+    .btn.saving,.choice.saving,.mission.saving{opacity:.72;}
+    .btn.secondary{background:rgba(255,255,255,.86);color:var(--blue);border:0;box-shadow:inset 0 0 0 1px rgba(17,24,39,.08),0 8px 18px rgba(15,23,42,.05);}
+    .btn.green{background:var(--green);}
+    .btn.yellow{background:var(--yellow);color:#111827;}
+    .btn.red{background:var(--red);}
+    .btn-row{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px;}
+
+    /* 3탭 네비게이션 */
+    .tabs{
+      display:grid;gap:4px;background:#e8eef7;
+      border-radius:var(--one-radius-sm);padding:4px;margin-bottom:14px;
+    }
+    .tabs.two{grid-template-columns:repeat(2,minmax(0,1fr));}
+    .tabs.three{grid-template-columns:repeat(3,minmax(0,1fr));}
+    .tab{
+      min-height:40px;border-radius:14px;background:transparent;
+      color:var(--muted);font-weight:800;font-size:13px;
+    }
+    .tab.active{background:white;color:var(--blue);box-shadow:0 4px 12px rgba(15,23,42,.08);}
+    .tab-pane{display:none;} .tab-pane.active{display:block;}
+
+    .section-title{display:flex;justify-content:space-between;align-items:center;gap:8px;margin:0 0 12px;}
+    .section-title h2{margin:0;font-size:20px;font-weight:950;letter-spacing:-.4px;}
+    .badge{
+      display:inline-flex;align-items:center;min-height:32px;
+      border-radius:999px;padding:6px 12px;
+      background:rgba(255,255,255,.70);box-shadow:inset 0 0 0 1px rgba(17,24,39,.06);
+      color:var(--blue);font-size:12px;font-weight:800;white-space:nowrap;
+    }
+
+    /* 오늘 카드 */
+    .today-card{
+      display:grid;gap:16px;border:1px solid rgba(255,255,255,.76);border-radius:var(--one-radius);
+      background:var(--soft-panel);padding:20px;margin-bottom:12px;box-shadow:var(--shadow);
+      backdrop-filter:blur(18px);
+    }
+    .today-head{display:flex;justify-content:space-between;align-items:flex-start;gap:12px;}
+    .today-title{display:grid;gap:5px;}
+    .today-title b{font-size:26px;font-weight:950;letter-spacing:-.5px;color:var(--ink);}
+    .today-title span{color:var(--muted);font-size:13px;line-height:1.45;}
+    .progress-ring{
+      flex:0 0 70px;width:70px;height:70px;border-radius:50%;
+      display:grid;place-items:center;
+      background:conic-gradient(var(--green) var(--mission-progress,0%),#e5e7eb 0);
+      box-shadow:inset 0 0 0 1px rgba(17,24,39,.06),0 12px 26px rgba(15,23,42,.08);
+      color:var(--ink);font-weight:900;font-size:15px;
+    }
+    .progress-ring span{display:grid;place-items:center;width:52px;height:52px;border-radius:50%;background:#fff;}
+    .status-row{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px;}
+    .status-pill{
+      min-height:54px;border:1px solid rgba(17,24,39,.06);border-radius:var(--one-radius-sm);
+      padding:10px;background:#f8fafc;display:grid;align-content:center;gap:4px;
+    }
+    .status-pill small{color:var(--muted);font-weight:800;font-size:11px;}
+    .status-pill b{color:var(--ink);font-size:14px;overflow-wrap:anywhere;line-height:1.25;}
+    .next-action{
+      border:0;border-radius:18px;
+      background:linear-gradient(135deg,rgba(37,99,235,.10),rgba(16,185,129,.10));
+      padding:12px;color:var(--ink);font-weight:800;line-height:1.45;
+    }
+
+    /* 핵심 동작 카드 */
+    .must-card{
+      display:grid;grid-template-columns:minmax(0,1fr) auto;gap:12px;align-items:center;
+      border:1px solid rgba(255,255,255,.76);border-radius:var(--one-radius);
+      background:var(--soft-panel);padding:18px;margin-bottom:12px;
+      box-shadow:var(--shadow);backdrop-filter:blur(18px);
+      position:relative;overflow:hidden;
+    }
+    .must-card::before{
+      content:"";position:absolute;left:0;top:0;bottom:0;width:7px;
+      background:linear-gradient(180deg,var(--blue),var(--accent));
+    }
+    .must-copy{display:grid;gap:5px;}
+    .must-copy small{color:var(--blue);font-weight:900;font-size:12px;letter-spacing:.2px;}
+    .must-copy b{font-size:24px;font-weight:950;letter-spacing:-.4px;color:var(--ink);}
+    .must-copy span{color:var(--muted);font-size:13px;line-height:1.45;}
+    .must-done{
+      min-width:92px;min-height:52px;border-radius:999px;
+      background:linear-gradient(135deg,var(--blue),var(--accent));
+      color:#fff;font-weight:950;box-shadow:0 12px 24px rgba(37,99,235,.18);
+    }
+    .must-done.complete{background:var(--green);}
+
+    /* 선택 버튼 */
+    .choice-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;}
+    .choice{
+      min-height:82px;border-radius:var(--one-radius-sm);border:1px solid rgba(17,24,39,.06);
+      background:rgba(255,255,255,.82);color:var(--ink);font-weight:900;font-size:19px;
+      box-shadow:0 10px 26px rgba(15,23,42,.05);
+    }
+    .choice.active{
+      background:linear-gradient(145deg,rgba(255,255,255,.98),var(--tint));
+      box-shadow:inset 0 0 0 2px var(--ring),0 14px 28px rgba(15,23,42,.07);
+    }
+    .theme-picker{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px;}
+    .theme-card{
+      min-height:58px;border-radius:var(--one-radius-sm);border:1px solid rgba(17,24,39,.06);
+      background:rgba(255,255,255,.82);color:var(--ink);font-weight:900;
+    }
+    .theme-card.active{border-color:var(--blue);color:var(--blue);background:var(--tint);}
+    .theme-card[data-theme="sporty"]{border-top:5px solid #0ea5e9;}
+    .theme-card[data-theme="soft"]{border-top:5px solid #ec4899;}
+    .theme-card[data-theme="fresh"]{border-top:5px solid #10b981;}
+    .student-options{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px;margin-bottom:12px;}
+
+    /* 동작/미션/기록 */
+    .list{display:grid;gap:8px;padding:0;margin:0;list-style:none;}
+    .list li{
+      background:rgba(255,255,255,.82);border:1px solid rgba(17,24,39,.06);
+      border-radius:var(--one-radius-sm);padding:12px;line-height:1.45;
+    }
+    .mission{
+      display:grid;grid-template-columns:30px 1fr;align-items:center;gap:10px;
+      background:rgba(255,255,255,.82);border:1px solid rgba(17,24,39,.06);
+      border-radius:var(--one-radius-sm);padding:14px 16px;
+    }
+    .mission.complete{border-color:var(--green);background:#ecfdf5;}
+    .mission input{width:22px;height:22px;box-shadow:none;accent-color:var(--blue);}
+    .mission span{color:var(--ink);font-weight:850;line-height:1.45;}
+
+    .action-item{
+      display:grid;grid-template-columns:30px minmax(0,1fr);align-items:start;gap:12px;
+      padding:16px;border-radius:24px;background:rgba(255,255,255,.88);
+      border:1px solid rgba(17,24,39,.06);box-shadow:0 12px 28px rgba(15,23,42,.06);
+      position:relative;overflow:hidden;
+    }
+    .action-item::after{
+      content:"";position:absolute;right:-34px;top:-44px;
+      width:112px;height:112px;border-radius:50%;background:var(--tint);z-index:0;
+    }
+    .action-item>input,.action-item>.action-text{position:relative;z-index:1;}
+    .action-item input{accent-color:var(--blue);transform:scale(1.08);margin-top:4px;width:22px;height:22px;box-shadow:none;}
+    .action-item.complete{background:linear-gradient(145deg,rgba(236,253,245,.95),rgba(255,255,255,.92));border-color:rgba(22,163,74,.22);}
+    .action-text{display:grid;gap:8px;}
+    .action-title-row{display:flex;flex-direction:row-reverse;justify-content:flex-end;align-items:center;gap:9px;}
+    .action-title-row b{font-size:18px;font-weight:950;line-height:1.3;letter-spacing:-.2px;}
+    .action-order{
+      display:inline-grid;place-items:center;min-width:30px;height:30px;border-radius:999px;
+      background:linear-gradient(135deg,var(--blue),var(--accent));color:white;
+      font-size:13px;font-weight:950;box-shadow:0 8px 16px rgba(37,99,235,.18);flex:0 0 auto;
+    }
+    .action-desc{display:block;margin-top:8px;color:#475569;font-size:14px;font-weight:750;line-height:1.52;}
+    .action-video{
+      display:inline-flex;align-items:center;justify-content:center;
+      min-height:40px;margin-top:12px;padding:0 15px;border-radius:999px;
+      background:linear-gradient(135deg,var(--blue),var(--accent));
+      color:#fff;text-decoration:none;font-weight:950;font-size:13px;width:fit-content;
+      box-shadow:0 12px 24px rgba(37,99,235,.18);
+    }
+    .action-video.empty{background:#e5e7eb;color:#6b7280;box-shadow:none;pointer-events:none;}
+
+    .mini-table{width:100%;border-collapse:collapse;font-size:13px;}
+    .mini-table th,.mini-table td{padding:9px 7px;border-bottom:1px solid #e5e7eb;text-align:left;vertical-align:top;}
+    .mini-table th{color:var(--muted);font-size:12px;background:rgba(255,255,255,.70);}
+
+    .stats{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:8px;}
+    .stat{background:#fff;border:1px solid var(--line);border-radius:var(--one-radius-sm);padding:12px;}
+    .stat b{display:block;font-size:22px;margin-bottom:4px;}
+    .stat span{color:var(--muted);font-size:12px;font-weight:700;}
+
+    .notice{border-radius:var(--one-radius-sm);padding:12px;background:#fff7ed;color:#9a3412;border:1px solid #fed7aa;font-weight:700;line-height:1.5;}
+    .goal-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px;}
+    .goal{border-radius:var(--one-radius-sm);border:1px solid rgba(17,24,39,.06);background:rgba(255,255,255,.82);padding:12px;box-shadow:0 8px 18px rgba(15,23,42,.05);}
+    .goal b{display:block;margin-bottom:6px;color:var(--blue);font-size:13px;}
+    .goal span{color:#344054;font-size:14px;line-height:1.45;}
+
+    .toast{position:fixed;left:50%;bottom:22px;transform:translateX(-50%);max-width:calc(100vw - 32px);background:rgba(17,24,39,.88);color:white;border-radius:999px;padding:12px 14px;box-shadow:var(--shadow);display:none;z-index:10;font-size:14px;backdrop-filter:blur(16px);}
+    .toast.show{display:block;}
+    .admin-scroll{overflow-x:auto;}
+
+    /* ===== 인터랙티브 전술판 (VB) ===== */
+    .vb-board{padding:0;}
+    /* 좌우 2열 레이아웃 */
+    .vb-layout{display:grid;grid-template-columns:1fr;gap:8px;margin-top:8px;}
+    @media(min-width:540px){
+      .vb-layout{grid-template-columns:200px 1fr;align-items:start;}
+      .vb-controls{display:block!important;position:sticky;top:8px;}
+      .vb-mobile-tabs{display:none;}
+      .vb-court{width:min(58vw,340px);}
+    }
+    @media(min-width:760px){
+      .vb-layout{grid-template-columns:220px 1fr;}
+      .vb-court{width:min(50vw,380px);}
+    }
+    .vb-mobile-tabs{
+      display:grid;grid-template-columns:repeat(4,1fr);gap:6px;
+      padding:7px;margin-bottom:8px;
+      border:1px solid var(--line);border-radius:14px;
+      background:rgba(255,255,255,.96);
+      box-shadow:0 10px 24px rgba(15,23,42,.1);
+    }
+    .vb-mobile-tabs button{
+      min-height:40px;border-radius:10px;font-weight:800;font-size:13px;
+      border:1px solid rgba(17,24,39,.06);background:rgba(255,255,255,.82);
+    }
+    .vb-mobile-tabs button.active{color:#fff;background:var(--blue);border-color:var(--blue);}
+    .vb-controls{
+      border:1px solid var(--line);border-radius:var(--one-radius-sm);
+      background:rgba(255,255,255,.92);overflow:hidden;display:none;
+    }
+    .vb-controls.open{display:block;}
+    .vb-section{padding:10px;border-bottom:1px solid #edf2f7;}
+    .vb-section:last-child{border-bottom:0;}
+    .vb-section h2{margin:0 0 8px;color:var(--muted);font-size:12px;font-weight:900;}
+    .vb-button-row{display:flex;flex-wrap:wrap;gap:6px;}
+    .vb-choice{
+      flex:0 0 auto;min-height:36px;padding:7px 11px;border-radius:10px;
+      font-weight:800;font-size:13px;border:1px solid rgba(17,24,39,.06);
+      background:rgba(255,255,255,.82);white-space:nowrap;cursor:pointer;
+    }
+    .vb-choice.active{color:#fff;background:var(--blue);border-color:var(--blue);}
+    .vb-court-wrap{
+      padding:8px 6px 22px;border-radius:var(--one-radius-sm);
+      background:rgba(255,255,255,.92);
+      box-shadow:0 16px 36px rgba(15,23,42,.1);
+    }
+    .vb-court{
+      position:relative;width:min(74vw,310px);aspect-ratio:1/1.5;
+      border:4px solid #bcc7d7;border-radius:12px;margin:0 auto;
+      background:
+        linear-gradient(to bottom,rgba(205,53,75,.12) 0 49.6%,#98a6b8 49.6% 50.8%,rgba(46,125,215,.12) 50.8% 100%),
+        linear-gradient(to right,transparent 0 33.1%,rgba(255,255,255,.78) 33.1% 33.9%,transparent 33.9% 66.1%,rgba(255,255,255,.78) 66.1% 66.9%,transparent 66.9%),
+        linear-gradient(to bottom,transparent 0 16.2%,rgba(255,255,255,.78) 16.2% 17%,transparent 17% 32.9%,rgba(255,255,255,.78) 32.9% 33.7%,transparent 33.7% 66.2%,rgba(255,255,255,.78) 66.2% 67%,transparent 67% 82.9%,rgba(255,255,255,.78) 82.9% 83.7%,transparent 83.7%);
+      overflow:visible;user-select:none;cursor:crosshair;
+    }
+    .vb-court-label{
+      position:absolute;z-index:1;left:8px;color:rgba(15,23,42,.62);
+      font-size:11px;font-weight:900;pointer-events:none;
+    }
+    .vb-court-label.away{top:7px;}
+    .vb-court-label.home{bottom:7px;}
+    .vb-net{
+      position:absolute;z-index:2;left:-4px;right:-4px;top:49.4%;
+      height:7px;background:#79879b;pointer-events:none;
+    }
+    .vb-net span{
+      position:absolute;left:50%;bottom:8px;transform:translateX(-50%);
+      color:#7d8ca2;font-weight:900;font-size:10px;letter-spacing:1px;
+    }
+    .vb-serve-zone{
+      position:absolute;left:-4px;right:-4px;top:100%;height:14%;
+      border:2px dashed rgba(37,99,235,.42);border-top:0;border-radius:0 0 10px 10px;
+      color:rgba(37,99,235,.8);display:flex;align-items:center;justify-content:center;
+      font-size:11px;font-weight:900;pointer-events:none;
+    }
+    .vb-layer{position:absolute;inset:0;z-index:3;overflow:visible;pointer-events:none;}
+    .vb-token{
+      position:absolute;z-index:5;
+      width:clamp(28px,8vw,40px);height:clamp(28px,8vw,40px);
+      display:grid;place-items:center;
+      border:3px solid #fff;border-radius:50%;color:#fff;
+      font-size:clamp(10px,2.8vw,12px);font-weight:900;
+      transform:translate(-50%,-50%);
+      box-shadow:0 4px 9px rgba(15,23,42,.22);
+      transition:left 2500ms cubic-bezier(.3,.1,.3,1),top 2500ms cubic-bezier(.3,.1,.3,1);
+      cursor:pointer;
+    }
+    .vb-token.home{background:#2e7dd7;}
+    .vb-token.away{background:#c9354b;}
+    .vb-token.ball{
+      z-index:7;width:clamp(18px,5vw,26px);height:clamp(18px,5vw,26px);
+      color:#3a2300;background:#f59e0b;border-width:2px;font-size:11px;
+    }
+    .vb-token.selected{outline:4px solid rgba(16,185,129,.4);}
+    .vb-target{
+      position:absolute;z-index:4;width:28px;height:28px;
+      display:grid;place-items:center;
+      border:2px dashed rgba(15,23,42,.6);border-radius:50%;
+      color:#172033;background:rgba(255,255,255,.75);
+      transform:translate(-50%,-50%);font-size:9px;font-weight:900;pointer-events:none;
+    }
+    .vb-actions{
+      display:grid;grid-template-columns:1.25fr 1fr 1fr;gap:6px;
+      padding:8px;margin-top:8px;
+      border:1px solid var(--line);border-radius:14px;
+      background:rgba(255,255,255,.96);
+    }
+    .vb-actions button{
+      min-height:42px;border-radius:10px;font-weight:800;font-size:13px;
+      border:1px solid rgba(17,24,39,.06);background:rgba(255,255,255,.82);cursor:pointer;
+    }
+    .vb-primary{color:#fff!important;background:var(--blue)!important;border-color:var(--blue)!important;}
+    .vb-detail{margin-top:8px;}
+    .vb-detail h3{font-size:14px;font-weight:900;margin:0 0 4px;color:var(--ink);}
+    .vb-detail p{margin:0;color:var(--muted);line-height:1.45;font-size:13px;}
+    .vb-legend-row{display:flex;flex-wrap:wrap;gap:5px 10px;font-size:12px;color:var(--muted);font-weight:800;}
+    .vb-dot{width:10px;height:10px;display:inline-block;border-radius:50%;margin-right:3px;vertical-align:-1px;}
+    .vb-dot.home{background:#2e7dd7;}.vb-dot.away{background:#c9354b;}
+    .vb-dot.ball{background:#f59e0b;}.vb-dot.move{background:#1fa971;}
+
+    /* 관련 영상 섹션 */
+    .tactic-videos{margin-top:14px;}
+    .tactic-videos h3{font-size:16px;font-weight:950;margin:0 0 10px;letter-spacing:-.3px;}
+    .video-pill-row{display:flex;flex-direction:column;gap:8px;}
+    .video-pill{
+      display:flex;align-items:center;justify-content:space-between;gap:12px;
+      background:rgba(255,255,255,.82);border:1px solid rgba(17,24,39,.06);
+      border-radius:var(--one-radius-sm);padding:12px 14px;
+      box-shadow:0 8px 18px rgba(15,23,42,.05);
+    }
+    .video-pill-info{display:grid;gap:2px;}
+    .video-pill-info b{font-size:13.5px;font-weight:850;color:var(--ink);}
+    .video-pill-info span{font-size:12px;color:var(--muted);}
+    .video-pill a{
+      flex:0 0 auto;display:inline-flex;align-items:center;justify-content:center;
+      min-height:36px;padding:0 14px;border-radius:999px;
+      background:linear-gradient(135deg,var(--blue),var(--accent));
+      color:#fff;text-decoration:none;font-weight:900;font-size:12px;white-space:nowrap;
+    }
+
+
+    /* 피구 전술판 */
+    .db-court{
+      position:relative;width:100%;padding-bottom:155%;
+      background:linear-gradient(180deg,#c8e6c9 0%,#c8e6c9 14%,#e3f2fd 14%,#e3f2fd 50%,#ffe8e8 50%,#ffe8e8 86%,#f8bbd0 86%,#f8bbd0 100%);
+      border:3px solid #aaa;border-radius:12px;overflow:hidden;
+    }
+    .db-court > *{position:absolute;}
+    .db-zone-label{
+      width:100%;text-align:center;font-size:11px;font-weight:900;
+      z-index:8;pointer-events:none;letter-spacing:.2px;
+    }
+    .db-zone-label.away{top:2%;color:#1b5e20;}
+    .db-zone-label.home{bottom:2%;color:#880e4f;}
+    .db-team-label{
+      width:100%;text-align:center;font-size:12px;font-weight:900;
+      z-index:8;pointer-events:none;
+    }
+    .db-team-label.away{top:22%;color:#1565c0;}
+    .db-team-label.home{bottom:22%;color:#b71c1c;}
+    .db-net{
+      left:0;right:0;top:50%;height:3px;
+      background:repeating-linear-gradient(90deg,#555 0 8px,transparent 8px 14px);
+      z-index:9;display:flex;align-items:center;justify-content:center;
+    }
+    .db-net span{
+      background:#fff;padding:1px 8px;font-size:11px;font-weight:900;color:#444;
+      border:1px solid #aaa;border-radius:4px;white-space:nowrap;
+    }
+    .db-token{
+      position:absolute;z-index:5;
+      width:clamp(26px,7vw,38px);height:clamp(26px,7vw,38px);
+      display:grid;place-items:center;
+      border:3px solid #fff;border-radius:50%;color:#fff;
+      font-size:clamp(9px,2.5vw,11px);font-weight:900;
+      transform:translate(-50%,-50%);
+      box-shadow:0 4px 9px rgba(15,23,42,.22);
+      transition:left 2500ms cubic-bezier(.3,.1,.3,1),top 2500ms cubic-bezier(.3,.1,.3,1);
+      cursor:pointer;
+    }
+    .db-token.home{background:#c9354b;}
+    .db-token.away{background:#2e7dd7;}
+    .db-token.ball{
+      z-index:7;width:clamp(16px,4.5vw,24px);height:clamp(16px,4.5vw,24px);
+      color:#3a2300;background:#f59e0b;border-width:2px;font-size:10px;
+      transition:left 700ms cubic-bezier(.3,.1,.3,1),top 700ms cubic-bezier(.3,.1,.3,1);
+    }
+    .db-token.selected{outline:4px solid rgba(16,185,129,.4);}
+    .db-target{
+      position:absolute;z-index:4;width:26px;height:26px;
+      display:grid;place-items:center;
+      border:2px dashed rgba(15,23,42,.6);border-radius:50%;
+      color:#172033;background:rgba(255,255,255,.75);
+      transform:translate(-50%,-50%);font-size:9px;font-weight:900;pointer-events:none;
+    }
+
+    /* 피구 플레이스홀더 */
+    .dodge-placeholder{text-align:center;padding:24px 16px;}
+    .dodge-placeholder .big-ico{font-size:52px;margin-bottom:12px;}
+    .dodge-placeholder h3{font-size:20px;font-weight:950;margin:0 0 8px;}
+    .dodge-placeholder p{color:var(--muted);line-height:1.55;margin:0 0 18px;font-size:14px;}
+
+    @media(max-width:720px){
+      .app{padding:14px 12px 28px;}
+      .topbar{border-radius:24px;align-items:center;}
+      .hero h1{font-size:27px;}
+      .hero,.panel,.today-card,.must-card{border-radius:24px;}
+      .status-row{grid-template-columns:1fr 1fr 1fr;}
+      .action-item{grid-template-columns:30px 1fr;gap:10px;padding:12px;}
+      .action-video{width:100%;}
+      .student-options,.goal-grid,.stats{grid-template-columns:1fr;}
+      .btn-row{grid-template-columns:1fr;}
+      .must-card{grid-template-columns:1fr;}
+      .must-done{width:100%;}
+      .mini-table{min-width:680px;}
+      .today-head{display:grid;grid-template-columns:1fr 70px;}
+    }
+
+    /* 오류 배너 */
+    #errorBanner{display:none;position:fixed;top:0;left:0;right:0;z-index:9999;
+      background:#dc2626;color:#fff;padding:12px 16px;font-size:13px;font-weight:700;
+      text-align:center;white-space:pre-wrap;}
+    #errorBanner.show{display:block;}
+  </style>
+</head>
+<body class="theme-fresh">
+<div id="errorBanner"></div>
+<main class="app">
+
+  <header class="topbar">
+    <div class="brand">
+      <strong>자율동아리 통합관리</strong>
+      <span id="todayText">오늘의 훈련을 확인하세요</span>
+    </div>
+    <button class="btn secondary" onclick="showScreen('adminLogin')">관리자</button>
+  </header>
+
+  <!-- ===== 로그인 화면 ===== -->
+  <section id="loginScreen" class="screen active">
+    <div class="hero">
+      <h1>배구·피구 동아리</h1>
+      <p>학년, 반, 번호, 이름으로 로그인하고 오늘의 출결, 훈련, 미션, 기록을 관리합니다.</p>
+    </div>
+    <div class="panel grid">
+      <div class="grid two">
+        <label>학년<select id="grade"><option value="">선택</option><option>1</option><option>2</option><option>3</option></select></label>
+        <label>반<input id="classNo" type="number" min="1" placeholder="예: 3"></label>
+        <label>번호<input id="number" type="number" min="1" placeholder="예: 12"></label>
+        <label>이름<input id="name" type="text" placeholder="홍길동"></label>
+      </div>
+      <div class="grid two">
+        <label>성별
+          <select id="gender" onchange="syncThemeFromGender()">
+            <option>선택 안 함</option><option>남학생</option><option>여학생</option>
+          </select>
+        </label>
+        <label>화면 스타일
+          <input id="theme" type="hidden" value="fresh">
+          <div class="theme-picker" id="themePicker">
+            <button class="theme-card active" type="button" data-theme="fresh" onclick="chooseTheme('fresh')">프레시</button>
+            <button class="theme-card" type="button" data-theme="sporty" onclick="chooseTheme('sporty')">스포티</button>
+            <button class="theme-card" type="button" data-theme="soft" onclick="chooseTheme('soft')">소프트</button>
+          </div>
+        </label>
+      </div>
+      <button class="btn" type="button" id="loginBtn" onclick="doLogin()">학생 로그인</button>
+    </div>
+  </section>
+
+  <!-- ===== 학생 화면 (3탭) ===== -->
+  <section id="studentScreen" class="screen">
+    <div class="hero">
+      <h1 id="studentTitle">학생 화면</h1>
+      <p id="studentSub">동아리와 훈련 단계를 확인하세요.</p>
+    </div>
+
+    <!-- 3탭 네비게이션 -->
+    <div class="tabs three" id="mainTabs">
+      <button class="tab active" data-tab="home" onclick="switchTab('home',this)">🏠 홈</button>
+      <button class="tab" data-tab="tactics" onclick="switchTab('tactics',this)">📋 전술학습</button>
+      <button class="tab" data-tab="records" onclick="switchTab('records',this)">📊 기록</button>
+    </div>
+
+    <!-- 홈 탭 -->
+    <div id="tab-home" class="tab-pane active">
+      <div class="must-card">
+        <div class="must-copy">
+          <small>오늘 이건 꼭 하고 간다</small>
+          <b id="mustTitle">동아리를 선택하세요</b>
+          <span id="mustTip">오늘의 핵심 동작이 여기에 표시됩니다.</span>
+        </div>
+        <button class="must-done" id="mustButton" type="button" onclick="completeMustAction()">완료</button>
+      </div>
+
+      <div class="today-card">
+        <div class="today-head">
+          <div class="today-title">
+            <b id="visualClub">오늘 루틴</b>
+            <span id="visualMission">동아리를 선택하면 오늘 할 동작이 표시됩니다.</span>
+          </div>
+          <div class="progress-ring" id="missionProgress"><span id="quickMission">0/0</span></div>
+        </div>
+        <div class="status-row">
+          <div class="status-pill"><small>출결</small><b id="quickAttendance">미확인</b></div>
+          <div class="status-pill"><small>단계</small><b id="quickLevel">초급</b></div>
+          <div class="status-pill"><small>동작</small><b id="quickAction">준비 전</b></div>
+        </div>
+        <div class="next-action" id="nextAction">첫 동작을 완료하면 진행률이 올라갑니다.</div>
+      </div>
+
+      <div class="student-options">
+        <div class="panel">
+          <div class="section-title"><h2>내 동아리</h2><span class="badge" id="clubBadge">미선택</span></div>
+          <div class="choice-grid" id="clubChoices"></div>
+        </div>
+        <div class="panel">
+          <div class="section-title"><h2>훈련 단계</h2><span class="badge" id="levelBadge">초급</span></div>
+          <label>현재 단계<select id="levelSelect" onchange="changeLevel()"></select></label>
+        </div>
+      </div>
+
+      <div class="panel">
+        <div class="section-title"><h2>오늘의 출결</h2><span class="badge" id="attendanceBadge">미확인</span></div>
+        <div class="btn-row">
+          <button class="btn green" onclick="markAttendance('출석')">출석</button>
+          <button class="btn yellow" onclick="markAttendance('지각')">지각</button>
+          <button class="btn red" onclick="markAttendance('결석')">결석</button>
+        </div>
+      </div>
+
+      <div class="panel">
+        <div class="section-title"><h2>오늘의 미션 체크</h2></div>
+        <div class="grid" id="missionList"></div>
+      </div>
+
+      <div class="panel">
+        <div class="section-title"><h2>오늘 할 동작</h2></div>
+        <ul class="list" id="programList"></ul>
+      </div>
+
+      <button class="btn secondary" style="width:100%;margin-top:4px;" onclick="logout()">로그아웃</button>
+    </div><!-- /tab-home -->
+
+    <!-- 전술학습 탭 -->
+    <div id="tab-tactics" class="tab-pane">
+
+      <!-- 배구 전술판 (인터랙티브 v2) -->
+      <div id="tacticVolley" hidden>
+        <div class="vb-board">
+          <div class="panel" style="padding:11px 14px 9px;">
+            <div class="section-title"><h2>🏐 배구 전술판</h2><span class="badge" id="vbStatusBadge">배구</span></div>
+          </div>
+          <!-- 모바일용 탭 (넓은 화면에서는 숨김) -->
+          <nav class="vb-mobile-tabs" style="margin-top:8px;">
+            <button type="button" data-vb-panel="formations" onclick="VB.panel('formations')">배치</button>
+            <button type="button" data-vb-panel="tactics" onclick="VB.panel('tactics')">전술</button>
+            <button type="button" onclick="VB.action('execute')" class="active">이동</button>
+            <button type="button" onclick="VB.action('reset')">초기화</button>
+          </nav>
+
+          <!-- 2열 레이아웃: 왼쪽=선택, 오른쪽=코트 -->
+          <div class="vb-layout">
+
+            <!-- 왼쪽: 배치/전술 선택 패널 -->
+            <div id="vb-controls" class="vb-controls">
+              <section class="vb-section" data-vb-panel-body="formations">
+                <h2>배치 선택</h2>
+                <div id="vb-formationButtons" class="vb-button-row"></div>
+              </section>
+              <section class="vb-section" data-vb-panel-body="tactics">
+                <h2>상황별 전술</h2>
+                <div id="vb-tacticButtons" class="vb-button-row"></div>
+              </section>
+            </div>
+
+            <!-- 오른쪽: 코트 + 버튼 -->
+            <div>
+              <!-- 코트 -->
+              <div class="vb-court-wrap">
+                <div id="vb-court" class="vb-court">
+                  <div class="vb-court-label away">상대 코트</div>
+                  <div class="vb-court-label home">우리 코트</div>
+                  <div class="vb-net"><span>NET</span></div>
+                  <svg id="vb-routeLayer" class="vb-layer" viewBox="0 0 100 100" preserveAspectRatio="none"></svg>
+                  <div id="vb-targetLayer"></div>
+                  <div id="vb-tokenLayer"></div>
+                  <div class="vb-serve-zone">서브 출발선</div>
+                </div>
+              </div>
+              <!-- 실행 버튼 -->
+              <div class="vb-actions">
+                <button type="button" class="vb-primary" onclick="VB.action('execute')">▶ 이동 실행</button>
+                <button type="button" onclick="VB.action('preview')">예정 삭제</button>
+                <button type="button" onclick="VB.action('reset')">초기화</button>
+              </div>
+              <!-- 상세 설명 -->
+              <div class="panel vb-detail">
+                <h3 id="vb-detailTitle">3-3-3 기본</h3>
+                <p id="vb-detailText">9인제 기본 3열 배치입니다. 전위는 블록과 짧은 공격, 중위는 연결과 커버, 후위는 리시브와 깊은 수비를 맡습니다.</p>
+              </div>
+              <div class="panel" style="margin-top:8px;">
+                <div class="vb-legend-row">
+                  <span><i class="vb-dot home"></i>우리</span>
+                  <span><i class="vb-dot away"></i>상대</span>
+                  <span><i class="vb-dot ball"></i>공</span>
+                  <span><i class="vb-dot move"></i>이동예정</span>
+                </div>
+              </div>
+            </div>
+
+          </div><!-- /vb-layout -->
+          <!-- 관련 영상 -->
+          <div class="panel tactic-videos" id="tbRelatedVideos" hidden></div>
+        </div>
+      </div>
+
+      <!-- 피구 전술판 -->
+      <div id="tacticDodge" hidden>
+        <div class="vb-board">
+          <div class="panel" style="padding:11px 14px 9px;">
+            <div class="section-title"><h2>🎯 피구 전술판</h2><span class="badge" id="dbStatusBadge">피구</span></div>
+          </div>
+          <nav class="vb-mobile-tabs" style="margin-top:8px;">
+            <button type="button" data-db-panel="formations" onclick="DB.panel('formations')">배치</button>
+            <button type="button" data-db-panel="tactics" onclick="DB.panel('tactics')">전술</button>
+            <button type="button" onclick="DB.action('execute')" class="active">이동</button>
+            <button type="button" onclick="DB.action('reset')">초기화</button>
+          </nav>
+          <div class="vb-layout">
+            <div id="db-controls" class="vb-controls">
+              <section class="vb-section" data-db-panel-body="formations">
+                <h2>배치 선택</h2>
+                <div id="db-formationButtons" class="vb-button-row"></div>
+              </section>
+              <section class="vb-section" data-db-panel-body="tactics">
+                <h2>상황별 전술</h2>
+                <div id="db-tacticButtons" class="vb-button-row"></div>
+              </section>
+            </div>
+            <div>
+              <div class="vb-court-wrap">
+                <div id="db-court" class="db-court">
+                  <div class="db-zone-label away">외야 (상대팀)</div>
+                  <div class="db-team-label away">상대팀 내야</div>
+                  <div class="db-net"><span>중앙선</span></div>
+                  <div class="db-team-label home">우리팀 내야</div>
+                  <div class="db-zone-label home">외야 (우리팀)</div>
+                  <svg id="db-routeLayer" class="vb-layer" viewBox="0 0 100 100" preserveAspectRatio="none"></svg>
+                  <div id="db-targetLayer"></div>
+                  <div id="db-tokenLayer"></div>
+                </div>
+              </div>
+              <div class="vb-actions">
+                <button type="button" class="vb-primary" onclick="DB.action('execute')">▶ 이동 실행</button>
+                <button type="button" onclick="DB.action('preview')">예정 삭제</button>
+                <button type="button" onclick="DB.action('reset')">초기화</button>
+              </div>
+              <div class="panel vb-detail">
+                <h3 id="db-detailTitle">기본 대형</h3>
+                <p id="db-detailText">6명이 내야를 고르게 나눠 자리를 잡습니다.</p>
+              </div>
+              <div class="panel" style="margin-top:8px;">
+                <div class="vb-legend-row">
+                  <span><i class="vb-dot home" style="background:#c9354b"></i>우리팀</span>
+                  <span><i class="vb-dot away" style="background:#2e7dd7"></i>상대팀</span>
+                  <span><i class="vb-dot ball"></i>공</span>
+                  <span><i class="vb-dot move"></i>이동예정</span>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="panel tactic-videos" id="dodgeRelatedVideos" hidden></div>
+        </div>
+      </div>
+
+      <!-- 동아리 미선택 -->
+      <div id="tacticNone">
+        <div class="panel">
+          <div class="notice" style="text-align:center;padding:24px;">
+            <div style="font-size:40px;margin-bottom:12px;">🏐🎯</div>
+            <b>홈 탭에서 동아리를 먼저 선택해주세요.</b><br>
+            <span style="color:var(--muted);font-size:13px;">배구 또는 피구를 선택하면 맞춤 전술학습 화면이 열립니다.</span>
+          </div>
+        </div>
+      </div>
+
+    </div><!-- /tab-tactics -->
+
+    <!-- 기록 탭 -->
+    <div id="tab-records" class="tab-pane">
+      <div class="panel">
+        <div class="section-title"><h2>최근 기록</h2></div>
+        <div class="admin-scroll">
+          <table class="mini-table">
+            <thead><tr><th>날짜</th><th>종류</th><th>값</th><th>메모</th></tr></thead>
+            <tbody id="recordRows"></tbody>
+          </table>
+        </div>
+      </div>
+      <div class="panel grid">
+        <div class="section-title"><h2>개인 기록 입력</h2></div>
+        <div class="grid two">
+          <label>기록 종류
+            <select id="recordType">
+              <option value="">선택</option>
+              <option>서브 성공</option><option>패스 성공</option><option>캐치 성공</option>
+              <option>공격 성공</option><option>체력 기록</option><option>기타</option>
+            </select>
+          </label>
+          <label>기록 값<input id="recordValue" placeholder="예: 8회, 12초"></label>
+        </div>
+        <label>메모<textarea id="recordMemo" placeholder="오늘 느낀 점이나 선생님 피드백"></textarea></label>
+        <button class="btn" type="button" id="recordSaveBtn" onclick="saveRecord()">기록 저장</button>
+      </div>
+    </div><!-- /tab-records -->
+
+  </section><!-- /studentScreen -->
+
+  <!-- ===== 관리자 로그인 ===== -->
+  <section id="adminLoginScreen" class="screen">
+    <div class="panel grid">
+      <div class="section-title"><h2>관리자 로그인</h2></div>
+      <label>비밀번호<input id="adminPassword" type="password" placeholder="초기 비밀번호: 1234"></label>
+      <button class="btn" onclick="adminLogin()">관리자 화면 열기</button>
+      <button class="btn secondary" onclick="showScreen(currentStudent ? 'student' : 'login')">돌아가기</button>
+    </div>
+  </section>
+
+  <!-- ===== 관리자 대시보드 ===== -->
+  <section id="adminScreen" class="screen">
+    <div class="hero">
+      <h1>관리자 대시보드</h1>
+      <p id="adminDate">전체 학생 출석, 미션 달성률, 단계, 기록 향상도를 확인합니다.</p>
+    </div>
+    <div class="panel">
+      <div class="section-title"><h2>오늘 출석 현황</h2><button class="btn secondary" onclick="refreshAdmin()">새로고침</button></div>
+      <div class="stats" id="attendanceStats"></div>
+    </div>
+    <div class="panel">
+      <div class="section-title"><h2>우수 학생 추천</h2></div>
+      <ul class="list" id="excellentList"></ul>
+    </div>
+    <div class="panel">
+      <div class="section-title"><h2>학생별 현황</h2></div>
+      <div class="admin-scroll">
+        <table class="mini-table">
+          <thead><tr><th>학생</th><th>동아리</th><th>출결</th><th>미션</th><th>단계</th><th>향상도</th><th>기록수</th></tr></thead>
+          <tbody id="adminRows"></tbody>
+        </table>
+      </div>
+    </div>
+    <div class="panel grid">
+      <div class="section-title"><h2>비밀번호 변경</h2></div>
+      <div class="grid two">
+        <label>현재<input id="currentPassword" type="password"></label>
+        <label>새 비밀번호<input id="nextPassword" type="password"></label>
+      </div>
+      <button class="btn secondary" onclick="changeAdminPassword()">변경</button>
+    </div>
+  </section>
+
+</main>
+<div id="toast" class="toast"></div>
+
+<script>
+
+/* ── 오류 진단 ── */
+window.onerror = function(msg, src, line, col, err) {
+  var b = document.getElementById('errorBanner');
+  if(b){ b.textContent = 'JS 오류 (line '+line+'): '+msg; b.classList.add('show'); }
+  return false;
+};
+function showError(msg) {
+  var b = document.getElementById('errorBanner');
+  if(b){ b.textContent = msg; b.classList.add('show'); }
+}
+
+/* ============================================================
+   기존 앱 JS (원본 유지)
+   ============================================================ */
+let currentStudent = null;
+let dashboard = null;
+let adminPasswordCache = '';
+
+const localTrainingPreview = {
+  '배구': {
+    '초급': {
+      program: ['언더핸드 패스 자세 만들기','벽 패스 30회','서브 기본 동작 연습'],
+      missions: ['언더핸드 패스 20회 성공','서브 라인 넘기기 5회','친구에게 정확히 패스 10회'],
+      videos: [
+        {title:'언더핸드 패스 따라하기',focus:'팔 모양과 무릎 사용',url:'https://www.youtube.com/results?search_query=중학생+배구+언더핸드+패스+기초'},
+        {title:'오버핸드 패스 기초',focus:'손 모양과 공 받는 위치',url:'https://www.youtube.com/results?search_query=배구+오버핸드+패스+기초'},
+        {title:'서브 기본 동작',focus:'공 올리기와 임팩트',url:'https://www.youtube.com/results?search_query=배구+언더핸드+서브+기초'}
+      ]
+    }
+  },
+  '피구': {
+    '초급': {
+      program: ['옆으로 서서 반대발 내딛기','어깨-팔꿈치-손목 순서로 던지기','콘이나 벽 목표 맞히기'],
+      missions: ['같은 자세로 목표 던지기 10회','좌우 피하기 20회','가슴 앞 캐치 5회'],
+      videos: [
+        {title:'정확하게 던지는 자세',focus:'옆으로 서기, 반대발, 목표 보고 던지기',url:'https://www.youtube.com/results?search_query=피구+정확하게+던지는+자세'},
+        {title:'공 던질 때 팔 동작',focus:'팔꿈치와 손목 사용',url:'https://www.youtube.com/results?search_query=피구+공+던지는+법+팔꿈치+손목'},
+        {title:'목표 맞히기 연습',focus:'같은 자세로 10번 반복',url:'https://www.youtube.com/results?search_query=피구+목표+맞히기+던지기+연습'}
+      ]
+    }
+  }
+};
+
+function showScreen(name) {
+  document.querySelectorAll('.screen').forEach(function(el){ el.classList.remove('active'); });
+  var screenMap = {login:'loginScreen',student:'studentScreen',adminLogin:'adminLoginScreen',admin:'adminScreen'};
+  var target = document.getElementById(screenMap[name]);
+  if (target) target.classList.add('active');
+}
+
+function switchTab(name, btn) {
+  document.querySelectorAll('.tab-pane').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('#mainTabs .tab').forEach(t => t.classList.remove('active'));
+  document.getElementById('tab-' + name).classList.add('active');
+  if (btn) btn.classList.add('active');
+  if (name === 'tactics') {
+    const club = currentStudent && currentStudent.club;
+    updateTacticTab(club);
+  }
+}
+
+/* ── GAS API URL (배포 후 여기에 주소 입력) ── */
+var GAS_API_URL = 'https://script.google.com/macros/s/AKfycbwP0zsW0CJo4ZulD-X5hlwrKT7CiHJE2cZZLTvFhFOdj-MYThcdjg5dmXvpL0v-gIpB/exec';
+
+function runServer(fnName, args, onSuccess, onFailure) {
+  /* 로컬 미리보기 (GAS_API_URL 미설정 시) */
+  if (!GAS_API_URL) {
+    var handled = runLocalPreview(fnName, args, onSuccess);
+    if (!handled) {
+      var msg = '로컬 미리보기입니다.';
+      if (onFailure) onFailure({message:msg});
+      showToast(msg);
+    }
+    return;
+  }
+  /* fetch API로 GAS doPost 호출 */
+  fetch(GAS_API_URL, {
+    method: 'POST',
+    headers: {'Content-Type': 'text/plain'},
+    body: JSON.stringify({fn: fnName, args: args || []})
+  })
+  .then(function(r) { return r.json(); })
+  .then(function(r) {
+    if (r.ok) {
+      onSuccess(r.data);
+    } else {
+      var err = {message: r.error || '서버 오류'};
+      if (onFailure) onFailure(err);
+      else showToast(err.message);
+    }
+  })
+  .catch(function(err) {
+    if (onFailure) onFailure(err);
+    else showToast(err.message || '네트워크 오류');
+  });
+}
+
+function runLocalPreview(fnName, args, onSuccess) {
+  if (fnName === 'loginStudent') {
+    const data = makeLocalDashboard(args[0], '피구');
+    setTimeout(() => onSuccess(data), 120);
+    showToast('로컬 미리보기: 저장 없이 화면만 확인합니다.');
+    return true;
+  }
+  if (fnName === 'saveStudentClubQuick') {
+    const club = args[1];
+    const training = (localTrainingPreview[club] || localTrainingPreview['배구'])['초급'];
+    setTimeout(() => onSuccess({club, level:'초급', training}), 120);
+    return true;
+  }
+  if (['saveActionStatus','saveMissionStatus','markAttendance'].includes(fnName)) {
+    setTimeout(() => onSuccess(dashboard), 120);
+    return true;
+  }
+  return false;
+}
+
+function makeLocalDashboard(payload, club) {
+  return {
+    date: new Date().toISOString().slice(0,10),
+    levels: ['초급','중급 전','중급','중급 후반','고급'],
+    clubs: ['배구','피구'],
+    student: {
+      studentId: [payload.grade,payload.classNo,payload.number,payload.name].join('-'),
+      grade: payload.grade, classNo: payload.classNo, number: payload.number,
+      name: payload.name, gender: payload.gender, theme: payload.theme, club, level: '초급'
+    },
+    attendanceStatus: '미확인',
+    training: (localTrainingPreview[club] || localTrainingPreview['배구'])['초급'],
+    missionStatuses: {}, actionStatuses: {}, recentRecords: []
+  };
+}
+
+function doLogin() {
+  var grade = val('grade'), classNo = val('classNo'), number = val('number'), name = val('name');
+  if (!grade || !classNo || !number || !name) {
+    alert('학년, 반, 번호, 이름을 모두 입력해주세요.');
+    return;
+  }
+  var payload = { grade:grade, classNo:classNo, number:number, name:name, gender:val('gender'), theme:val('theme')||'fresh' };
+
+  /* ── 즉시 화면 전환 ── */
+  applyTheme(payload.theme);
+  document.getElementById('todayText').textContent = new Date().toISOString().slice(0,10);
+  document.getElementById('studentTitle').textContent = name + ' 학생';
+  document.getElementById('studentSub').textContent = grade+'학년 '+classNo+'반 '+number+'번 · '+(payload.gender||'선택 안 함')+' · '+themeLabel(payload.theme);
+  document.getElementById('clubBadge').textContent = '불러오는 중...';
+  document.getElementById('levelBadge').textContent = '...';
+  document.getElementById('attendanceBadge').textContent = '...';
+  document.getElementById('programList').innerHTML = '<li style="color:var(--muted)">서버에서 불러오는 중...</li>';
+  document.getElementById('missionList').innerHTML = '<div style="color:var(--muted);padding:8px">잠시만 기다려 주세요...</div>';
+  document.querySelectorAll('.screen').forEach(function(el){ el.classList.remove('active'); });
+  document.getElementById('studentScreen').classList.add('active');
+
+  /* ── 캐시가 있으면 즉시 표시 ── */
+  var cacheKey = dashboardCacheKey(payload);
+  var cached = readDashboardCache(cacheKey);
+  if (cached) {
+    try { renderStudent(cached); } catch(e) {}
+    showToast('저장된 데이터 표시 중 · 최신 데이터 불러오는 중...');
+  }
+
+  /* ── 서버에서 최신 데이터 백그라운드 로드 ── */
+  if (window.google && google.script && google.script.run) {
+    google.script.run
+      .withSuccessHandler(function(data) {
+        try { renderStudent(data); } catch(e) { showError('렌더링 오류: ' + e.message); }
+        if (cached) showToast('최신 데이터로 업데이트됨 ✓');
+      })
+      .withFailureHandler(function(err) {
+        if (!cached) showError('서버 오류: ' + (err && err.message ? err.message : String(err)));
+        else showToast('오프라인 모드 (저장된 데이터 사용 중)');
+      })
+      .loginStudent(payload);
+  } else {
+    var d = makeLocalDashboard(payload, '피구');
+    try { renderStudent(d); } catch(e) {}
+  }
+}
+
+function dashboardCacheKey(p) {
+  return ['dashboard',p.grade,p.classNo,p.number,p.name].join(':');
+}
+function readDashboardCache(key) {
+  try {
+    const raw = localStorage.getItem(key);
+    if (!raw) return null;
+    const c = JSON.parse(raw);
+    if (Date.now() - c.savedAt > 1000*60*60*12) return null;
+    return c.data;
+  } catch(e) { return null; }
+}
+function writeDashboardCache(key, data) {
+  try { localStorage.setItem(key, JSON.stringify({savedAt:Date.now(), data})); } catch(e) {}
+}
+
+function renderStudent(data) {
+  try {
+  dashboard = data; currentStudent = data.student;
+  applyTheme(data.student.theme || 'fresh');
+  document.getElementById('todayText').textContent = data.date;
+  document.getElementById('studentTitle').textContent = `${data.student.name} 학생`;
+  document.getElementById('studentSub').textContent = `${data.student.grade}학년 ${data.student.classNo}반 ${data.student.number}번 · ${data.student.gender||'선택 안 함'} · ${themeLabel(data.student.theme||'fresh')}`;
+  document.getElementById('clubBadge').textContent = data.student.club || '미선택';
+  document.getElementById('levelBadge').textContent = data.student.level || '초급';
+  document.getElementById('attendanceBadge').textContent = data.attendanceStatus || '미확인';
+  renderVisualSummary(data);
+  renderClubChoices(data);
+  renderLevelSelect(data);
+  renderTraining(data);
+  renderRecords(data.recentRecords || []);
+  writeDashboardCache(dashboardCacheKey({
+    grade:data.student.grade, classNo:data.student.classNo,
+    number:data.student.number, name:data.student.name
+  }), data);
+  // 전술탭 활성화 상태면 업데이트
+  if (document.getElementById('tab-tactics').classList.contains('active')) {
+    updateTacticTab(data.student.club);
+  }
+
+  } catch(e) { showError('renderStudent 오류: ' + e.message + ' (line ' + (e.lineNumber||'?') + ')'); }
+}
+
+function renderVisualSummary(data) {
+  const club = data.student.club || '오늘 루틴';
+  const level = data.student.level || '초급';
+  const total = data.training ? data.training.missions.length : 0;
+  const done = Object.values(data.missionStatuses||{}).filter(Boolean).length;
+  const actionDone = Object.values(data.actionStatuses||{}).filter(Boolean).length;
+  const actionTotal = data.training ? data.training.program.length : 0;
+  const percent = total ? Math.round(done/total*100) : 0;
+  document.getElementById('visualClub').textContent = data.student.club ? `${club} · ${level}` : '오늘 루틴';
+  document.getElementById('visualMission').textContent = data.training
+    ? `미션 ${done}/${total} · 동작 ${actionDone}/${actionTotal}`
+    : '동아리를 선택하면 오늘 할 동작이 표시됩니다.';
+  document.getElementById('quickAttendance').textContent = data.attendanceStatus || '미확인';
+  document.getElementById('quickLevel').textContent = level;
+  document.getElementById('quickMission').textContent = `${done}/${total}`;
+  document.getElementById('quickAction').textContent = actionTotal ? `${actionDone}/${actionTotal}` : '준비 전';
+  document.getElementById('missionProgress').style.setProperty('--mission-progress', `${percent}%`);
+  document.getElementById('nextAction').textContent = data.training
+    ? `다음 동작: ${data.training.program.find((_,i)=>!(data.actionStatuses||{})[i])||'오늘 동작 완료'}`
+    : '동아리를 선택하면 다음 동작이 표시됩니다.';
+  renderMustAction(data);
+}
+
+function getMustAction(data) {
+  if (!data||!data.training||!data.training.program) return null;
+  const statuses = data.actionStatuses||{};
+  const index = data.training.program.findIndex((_,i)=>!statuses[i]);
+  if (index<0) return {index:-1,title:'오늘 핵심 완료',tip:'오늘 할 동작을 모두 체크했습니다.',complete:true};
+  const title = data.training.program[index];
+  const kind = actionKind(title, data.student.club);
+  return {index, title, tip:actionTip(kind), complete:false, kind};
+}
+
+function renderMustAction(data) {
+  const must = getMustAction(data);
+  const title = document.getElementById('mustTitle');
+  const tip = document.getElementById('mustTip');
+  const button = document.getElementById('mustButton');
+  if (!must) {
+    title.textContent = '동아리를 선택하세요';
+    tip.textContent = '오늘의 핵심 동작이 여기에 표시됩니다.';
+    button.textContent = '완료'; button.disabled = true;
+    button.classList.remove('complete'); return;
+  }
+  title.textContent = must.title; tip.textContent = must.tip;
+  button.disabled = must.complete;
+  button.textContent = must.complete ? '완료됨' : '완료';
+  button.classList.toggle('complete', must.complete);
+}
+
+function completeMustAction() {
+  const must = getMustAction(dashboard);
+  if (!must||must.complete||must.index<0) return;
+  dashboard.actionStatuses = dashboard.actionStatuses||{};
+  dashboard.actionStatuses[must.index] = true;
+  renderStudent(dashboard);
+  runServer('saveActionStatus', [currentStudent.studentId, String(must.index), true], renderStudent);
+}
+
+function chooseTheme(theme) {
+  document.getElementById('theme').value = theme;
+  applyTheme(theme);
+  document.querySelectorAll('.theme-card').forEach(btn => btn.classList.toggle('active', btn.dataset.theme===theme));
+}
+function syncThemeFromGender() {
+  const g = val('gender');
+  if (g==='남학생') chooseTheme('sporty');
+  else if (g==='여학생') chooseTheme('soft');
+  else chooseTheme('fresh');
+}
+function applyTheme(theme) {
+  document.body.classList.remove('theme-sporty','theme-soft','theme-fresh');
+  document.body.classList.add(`theme-${theme||'fresh'}`);
+}
+function themeLabel(t) { return ({sporty:'스포티',soft:'소프트',fresh:'프레시'})[t]||'프레시'; }
+
+function renderClubChoices(data) {
+  const box = document.getElementById('clubChoices'); box.innerHTML = '';
+  data.clubs.forEach(club => {
+    const btn = document.createElement('button');
+    btn.className = 'choice'+(data.student.club===club?' active':'');
+    btn.textContent = club;
+    btn.onclick = () => {
+      document.querySelectorAll('#clubChoices .choice').forEach(b=>b.classList.remove('active','saving'));
+      btn.classList.add('active','saving');
+      document.getElementById('clubBadge').textContent = club;
+      if (dashboard&&currentStudent) {
+        dashboard.student.club = club; currentStudent.club = club;
+        renderVisualSummary(dashboard);
+      }
+      runServer('saveStudentClubQuick', [currentStudent.studentId, club], result => {
+        dashboard.student.club = result.club;
+        dashboard.student.level = result.level;
+        dashboard.training = result.training;
+        currentStudent.club = result.club; currentStudent.level = result.level;
+        renderStudent(dashboard);
+        showToast(`${club} 동아리로 저장되었습니다.`);
+      }, () => { btn.classList.remove('saving'); if (dashboard) renderStudent(dashboard); });
+    };
+    box.appendChild(btn);
+  });
+}
+
+function renderLevelSelect(data) {
+  const select = document.getElementById('levelSelect'); select.innerHTML = '';
+  data.levels.forEach(level => {
+    const option = document.createElement('option');
+    option.value = level; option.textContent = level;
+    if ((data.student.level||'초급')===level) option.selected = true;
+    select.appendChild(option);
+  });
+}
+
+function renderTraining(data) {
+  const programList = document.getElementById('programList');
+  const missionList = document.getElementById('missionList');
+  programList.innerHTML = ''; missionList.innerHTML = '';
+  if (!data.student.club||!data.training) {
+    programList.innerHTML = '<li class="notice">동아리를 먼저 선택하면 훈련 프로그램이 표시됩니다.</li>';
+    missionList.innerHTML = '<div class="notice">동아리를 먼저 선택해주세요.</div>';
+    return;
+  }
+  data.training.program.forEach((item, index) => {
+    const li = document.createElement('li');
+    li.className = 'action-item';
+    const checked = data.actionStatuses&&data.actionStatuses[index];
+    if (checked) li.classList.add('complete');
+    const kind = actionKind(item, data.student.club);
+    const video = (data.training.videos||[])[index]||null;
+    const description = video&&video.focus ? video.focus : actionTip(kind);
+    const videoTitle = video&&video.title ? video.title : '따라하기 영상';
+    const videoUrl = video&&video.url ? video.url : '';
+    li.innerHTML = `
+      <input type="checkbox" ${checked?'checked':''}>
+      <span class="action-text">
+        <span class="action-title-row">
+          <b>${safe(item)}</b><span class="action-order">${index+1}</span>
+        </span>
+        <span class="action-desc">💡 ${safe(description)}</span>
+        ${videoUrl
+          ? `<a class="action-video" href="${safe(videoUrl)}" target="_blank" rel="noopener">▶ ${safe(videoTitle)} 보기</a>`
+          : '<span class="action-video empty">영상 준비 중</span>'}
+      </span>`;
+    li.querySelector('input').onchange = e => {
+      li.classList.toggle('complete', e.target.checked);
+      li.classList.add('saving');
+      dashboard.actionStatuses = dashboard.actionStatuses||{};
+      dashboard.actionStatuses[index] = e.target.checked;
+      renderVisualSummary(dashboard);
+      runServer('saveActionStatus', [currentStudent.studentId, String(index), e.target.checked], renderStudent);
+    };
+    programList.appendChild(li);
+  });
+  data.training.missions.forEach((mission, index) => {
+    const label = document.createElement('label');
+    label.className = 'mission';
+    const checked = data.missionStatuses&&data.missionStatuses[index];
+    if (checked) label.classList.add('complete');
+    label.innerHTML = `<input type="checkbox" ${checked?'checked':''}><span>${safe(mission)}</span>`;
+    label.querySelector('input').onchange = e => {
+      label.classList.toggle('complete', e.target.checked);
+      label.classList.add('saving');
+      dashboard.missionStatuses = dashboard.missionStatuses||{};
+      dashboard.missionStatuses[index] = e.target.checked;
+      renderVisualSummary(dashboard);
+      runServer('saveMissionStatus', [currentStudent.studentId, String(index), e.target.checked], renderStudent);
+    };
+    missionList.appendChild(label);
+  });
+}
+
+function actionKind(text, club) {
+  const v = `${club||''} ${text||''}`;
+  if (/피하기|좌우|수비 라인|위기/.test(v)) return 'dodge';
+  if (/캐치|잡기|잡고/.test(v)) return 'catch';
+  if (/던지|목표|공격|속공|페이크/.test(v)&&/피구/.test(v)) return 'throw';
+  if (/서브/.test(v)) return 'serve';
+  if (/스파이크|공격 접근|속공/.test(v)) return 'spike';
+  if (/리시브|패스|연결|토스|언더|오버/.test(v)) return 'pass';
+  return club==='피구' ? 'throw' : 'pass';
+}
+function actionTip(kind) {
+  return ({
+    throw:'옆으로 서고 반대발을 내딛은 뒤 목표를 보고 던지기',
+    dodge:'무릎을 낮추고 공 방향을 보며 짧게 이동하기',
+    catch:'손을 앞에 두고 공을 몸쪽으로 끌어안기',
+    pass:'무릎을 낮추고 팔/손 모양을 고정해서 보내기',
+    serve:'공을 낮게 올리고 손바닥 중심으로 밀어 보내기',
+    spike:'리듬 스텝 후 팔을 크게 휘둘러 위에서 때리기'
+  })[kind]||'자세를 먼저 보고 천천히 반복하기';
+}
+
+function renderRecords(records) {
+  const body = document.getElementById('recordRows'); body.innerHTML = '';
+  if (!records.length) { body.innerHTML = '<tr><td colspan="4">아직 입력한 기록이 없습니다.</td></tr>'; return; }
+  records.forEach(row => {
+    const tr = document.createElement('tr');
+    tr.innerHTML = `<td>${safe(row.date)}</td><td>${safe(row.recordType)}</td><td>${safe(row.recordValue)}</td><td>${safe(row.memo)}</td>`;
+    body.appendChild(tr);
+  });
+}
+
+function changeLevel() {
+  const level = val('levelSelect');
+  document.getElementById('levelBadge').textContent = level;
+  document.getElementById('quickLevel').textContent = level;
+  runServer('saveStudentLevel', [currentStudent.studentId, level], renderStudent);
+}
+
+function markAttendance(status) {
+  // 낙관적 업데이트 제거 — 서버 응답 후에만 UI 반영
+  const prevStatus = (dashboard && dashboard.attendanceStatus) || '미확인';
+  const badge = document.getElementById('attendanceBadge');
+  const quick = document.getElementById('quickAttendance');
+  if (badge) badge.textContent = '저장 중…';
+  if (quick) quick.textContent = '저장 중…';
+  showToast('출결 저장 중...');
+  runServer('markAttendance', [currentStudent.studentId, status],
+    data => {
+      renderStudent(data);
+      showToast(`${status} 저장 완료 ✓`);
+    },
+    err => {
+      // 저장 실패 시 이전 상태로 복원
+      if (badge) badge.textContent = prevStatus;
+      if (quick) quick.textContent = prevStatus;
+      if (dashboard) dashboard.attendanceStatus = prevStatus;
+      showToast('출결 저장 실패: ' + ((err && err.message) || '다시 시도해주세요.'));
+    }
+  );
+}
+
+function saveRecord() {
+  var recordType = val('recordType'), recordValue = val('recordValue');
+  if (!recordType || !recordValue) { showToast('기록 종류와 값을 입력해주세요.'); return; }
+  var btn = document.getElementById('recordSaveBtn');
+  if (btn) { btn.disabled = true; btn.textContent = '저장 중...'; }
+  var payload = {
+    studentId: currentStudent.studentId,
+    recordType: recordType, recordValue: recordValue, memo: val('recordMemo')
+  };
+  runServer('saveRecord', [payload], function(data) {
+    document.getElementById('recordType').value = '';
+    document.getElementById('recordValue').value = '';
+    document.getElementById('recordMemo').value = '';
+    if (btn) { btn.disabled = false; btn.textContent = '기록 저장'; }
+    renderStudent(data); showToast('개인 기록이 저장되었습니다.');
+  }, function() {
+    if (btn) { btn.disabled = false; btn.textContent = '기록 저장'; }
+    showToast('기록 저장에 실패했습니다.');
+  });
+}
+
+function adminLogin() {
+  adminPasswordCache = val('adminPassword');
+  runServer('adminLogin', [adminPasswordCache], data => { renderAdmin(data); showScreen('admin'); });
+}
+function refreshAdmin() {
+  runServer('adminLogin', [adminPasswordCache], renderAdmin);
+}
+function renderAdmin(data) {
+  document.getElementById('adminDate').textContent = `${data.today} 기준 전체 ${data.totalStudents}명`;
+  const stats = document.getElementById('attendanceStats'); stats.innerHTML = '';
+  Object.entries(data.attendanceCounts).forEach(([label, count]) => {
+    const item = document.createElement('div'); item.className = 'stat';
+    item.innerHTML = `<b>${count}</b><span>${label}</span>`; stats.appendChild(item);
+  });
+  const excellent = document.getElementById('excellentList'); excellent.innerHTML = '';
+  if (!data.excellent.length) { excellent.innerHTML = '<li>오늘 기준 추천 학생이 아직 없습니다.</li>'; }
+  else data.excellent.forEach(row => {
+    const li = document.createElement('li');
+    li.textContent = `${row.name} (${row.club}, ${row.level}) - 미션 ${row.missionRate}%, 향상도 ${row.improvement.text}`;
+    excellent.appendChild(li);
+  });
+  const body = document.getElementById('adminRows'); body.innerHTML = '';
+  if (!data.students.length) { body.innerHTML = '<tr><td colspan="7">등록된 학생이 없습니다.</td></tr>'; return; }
+  data.students.forEach(row => {
+    const tr = document.createElement('tr');
+    tr.innerHTML = `<td>${safe(row.grade)}-${safe(row.classNo)}-${safe(row.number)} ${safe(row.name)}</td><td>${safe(row.club)}</td><td>${safe(row.todayStatus)}</td><td>${safe(row.missionRate)}%</td><td>${safe(row.level)}</td><td>${safe(row.improvement.text)}</td><td>${safe(row.recordCount)}</td>`;
+    body.appendChild(tr);
+  });
+}
+function changeAdminPassword() {
+  runServer('updateAdminPassword', [val('currentPassword'), val('nextPassword')], () => {
+    adminPasswordCache = val('nextPassword');
+    document.getElementById('currentPassword').value = '';
+    document.getElementById('nextPassword').value = '';
+    showToast('관리자 비밀번호가 변경되었습니다.');
+  });
+}
+function logout() { currentStudent = null; dashboard = null; showScreen('login'); }
+function val(id) { return document.getElementById(id).value.trim(); }
+function safe(text) {
+  return String(text != null ? text : '').replace(/[&<>"']/g, function(ch){ return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[ch]; });
+}
+function showToast(message) {
+  const toast = document.getElementById('toast');
+  toast.textContent = message; toast.classList.add('show');
+  setTimeout(()=>toast.classList.remove('show'), 2400);
+}
+
+/* ============================================================
+   전술탭 전환 로직
+   ============================================================ */
+function updateTacticTab(club) {
+  const volley = document.getElementById('tacticVolley');
+  const dodge  = document.getElementById('tacticDodge');
+  const none   = document.getElementById('tacticNone');
+  volley.hidden = (club !== '배구');
+  dodge.hidden  = (club !== '피구');
+  none.hidden   = (club === '배구' || club === '피구');
+
+  if (club === '배구') {
+    if (!VB.initialized) VB.init();
+    VB.renderVideos(dashboard && dashboard.training ? dashboard.training.videos : []);
+  } else if (club === '피구') {
+    if (!DB.initialized) DB.init();
+    DB.renderVideos(dashboard && dashboard.training ? dashboard.training.videos : []);
+  }
+}
+
+/* renderDodgeVideos -> DB.renderVideos */
+
+/* ============================================================
+   인터랙티브 전술판 (VB 네임스페이스) - v2
+   ============================================================ */
+var VB = (function() { try { return (function() {
+  "use strict";
+  /* ---- 선수 명단 ---- */
+  const roster = [
+    ["H1","home","전좌","전위 좌"], ["H2","home","전중","전위 중"], ["H3","home","전우","전위 우"],
+    ["H4","home","중좌","중위 좌"], ["H5","home","중중","중위 중 / 연결"], ["H6","home","중우","중위 우"],
+    ["H7","home","후좌","후위 좌"], ["H8","home","후중","후위 중"], ["H9","home","후우","후위 우"],
+    ["A1","away","전좌","상대 전위 좌"], ["A2","away","전중","상대 전위 중"], ["A3","away","전우","상대 전위 우"],
+    ["A4","away","중좌","상대 중위 좌"], ["A5","away","중중","상대 중위 중"], ["A6","away","중우","상대 중위 우"],
+    ["A7","away","후좌","상대 후위 좌"], ["A8","away","후중","상대 후위 중"], ["A9","away","후우","상대 후위 우"],
+    ["BALL","ball","공","공"]
+  ];
+  /* ---- 배치 데이터 ---- */
+  const positions = {
+    base:{title:"3-3-3 기본",text:"9인제 기본 3열 배치입니다. 전위는 블록과 짧은 공격, 중위는 연결과 커버, 후위는 리시브와 깊은 수비를 맡습니다.",pos:{H1:[18,58],H2:[50,58],H3:[82,58],H4:[18,74],H5:[50,74],H6:[82,74],H7:[18,90],H8:[50,90],H9:[82,90],A1:[18,42],A2:[50,42],A3:[82,42],A4:[18,26],A5:[50,26],A6:[82,26],A7:[18,10],A8:[50,10],A9:[82,10],BALL:[50,107]}},
+    serve:{title:"서브 압박",text:"서브 선수는 반드시 라인 뒤에서 출발합니다. 나머지는 상대 리턴을 대비해 중앙을 조금 당깁니다.",pos:{H1:[20,60],H2:[50,58],H3:[80,60],H4:[22,75],H5:[50,72],H6:[78,75],H7:[18,90],H8:[50,88],H9:[82,107],A1:[18,42],A2:[50,42],A3:[82,42],A4:[18,26],A5:[50,26],A6:[82,26],A7:[18,10],A8:[50,10],A9:[82,10],BALL:[82,107]}},
+    receive:{title:"서브 리시브",text:"후위 3명과 중위 양쪽이 넓게 받고, 중위 중앙은 두 번째 터치를 준비합니다.",pos:{H1:[18,58],H2:[50,59],H3:[82,58],H4:[15,73],H5:[50,70],H6:[85,73],H7:[18,88],H8:[50,91],H9:[82,88],A1:[18,42],A2:[50,42],A3:[82,42],A4:[18,26],A5:[50,26],A6:[82,26],A7:[18,10],A8:[50,10],A9:[82,10],BALL:[50,6]}},
+    attack:{title:"공격 전개",text:"중위 중앙이 연결하고 전위 3명이 공격 선택지를 만듭니다. 후위는 빈 공간 커버에 들어갑니다.",pos:{H1:[16,54],H2:[50,52],H3:[84,54],H4:[22,68],H5:[50,63],H6:[78,68],H7:[20,86],H8:[50,88],H9:[80,86],A1:[16,42],A2:[50,42],A3:[84,42],A4:[18,26],A5:[50,26],A6:[82,26],A7:[18,10],A8:[50,10],A9:[82,10],BALL:[50,63]}},
+    block:{title:"블록 커버",text:"전위는 네트 앞을 닫고 중위는 떨어지는 공을 받습니다. 후위 중앙은 깊은 공을 지킵니다.",pos:{H1:[19,53],H2:[50,52],H3:[81,53],H4:[24,66],H5:[50,68],H6:[76,66],H7:[18,86],H8:[50,91],H9:[82,86],A1:[18,42],A2:[50,42],A3:[82,42],A4:[18,26],A5:[50,26],A6:[82,26],A7:[18,10],A8:[50,10],A9:[82,10],BALL:[50,48]}},
+    narrow:{title:"좁은 리시브",text:"초보 팀에서 실수가 많은 중앙을 먼저 막는 배치입니다. 좌우 끝은 한 발 늦게라도 커버합니다.",pos:{H1:[24,58],H2:[50,57],H3:[76,58],H4:[28,74],H5:[50,72],H6:[72,74],H7:[25,89],H8:[50,91],H9:[75,89],A1:[18,42],A2:[50,42],A3:[82,42],A4:[18,26],A5:[50,26],A6:[82,26],A7:[18,10],A8:[50,10],A9:[82,10],BALL:[50,7]}},
+    deep:{title:"깊은 수비",text:"상대가 길게 넘기는 팀일 때 후위를 뒤로 빼고 중위가 빈 앞공간을 받습니다.",pos:{H1:[18,59],H2:[50,59],H3:[82,59],H4:[20,71],H5:[50,72],H6:[80,71],H7:[16,95],H8:[50,96],H9:[84,95],A1:[18,42],A2:[50,42],A3:[82,42],A4:[18,26],A5:[50,26],A6:[82,26],A7:[18,10],A8:[50,10],A9:[82,10],BALL:[50,6]}}
+  };
+  /* ---- 전술 데이터 ---- */
+  const tactics = {
+    serveRight:{title:"우측 깊은 서브",text:"후우가 라인 뒤에서 출발해 상대 후좌/후중 사이 깊은 곳으로 보냅니다.",base:"serve",moves:{H9:[82,107],H5:[50,70],H2:[50,55],H6:[76,74],H8:[50,90]},ball:{from:[82,107],to:[22,8],label:"서브"}},
+    serveShort:{title:"짧은 서브",text:"상대 전위와 중위 사이로 짧게 떨어뜨려 첫 터치를 흔듭니다.",base:"serve",moves:{H9:[82,107],H1:[18,55],H2:[50,53],H3:[82,55],H5:[50,69]},ball:{from:[82,107],to:[53,31],label:"짧은 서브"}},
+    receiveCenter:{title:"중앙 리시브 연결",text:"상대 서브가 우리 중앙으로 들어오는 장면입니다. 후중이 받고 중중이 두 번째 공을 전위로 연결합니다.",base:"receive",moves:{H8:[50,86],H5:[50,65],H2:[50,54],H1:[18,56],H3:[82,56]},ball:{from:[50,5],to:[50,86],label:"리시브"}},
+    receiveLeft:{title:"좌측 리시브",text:"좌측으로 오는 서브를 후좌가 받고, 중좌와 중중이 겹치지 않게 연결 동선을 나눕니다.",base:"receive",moves:{H7:[18,85],H4:[24,70],H5:[50,66],H1:[18,55],H2:[50,55]},ball:{from:[25,5],to:[18,85],label:"리시브"}},
+    attackLeft:{title:"좌측 공격",text:"중중이 좌측 전위로 연결합니다. 전좌가 공격하고 중좌와 후좌가 커버를 잡습니다.",base:"attack",moves:{H5:[45,64],H1:[14,53],H2:[50,54],H4:[24,68],H7:[20,86]},ball:{from:[50,64],to:[16,34],label:"공격"}},
+    attackRight:{title:"우측 공격",text:"오른쪽 전위로 빠르게 밀어 상대 블록을 늦춥니다. 후우는 길게 튀는 공을 대비합니다.",base:"attack",moves:{H5:[55,64],H3:[86,53],H2:[50,54],H6:[76,68],H9:[80,86]},ball:{from:[50,64],to:[84,35],label:"공격"}},
+    centerTip:{title:"중앙 페인트",text:"강하게 때리는 척하다가 네트 바로 뒤 빈 공간으로 떨어뜨리는 전술입니다.",base:"attack",moves:{H2:[50,52],H5:[50,63],H1:[24,55],H3:[76,55],H8:[50,86]},ball:{from:[50,63],to:[50,38],label:"페인트"}},
+    blockMiddle:{title:"중앙 블록 커버",text:"상대 중앙 공격이 예상될 때 전중이 블록 기준점이 되고 좌우 전위가 좁혀 들어옵니다.",base:"block",moves:{H1:[28,53],H2:[50,51],H3:[72,53],H4:[30,66],H5:[50,68],H6:[70,66]},ball:{from:[50,37],to:[50,61],label:"상대 공격"}},
+    coverDrop:{title:"빈 공간 커버",text:"상대가 짧게 넘기는 팀일 때 중위 세 명이 앞공간을 좁히고 후위는 깊은 공을 남겨 둡니다.",base:"base",moves:{H4:[20,66],H5:[50,65],H6:[80,66],H7:[18,89],H8:[50,92],H9:[82,89]},ball:{from:[58,38],to:[44,65],label:"짧은 공"}},
+    deepBall:{title:"깊은 공 대응",text:"상대가 우리 후방으로 길게 넘길 때 후위 세 명이 먼저 빠지고 중중이 연결 위치로 들어옵니다.",base:"deep",moves:{H7:[16,95],H8:[50,96],H9:[84,95],H5:[50,72],H2:[50,57]},ball:{from:[47,36],to:[50,96],label:"긴 공"}},
+    freeBall:{title:"찬스볼 전환",text:"쉬운 공이 넘어오면 후중이 안정적으로 받고 중중이 공격 세 방향 중 하나를 고릅니다.",base:"base",moves:{H8:[50,86],H5:[50,64],H1:[15,54],H2:[50,53],H3:[85,54]},ball:{from:[50,33],to:[50,86],label:"찬스볼"}},
+    myTactic:{title:"교실형 좌우 흔들기",text:"초보 학생 경기용 전술입니다. 첫 공은 안전하게 중앙으로 모으고, 두 번째 공은 비어 있는 좌우 끝으로 보냅니다.",base:"base",moves:{H5:[50,64],H1:[13,55],H3:[87,55],H4:[28,70],H6:[72,70],H8:[50,88]},ball:{from:[50,88],to:[87,35],label:"좌우 전환"}}
+  };
+
+  /* ---- 상태 ---- */
+  const st = {selected:null,selectedFormation:"base",selectedTactic:null,openPanel:null,moving:false,players:{},planned:{},completed:[]};
+  let initialized = false;
+
+  /* ---- 헬퍼 ---- */
+  const $v = id => document.getElementById(id);
+  function scaleY(y){ return y<=100?y:100+((y-100)*0.72); }
+  function tokenStyle(x,y){ return `left:${x}%;top:${scaleY(y)}%;`; }
+  function playerById(id){ return st.players[id]; }
+
+  /* ---- 선수 초기화 ---- */
+  function seedPlayers(key="base"){
+    st.players={};
+    roster.forEach(([id,team,label,role])=>{
+      const p=(positions[key]||positions.base).pos[id]||positions.base.pos[id]||[50,50];
+      st.players[id]={id,team,label,role,x:p[0],y:p[1]};
+    });
+    st.planned={}; st.completed=[]; st.selected=null; st.selectedFormation=key; st.selectedTactic=null;
+  }
+
+  /* ---- 렌더링 ---- */
+  function renderButtons(){
+    $v('vb-formationButtons').innerHTML=Object.entries(positions).map(([k,item])=>
+      `<button type="button" class="vb-choice${st.selectedFormation===k?' active':''}" onclick="VB.formation('${k}')">${item.title}</button>`
+    ).join('');
+    $v('vb-tacticButtons').innerHTML=Object.entries(tactics).map(([k,item])=>
+      `<button type="button" class="vb-choice${st.selectedTactic===k?' active':''}" onclick="VB.tactic('${k}')">${item.title}</button>`
+    ).join('');
+  }
+
+  function renderTokens(){
+    $v('vb-tokenLayer').innerHTML=Object.values(st.players).map(p=>{
+      const sel=p.id===st.selected?' selected':'';
+      return `<button type="button" class="vb-token ${p.team}${sel}" data-vb-player="${p.id}" style="${tokenStyle(p.x,p.y)}" title="${p.role}">${p.label}</button>`;
+    }).join('');
+  }
+
+  function routeLine(from,to,color,dashed=false){
+    const dash=dashed?" stroke-dasharray='3 3'":'';
+    return `<line x1="${from[0]}" y1="${scaleY(from[1])}" x2="${to[0]}" y2="${scaleY(to[1])}" stroke="${color}" stroke-width="1.5" stroke-linecap="round"${dash}></line>`;
+  }
+
+  function renderRoutes(){
+    const items=[];
+    st.completed.slice(-14).forEach(m=>items.push(routeLine(m.from,m.to,'rgba(31,169,113,.34)',true)));
+    Object.values(st.planned).forEach(m=>{
+      const color=m.id==='BALL'?'rgba(245,158,11,.95)':'rgba(31,169,113,.88)';
+      items.push(routeLine(m.from,m.to,color,m.id!=='BALL'));
+    });
+    $v('vb-routeLayer').innerHTML=items.join('');
+  }
+
+  function renderTargets(){
+    $v('vb-targetLayer').innerHTML=Object.values(st.planned).map(m=>{
+      const lbl=m.label||(m.id==='BALL'?'공':playerById(m.id).label);
+      return `<div class="vb-target" style="${tokenStyle(m.to[0],m.to[1])}">${lbl}</div>`;
+    }).join('');
+  }
+
+  function renderDetail(title,text){
+    $v('vb-detailTitle').textContent=title;
+    $v('vb-detailText').textContent=text;
+  }
+
+  function render(){ renderButtons(); renderTokens(); renderRoutes(); renderTargets(); }
+
+  /* ---- 패널 ---- */
+  function closeMobilePanel(){
+    st.openPanel=null;
+    $v('vb-controls').classList.remove('open');
+    document.querySelectorAll('[data-vb-panel]').forEach(b=>b.classList.remove('active'));
+  }
+
+  function openPanel(name){
+    st.openPanel=name;
+    $v('vb-controls').classList.add('open');
+    document.querySelectorAll('[data-vb-panel]').forEach(b=>b.classList.toggle('active',b.dataset.vbPanel===name));
+    document.querySelectorAll('[data-vb-panel-body]').forEach(s=>{
+      s.style.display=(s.dataset.vbPanelBody===name)?'':'none';
+    });
+  }
+
+  /* ---- 배치/전술 적용 ---- */
+  function applyFormation(key){
+    if(!positions[key])return;
+    seedPlayers(key);
+    renderDetail(positions[key].title,positions[key].text);
+    render(); closeMobilePanel();
+    showToast('배치 적용: '+positions[key].title);
+  }
+
+  function applyTactic(key){
+    const tac=tactics[key]; if(!tac)return;
+    seedPlayers(tac.base||st.selectedFormation);
+    st.selectedTactic=key; st.planned={};
+    Object.entries(tac.moves||{}).forEach(([id,pos])=>{
+      const p=playerById(id); if(!p)return;
+      st.planned[id]={id,from:[p.x,p.y],to:pos,label:p.label};
+    });
+    if(tac.ball){
+      const ball=playerById('BALL');
+      ball.x=tac.ball.from[0]; ball.y=tac.ball.from[1];
+      st.planned.BALL={id:'BALL',from:tac.ball.from,to:tac.ball.to,label:tac.ball.label||'공'};
+    }
+    renderDetail(tac.title,tac.text);
+    render(); closeMobilePanel();
+    showToast('전술 선택: '+tac.title);
+  }
+
+  /* ---- 이동 실행 ---- */
+  function executeMoves(){
+    if(st.moving)return;
+    const moves=Object.values(st.planned);
+    if(!moves.length){showToast('예약된 이동이 없어요');return;}
+    st.moving=true;
+    moves.forEach(m=>{const p=playerById(m.id);if(!p)return;p.x=m.to[0];p.y=m.to[1];});
+    renderTokens();
+    setTimeout(()=>{
+      st.completed.push(...moves); st.planned={}; st.moving=false; render(); showToast('이동 완료');
+    },2700);
+  }
+
+  /* ---- 코트 클릭 ---- */
+  function courtClick(ev){
+    const token=ev.target.closest('[data-vb-player]');
+    if(token){st.selected=token.dataset.vbPlayer;renderTokens();showToast(playerById(st.selected).role);return;}
+    if(!st.selected||ev.target.closest('button'))return;
+    const rect=$v('vb-court').getBoundingClientRect();
+    const x=((ev.clientX-rect.left)/rect.width)*100;
+    const y=((ev.clientY-rect.top)/rect.height)*100;
+    const p=playerById(st.selected);
+    st.planned[p.id]={id:p.id,from:[p.x,p.y],to:[Math.max(4,Math.min(96,x)),Math.max(2,Math.min(114,y))],label:p.label};
+    render(); showToast('이동 예약됨');
+  }
+
+  /* ---- 초기화 ---- */
+  function init(){
+    initialized=true;
+    seedPlayers('base');
+    renderDetail(positions.base.title,positions.base.text);
+    render();
+    $v('vb-court').addEventListener('click',courtClick);
+    showToast('전술판 준비됨');
+  }
+
+  /* ---- 영상 ---- */
+  function renderVideos(videos){
+    const wrap=$v('tbRelatedVideos'); if(!wrap)return;
+    if(!videos||!videos.length){wrap.hidden=true;return;}
+    wrap.hidden=false;
+    wrap.innerHTML='<h3>📹 현재 단계 훈련 영상</h3><div class="video-pill-row">'+
+      videos.map(v=>
+        `<div class="video-pill"><div class="video-pill-info"><b>${safe(v.title)}</b><span>${safe(v.focus)}</span></div><a href="${safe(v.url)}" target="_blank" rel="noopener">▶ 보기</a></div>`
+      ).join('')+'</div>';
+  }
+
+  /* ---- 공개 API ---- */
+  function action(name){
+    if(name==='execute')executeMoves();
+    else if(name==='preview'){st.planned={};render();showToast('예정 삭제됨');}
+    else if(name==='reset'){applyFormation('base');}
+  }
+  function formation(key){applyFormation(key);}
+  function tactic(key){applyTactic(key);}
+  function panel(name){
+    if(st.openPanel===name&&$v('vb-controls').classList.contains('open'))closeMobilePanel();
+    else openPanel(name);
+  }
+
+  return { init: init, renderVideos: renderVideos, action: action, formation: formation, tactic: tactic, panel: panel, initialized: false };
+})(); } catch(e) { showError('VB 초기화 오류: '+(e.message||String(e))); return {init:function(){},renderVideos:function(){},action:function(){},formation:function(){},tactic:function(){},panel:function(){},initialized:false}; } })();
+
+
+/* ============================================================
+   피구 전술판 (DB 네임스페이스)
+   코트: 세로형 - 외야(0-14%, 86-100%) + 내야(14-86%)
+   팀: H1-H6(우리팀/빨강), A1-A6(상대팀/파랑), BALL
+   ============================================================ */
+var DB = (function() { try { return (function() {
+  "use strict";
+  var initialized = false;
+
+  /* ── 헬퍼 ── */
+  function $d(id){ return document.getElementById(id); }
+
+  /* ── 선수 초기 데이터 ── */
+  var defaultPlayers = [
+    {id:'H1',label:'H1',team:'home',role:'공격수',x:20,y:60},
+    {id:'H2',label:'H2',team:'home',role:'공격수',x:50,y:60},
+    {id:'H3',label:'H3',team:'home',role:'공격수',x:80,y:60},
+    {id:'H4',label:'H4',team:'home',role:'수비수',x:20,y:78},
+    {id:'H5',label:'H5',team:'home',role:'수비수',x:50,y:78},
+    {id:'H6',label:'H6',team:'home',role:'수비수',x:80,y:78},
+    {id:'A1',label:'A1',team:'away',role:'공격수',x:20,y:22},
+    {id:'A2',label:'A2',team:'away',role:'공격수',x:50,y:22},
+    {id:'A3',label:'A3',team:'away',role:'공격수',x:80,y:22},
+    {id:'A4',label:'A4',team:'away',role:'수비수',x:20,y:38},
+    {id:'A5',label:'A5',team:'away',role:'수비수',x:50,y:38},
+    {id:'A6',label:'A6',team:'away',role:'수비수',x:80,y:38},
+    {id:'BALL',label:'●',team:'ball',role:'공',x:50,y:50}
+  ];
+
+  /* ── 대형 정의 ── */
+  var formations = {
+    base:{
+      title:'기본 대형',
+      text:'6명이 내야를 고르게 나눠 자리를 잡습니다. 공격수 3명이 앞(상대팀 쪽), 수비수 3명이 뒤에 위치합니다.',
+      pos:{H1:[20,60],H2:[50,60],H3:[80,60],H4:[20,78],H5:[50,78],H6:[80,78],
+           A1:[20,22],A2:[50,22],A3:[80,22],A4:[20,38],A5:[50,38],A6:[80,38],BALL:[50,50]}
+    },
+    attack:{
+      title:'전진 공격 대형',
+      text:'공격수들이 중앙선 가까이 전진합니다. 상대 내야를 압박하며 던지기 유리한 각도를 확보합니다.',
+      pos:{H1:[20,52],H2:[50,52],H3:[80,52],H4:[25,72],H5:[50,72],H6:[75,72],
+           A1:[20,22],A2:[50,22],A3:[80,22],A4:[20,38],A5:[50,38],A6:[80,38],BALL:[50,48]}
+    },
+    defense:{
+      title:'수비 대형',
+      text:'수비수들이 내야 뒤쪽으로 깊이 물러납니다. 공격 방향을 예측하며 피하기 쉬운 공간을 확보합니다.',
+      pos:{H1:[25,58],H2:[50,58],H3:[75,58],H4:[15,82],H5:[50,82],H6:[85,82],
+           A1:[20,22],A2:[50,22],A3:[80,22],A4:[20,38],A5:[50,38],A6:[80,38],BALL:[50,50]}
+    },
+    wide:{
+      title:'좌우 넓은 대형',
+      text:'선수들이 좌우로 최대한 펼쳐서 상대 공격 범위를 넓힙니다. 중앙 공백을 이용한 속공에 대비합니다.',
+      pos:{H1:[8,58],H2:[50,60],H3:[92,58],H4:[20,80],H5:[50,80],H6:[80,80],
+           A1:[8,22],A2:[50,22],A3:[92,22],A4:[20,38],A5:[50,38],A6:[80,38],BALL:[50,50]}
+    },
+    pincer:{
+      title:'협공 대형',
+      text:'공격수 둘이 양쪽 측면에 붙고 한 명이 중앙에 위치합니다. 동시에 던져 상대가 피하기 어렵게 합니다.',
+      pos:{H1:[12,54],H2:[50,56],H3:[88,54],H4:[25,76],H5:[50,76],H6:[75,76],
+           A1:[20,22],A2:[50,22],A3:[80,22],A4:[20,38],A5:[50,38],A6:[80,38],BALL:[50,50]}
+    }
+  };
+
+  /* ── 전술 정의 ── */
+  var tactics = {
+    centerThrow:{
+      title:'중앙 집중 투구',
+      text:'3명이 동시에 중앙을 향해 던져 상대가 피할 공간을 없앱니다.',
+      moves:{H1:[30,53],H2:[50,51],H3:[70,53],BALL:[50,35]}
+    },
+    sideAttack:{
+      title:'측면 우선 공격',
+      text:'왼쪽 공격수가 오른쪽 끝을 노리고, 오른쪽 공격수가 왼쪽 끝을 노립니다. 교차 공격으로 혼란을 줍니다.',
+      moves:{H1:[75,53],H3:[25,53],H2:[50,52],BALL:[80,30]}
+    },
+    catchReturn:{
+      title:'캐치 후 반격',
+      text:'수비수가 공을 잡으면 즉시 공격수에게 패스합니다. 공격수는 빠르게 던져 반격합니다.',
+      moves:{H5:[50,66],H2:[50,53],BALL:[50,53]}
+    },
+    splitDodge:{
+      title:'분산 회피',
+      text:'공격이 들어오면 선수들이 좌우로 분산합니다. 한 방향으로 몰리지 않아 여러 명이 피할 수 있습니다.',
+      moves:{H1:[10,60],H2:[50,72],H3:[90,60],H4:[15,82],H5:[50,82],H6:[85,82]}
+    },
+    outerPincer:{
+      title:'외야 협공',
+      text:'외야 선수가 상대 내야 뒤쪽에서 던지고 내야 선수가 앞에서 동시에 던집니다. 앞뒤 협공입니다.',
+      moves:{H1:[50,93],H2:[50,54],H3:[80,55],BALL:[50,93]}
+    },
+    rushAll:{
+      title:'전원 돌격',
+      text:'전체 선수가 동시에 중앙선 쪽으로 전진합니다. 빠른 투구 거리 확보로 기습 효과를 냅니다.',
+      moves:{H1:[18,52],H2:[50,52],H3:[82,52],H4:[22,66],H5:[50,66],H6:[78,66]}
+    },
+    safeReturn:{
+      title:'안전 복귀',
+      text:'공격 후 모든 선수가 안전한 기본 자리로 복귀합니다. 다음 공격을 위한 재정비입니다.',
+      moves:{H1:[20,60],H2:[50,60],H3:[80,60],H4:[20,78],H5:[50,78],H6:[80,78]}
+    }
+  };
+
+  /* ── 상태 ── */
+  var st = {
+    players: [],
+    planned: {},
+    completed: [],
+    selected: null,
+    moving: false,
+    openPanel: null
+  };
+
+  function playerById(id){
+    return st.players.find(function(p){ return p.id===id; });
+  }
+
+  /* ── 선수 초기화 ── */
+  function seedPlayers(fkey){
+    var f = formations[fkey] || formations.base;
+    st.players = defaultPlayers.map(function(p){
+      var pos = f.pos[p.id] || [p.x, p.y];
+      return {id:p.id,label:p.label,team:p.team,role:p.role,x:pos[0],y:pos[1]};
+    });
+  }
+
+  /* ── 대형 적용 ── */
+  function applyFormation(key){
+    var f = formations[key];
+    if(!f) return;
+    st.planned = {}; st.completed = []; st.selected = null; st.moving = false;
+    seedPlayers(key);
+    renderDetail(f.title, f.text);
+    render();
+    showToast('대형: ' + f.title);
+  }
+
+  /* ── 전술 적용 ── */
+  function applyTactic(key){
+    var t = tactics[key];
+    if(!t) return;
+    st.planned = {};
+    Object.keys(t.moves).forEach(function(id){
+      var pos = t.moves[id];
+      var p = playerById(id);
+      if(p) st.planned[id] = {id:id, from:[p.x,p.y], to:pos, label:p.label || id};
+    });
+    renderDetail(t.title, t.text);
+    render();
+    closeMobilePanel();
+    showToast('전술: ' + t.title);
+  }
+
+  /* ── 렌더링 ── */
+  function render(){
+    renderTokens();
+    renderRoutes();
+    renderTargets();
+    renderFormationButtons();
+    renderTacticButtons();
+  }
+
+  function renderDetail(title, text){
+    var tEl = $d('db-detailTitle');
+    var pEl = $d('db-detailText');
+    if(tEl) tEl.textContent = title;
+    if(pEl) pEl.textContent = text;
+  }
+
+  function renderTokens(){
+    var layer = $d('db-tokenLayer');
+    if(!layer) return;
+    // Reuse existing tokens to preserve transition
+    var existing = {};
+    Array.prototype.forEach.call(layer.querySelectorAll('[data-db-player]'), function(el){
+      existing[el.dataset.dbPlayer] = el;
+    });
+    st.players.forEach(function(p){
+      var el = existing[p.id];
+      if(!el){
+        el = document.createElement('div');
+        el.className = 'db-token ' + p.team;
+        el.dataset.dbPlayer = p.id;
+        el.textContent = p.label;
+        layer.appendChild(el);
+      }
+      el.style.left = p.x + '%';
+      el.style.top  = p.y + '%';
+      el.className = 'db-token ' + p.team + (st.selected===p.id ? ' selected' : '');
+    });
+    // Remove stale tokens
+    Object.keys(existing).forEach(function(id){
+      if(!playerById(id)) layer.removeChild(existing[id]);
+    });
+  }
+
+  function renderRoutes(){
+    var svg = $d('db-routeLayer');
+    if(!svg) return;
+    svg.innerHTML = '';
+    Object.values(st.planned).forEach(function(m){
+      var line = document.createElementNS('http://www.w3.org/2000/svg','line');
+      line.setAttribute('x1', m.from[0]); line.setAttribute('y1', m.from[1]);
+      line.setAttribute('x2', m.to[0]);   line.setAttribute('y2', m.to[1]);
+      line.setAttribute('stroke','#1fa971'); line.setAttribute('stroke-width','1.5');
+      line.setAttribute('stroke-dasharray','4 3'); line.setAttribute('opacity','.85');
+      svg.appendChild(line);
+    });
+    st.completed.forEach(function(m){
+      var line = document.createElementNS('http://www.w3.org/2000/svg','line');
+      line.setAttribute('x1', m.from[0]); line.setAttribute('y1', m.from[1]);
+      line.setAttribute('x2', m.to[0]);   line.setAttribute('y2', m.to[1]);
+      line.setAttribute('stroke','rgba(31,169,113,.35)'); line.setAttribute('stroke-width','1');
+      line.setAttribute('stroke-dasharray','3 3');
+      svg.appendChild(line);
+    });
+  }
+
+  function renderTargets(){
+    var layer = $d('db-targetLayer');
+    if(!layer) return;
+    layer.innerHTML = '';
+    Object.values(st.planned).forEach(function(m){
+      var el = document.createElement('div');
+      el.className = 'db-target';
+      el.style.left = m.to[0] + '%';
+      el.style.top  = m.to[1] + '%';
+      el.textContent = m.label;
+      layer.appendChild(el);
+    });
+  }
+
+  function renderFormationButtons(){
+    var wrap = $d('db-formationButtons');
+    if(!wrap) return;
+    wrap.innerHTML = '';
+    Object.keys(formations).forEach(function(key){
+      var f = formations[key];
+      var btn = document.createElement('button');
+      btn.type = 'button';
+      btn.className = 'vb-btn';
+      btn.textContent = f.title;
+      btn.onclick = function(){ DB.formation(key); };
+      wrap.appendChild(btn);
+    });
+  }
+
+  function renderTacticButtons(){
+    var wrap = $d('db-tacticButtons');
+    if(!wrap) return;
+    wrap.innerHTML = '';
+    Object.keys(tactics).forEach(function(key){
+      var t = tactics[key];
+      var btn = document.createElement('button');
+      btn.type = 'button';
+      btn.className = 'vb-btn';
+      btn.textContent = t.title;
+      btn.onclick = function(){ DB.tactic(key); };
+      wrap.appendChild(btn);
+    });
+  }
+
+  /* ── 모바일 패널 ── */
+  function openPanel(name){
+    st.openPanel = name;
+    var ctrl = $d('db-controls');
+    if(ctrl) ctrl.classList.add('open');
+    document.querySelectorAll('[data-db-panel-body]').forEach(function(s){
+      s.hidden = (s.dataset.dbPanelBody !== name);
+    });
+    document.querySelectorAll('[data-db-panel]').forEach(function(b){
+      b.classList.toggle('active', b.dataset.dbPanel === name);
+    });
+  }
+
+  function closeMobilePanel(){
+    st.openPanel = null;
+    var ctrl = $d('db-controls');
+    if(ctrl) ctrl.classList.remove('open');
+  }
+
+  /* ── 코트 클릭 ── */
+  function courtClick(ev){
+    var token = ev.target.closest('[data-db-player]');
+    if(token){
+      st.selected = token.dataset.dbPlayer;
+      renderTokens();
+      var p = playerById(st.selected);
+      if(p) showToast(p.id + ' - ' + p.role);
+      return;
+    }
+    if(!st.selected || ev.target.closest('button')) return;
+    var rect = $d('db-court').getBoundingClientRect();
+    var x = ((ev.clientX - rect.left) / rect.width) * 100;
+    var y = ((ev.clientY - rect.top)  / rect.height) * 100;
+    var p = playerById(st.selected);
+    if(!p) return;
+    st.planned[p.id] = {id:p.id, from:[p.x,p.y], to:[Math.max(4,Math.min(96,x)), Math.max(2,Math.min(98,y))], label:p.label};
+    render();
+    showToast('이동 예약됨');
+  }
+
+  /* ── 이동 실행 ── */
+  function executeMoves(){
+    if(st.moving) return;
+    var moves = Object.values(st.planned);
+    if(!moves.length){ showToast('예약된 이동이 없어요'); return; }
+    st.moving = true;
+    moves.forEach(function(m){
+      var p = playerById(m.id);
+      if(!p) return;
+      p.x = m.to[0]; p.y = m.to[1];
+    });
+    renderTokens();
+    setTimeout(function(){
+      st.completed.push.apply(st.completed, moves);
+      st.planned = {}; st.moving = false;
+      render(); showToast('이동 완료');
+    }, 2700);
+  }
+
+  /* ── 초기화 ── */
+  function init(){
+    initialized = true;
+    seedPlayers('base');
+    renderDetail(formations.base.title, formations.base.text);
+    render();
+    var court = $d('db-court');
+    if(court) court.addEventListener('click', courtClick);
+    showToast('피구 전술판 준비됨');
+  }
+
+  /* ── 영상 ── */
+  function renderVideos(videos){
+    var wrap = $d('dodgeRelatedVideos');
+    if(!wrap) return;
+    if(!videos || !videos.length){ wrap.hidden = true; return; }
+    wrap.hidden = false;
+    wrap.innerHTML = '<h3>📹 현재 단계 훈련 영상</h3><div class="video-pill-row">' +
+      videos.map(function(v){
+        return '<div class="video-pill"><div class="video-pill-info"><b>' + safe(v.title) + '</b><span>' + safe(v.focus) + '</span></div>' +
+          '<a href="' + safe(v.url) + '" target="_blank" rel="noopener">▶ 보기</a></div>';
+      }).join('') + '</div>';
+  }
+
+  /* ── 공개 API ── */
+  function action(name){
+    if(name==='execute') executeMoves();
+    else if(name==='preview'){ st.planned={}; render(); showToast('예정 삭제됨'); }
+    else if(name==='reset'){ applyFormation('base'); }
+  }
+  function formation(key){ applyFormation(key); }
+  function tactic(key){ applyTactic(key); }
+  function panel(name){
+    if(st.openPanel===name && $d('db-controls') && $d('db-controls').classList.contains('open')) closeMobilePanel();
+    else openPanel(name);
+  }
+  return { init:init, renderVideos:renderVideos, action:action, formation:formation, tactic:tactic, panel:panel, initialized: false };
+})(); } catch(e) { showError('DB 초기화 오류: '+(e.message||String(e))); return {init:function(){},renderVideos:function(){},action:function(){},formation:function(){},tactic:function(){},panel:function(){},initialized:false}; } })();
+
+</script>
+</body>
+</html>

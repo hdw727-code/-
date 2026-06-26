@@ -371,7 +371,7 @@
       font-size:clamp(10px,2.8vw,12px);font-weight:900;
       transform:translate(-50%,-50%);
       box-shadow:0 4px 9px rgba(15,23,42,.22);
-      transition:left 2500ms cubic-bezier(.3,.1,.3,1),top 2500ms cubic-bezier(.3,.1,.3,1);
+      transition:left 4000ms cubic-bezier(.25,.1,.25,1),top 4000ms cubic-bezier(.25,.1,.3,1);
       cursor:pointer;
     }
     .vb-token.home{background:#2e7dd7;}
@@ -464,7 +464,7 @@
       font-size:clamp(9px,2.5vw,11px);font-weight:900;
       transform:translate(-50%,-50%);
       box-shadow:0 4px 9px rgba(15,23,42,.22);
-      transition:left 2500ms cubic-bezier(.3,.1,.3,1),top 2500ms cubic-bezier(.3,.1,.3,1);
+      transition:left 4000ms cubic-bezier(.25,.1,.25,1),top 4000ms cubic-bezier(.25,.1,.3,1);
       cursor:pointer;
     }
     .db-token.home{background:#c9354b;}
@@ -698,6 +698,8 @@
             </div>
 
           </div><!-- /vb-layout -->
+          <!-- 포지션 피드백 -->
+          <div class="position-feedback" id="vb-feedback" hidden></div>
           <!-- 관련 영상 -->
           <div class="panel tactic-videos" id="tbRelatedVideos" hidden></div>
         </div>
@@ -758,6 +760,7 @@
               </div>
             </div>
           </div>
+          <div class="position-feedback" id="db-feedback" hidden></div>
           <div class="panel tactic-videos" id="dodgeRelatedVideos" hidden></div>
         </div>
       </div>
@@ -1471,10 +1474,87 @@ var VB = (function() { try { return (function() {
   }
 
   function renderTokens(){
-    $v('vb-tokenLayer').innerHTML=Object.values(st.players).map(p=>{
-      const sel=p.id===st.selected?' selected':'';
-      return `<button type="button" class="vb-token ${p.team}${sel}" data-vb-player="${p.id}" style="${tokenStyle(p.x,p.y)}" title="${p.role}">${p.label}</button>`;
-    }).join('');
+    const layer=$v('vb-tokenLayer'); layer.innerHTML='';
+    Object.values(st.players).forEach(function(p){
+      const btn=document.createElement('button');
+      btn.type='button';
+      btn.className='vb-token '+p.team+(p.id===st.selected?' selected':'');
+      btn.setAttribute('data-vb-player',p.id);
+      btn.style.cssText=tokenStyle(p.x,p.y);
+      btn.title=p.role; btn.textContent=p.label;
+      if(p.team==='home') makeDraggable(btn,p,'vb-court',analyzeVBPositions);
+      layer.appendChild(btn);
+    });
+  }
+
+  /* ---- 드래그 공통 ---- */
+  function makeDraggable(el,player,courtId,onDrop){
+    var isDrag=false,sx,sy,spx,spy;
+    function coords(e){ return e.touches?[e.touches[0].clientX,e.touches[0].clientY]:[e.clientX,e.clientY]; }
+    function onStart(e){
+      if(e.type==='mousedown'&&e.button!==0)return;
+      isDrag=true; var c=coords(e); sx=c[0];sy=c[1]; spx=player.x;spy=player.y;
+      el.style.transition='none'; e.stopPropagation();
+      document.addEventListener('mousemove',onMove);
+      document.addEventListener('mouseup',onEnd);
+      document.addEventListener('touchmove',onMove,{passive:false});
+      document.addEventListener('touchend',onEnd);
+    }
+    function onMove(e){
+      if(!isDrag)return; if(e.cancelable)e.preventDefault();
+      var c=coords(e); var rect=document.getElementById(courtId).getBoundingClientRect();
+      var nx=Math.max(4,Math.min(96,spx+(c[0]-sx)/rect.width*100));
+      var ny=Math.max(2,Math.min(110,spy+(c[1]-sy)/rect.height*100));
+      player.x=nx; player.y=ny;
+      el.style.left=nx+'%'; el.style.top=scaleY(ny)+'%';
+    }
+    function onEnd(){
+      if(!isDrag)return; isDrag=false;
+      document.removeEventListener('mousemove',onMove); document.removeEventListener('mouseup',onEnd);
+      document.removeEventListener('touchmove',onMove); document.removeEventListener('touchend',onEnd);
+      el.style.transition=''; onDrop();
+    }
+    el.addEventListener('mousedown',onStart);
+    el.addEventListener('touchstart',onStart,{passive:false});
+  }
+
+  /* ---- VB 포지션 분석 ---- */
+  function analyzeVBPositions(){
+    var home=Object.values(st.players).filter(function(p){return p.team==='home';});
+    var issues=[], tips=[];
+    var front=home.filter(function(p){return p.y<66;});
+    var mid=home.filter(function(p){return p.y>=66&&p.y<83;});
+    var back=home.filter(function(p){return p.y>=83;});
+    var left=home.filter(function(p){return p.x<33;});
+    var right=home.filter(function(p){return p.x>67;});
+    if(front.length===0) issues.push('⚠️ 전위가 없어요! 네트 앞이 비어 블로킹·공격이 불가능합니다.');
+    if(back.length===0)  issues.push('⚠️ 후위가 없어요! 깊게 오는 공을 아무도 받을 수 없습니다.');
+    if(mid.length===0)   issues.push('⚠️ 중위가 없어요! 연결(세컨드 터치) 역할이 비어 있습니다.');
+    if(left.length===0)  issues.push('⚠️ 왼쪽이 완전히 비어있어요! 상대가 왼쪽을 집중 공략하면 막을 수 없습니다.');
+    if(right.length===0) issues.push('⚠️ 오른쪽이 완전히 비어있어요! 오른쪽 공격에 취약합니다.');
+    for(var i=0;i<home.length;i++){
+      for(var j=i+1;j<home.length;j++){
+        var dx=home[i].x-home[j].x, dy=home[i].y-home[j].y;
+        if(Math.sqrt(dx*dx+dy*dy)<9) issues.push('⚠️ '+home[i].label+'·'+home[j].label+' 충돌 위험! 같은 공을 둘이 쫓게 됩니다.');
+      }
+    }
+    var avgX=home.reduce(function(s,p){return s+p.x;},0)/home.length;
+    var avgY=home.reduce(function(s,p){return s+p.y;},0)/home.length;
+    var spread=home.reduce(function(s,p){return s+Math.sqrt((p.x-avgX)*(p.x-avgX)+(p.y-avgY)*(p.y-avgY));},0)/home.length;
+    if(spread<12) issues.push('⚠️ 선수들이 너무 몰려있어요! 더 넓게 퍼져야 코트를 커버할 수 있습니다.');
+    if(issues.length===0){
+      tips.push('✅ 좋은 포지션이에요! 전·중·후위가 고르게 퍼져 있습니다.');
+      if(front.length>=3) tips.push('💡 전위 3명이 네트를 잘 지키고 있어요.');
+      if(back.length>=3)  tips.push('💡 후위 3명이 깊은 공을 안전하게 커버합니다.');
+    }
+    var fb=document.getElementById('vb-feedback');
+    if(!fb)return;
+    var all=issues.concat(tips);
+    if(!all.length){fb.hidden=true;return;}
+    fb.hidden=false;
+    fb.innerHTML='<div class="feedback-title">📍 포지션 분석 (드래그해서 바꿔보세요)</div>'+
+      all.map(function(m){return '<div class="feedback-item'+(m.startsWith('⚠️')?' warn':' good')+'">'+m+'</div>';}).join('')+
+      '<div class="feedback-hint">선수를 드래그해서 더 나은 위치를 찾아보세요!</div>';
   }
 
   function routeLine(from,to,color,dashed=false){
@@ -1559,7 +1639,7 @@ var VB = (function() { try { return (function() {
     renderTokens();
     setTimeout(()=>{
       st.completed.push(...moves); st.planned={}; st.moving=false; render(); showToast('이동 완료');
-    },2700);
+    },4200);
   }
 
   /* ---- 코트 클릭 ---- */
@@ -1784,7 +1864,6 @@ var DB = (function() { try { return (function() {
   function renderTokens(){
     var layer = $d('db-tokenLayer');
     if(!layer) return;
-    // Reuse existing tokens to preserve transition
     var existing = {};
     Array.prototype.forEach.call(layer.querySelectorAll('[data-db-player]'), function(el){
       existing[el.dataset.dbPlayer] = el;
@@ -1796,16 +1875,85 @@ var DB = (function() { try { return (function() {
         el.className = 'db-token ' + p.team;
         el.dataset.dbPlayer = p.id;
         el.textContent = p.label;
+        if(p.team === 'home') makeDraggableDB(el, p);
         layer.appendChild(el);
       }
       el.style.left = p.x + '%';
       el.style.top  = p.y + '%';
       el.className = 'db-token ' + p.team + (st.selected===p.id ? ' selected' : '');
     });
-    // Remove stale tokens
     Object.keys(existing).forEach(function(id){
       if(!playerById(id)) layer.removeChild(existing[id]);
     });
+  }
+
+  /* ── DB 드래그 ── */
+  function makeDraggableDB(el, player){
+    var isDrag=false, sx, sy, spx, spy;
+    function coords(e){ return e.touches?[e.touches[0].clientX,e.touches[0].clientY]:[e.clientX,e.clientY]; }
+    function onStart(e){
+      if(e.type==='mousedown'&&e.button!==0)return;
+      isDrag=true; var c=coords(e); sx=c[0];sy=c[1]; spx=player.x;spy=player.y;
+      el.style.transition='none'; e.stopPropagation();
+      document.addEventListener('mousemove',onMove);
+      document.addEventListener('mouseup',onEnd);
+      document.addEventListener('touchmove',onMove,{passive:false});
+      document.addEventListener('touchend',onEnd);
+    }
+    function onMove(e){
+      if(!isDrag)return; if(e.cancelable)e.preventDefault();
+      var c=coords(e); var rect=$d('db-court').getBoundingClientRect();
+      var nx=Math.max(4,Math.min(96,spx+(c[0]-sx)/rect.width*100));
+      var ny=Math.max(4,Math.min(96,spy+(c[1]-sy)/rect.height*100));
+      player.x=nx; player.y=ny;
+      el.style.left=nx+'%'; el.style.top=ny+'%';
+    }
+    function onEnd(){
+      if(!isDrag)return; isDrag=false;
+      document.removeEventListener('mousemove',onMove); document.removeEventListener('mouseup',onEnd);
+      document.removeEventListener('touchmove',onMove); document.removeEventListener('touchend',onEnd);
+      el.style.transition=''; analyzeDBPositions();
+    }
+    el.addEventListener('mousedown',onStart);
+    el.addEventListener('touchstart',onStart,{passive:false});
+  }
+
+  /* ── DB 포지션 분석 ── */
+  function analyzeDBPositions(){
+    var home=st.players.filter(function(p){return p.team==='home';});
+    var issues=[], tips=[];
+    /* 내야(14~86%), 외야(0~14%, 86~100%) */
+    var inField=home.filter(function(p){return p.y>=16&&p.y<=84;});
+    var outField=home.filter(function(p){return p.y<16||p.y>84;});
+    var left=home.filter(function(p){return p.x<28;});
+    var right=home.filter(function(p){return p.x>72;});
+    var center=home.filter(function(p){return p.x>=28&&p.x<=72;});
+    if(left.length===0)   issues.push('⚠️ 왼쪽이 비어있어요! 상대가 왼쪽으로 던지면 맞을 수 있습니다.');
+    if(right.length===0)  issues.push('⚠️ 오른쪽이 비어있어요! 오른쪽 공격에 취약합니다.');
+    if(center.length===0) issues.push('⚠️ 중앙이 비어있어요! 직선 공격이 그대로 통과됩니다.');
+    if(outField.length>2) issues.push('⚠️ 외야에 너무 많아요! 내야 수비가 얇아집니다.');
+    for(var i=0;i<home.length;i++){
+      for(var j=i+1;j<home.length;j++){
+        var dx=home[i].x-home[j].x, dy=home[i].y-home[j].y;
+        if(Math.sqrt(dx*dx+dy*dy)<10) issues.push('⚠️ '+home[i].label+'·'+home[j].label+' 충돌 위험! 피할 공간이 겹칩니다.');
+      }
+    }
+    var avgX=home.reduce(function(s,p){return s+p.x;},0)/home.length;
+    var spread=home.reduce(function(s,p){return s+Math.abs(p.x-avgX);},0)/home.length;
+    if(spread<12) issues.push('⚠️ 좌우로 너무 몰려있어요! 넓게 퍼져야 피할 공간이 생깁니다.');
+    if(issues.length===0){
+      tips.push('✅ 좋은 배치예요! 내야가 고르게 커버되고 있습니다.');
+      if(outField.length>=1) tips.push('💡 외야 선수가 있어 상대 뒤쪽 협공이 가능합니다.');
+      if(spread>=20) tips.push('💡 좌우로 잘 퍼져있어 피하기 공간이 충분합니다.');
+    }
+    var fb=document.getElementById('db-feedback');
+    if(!fb)return;
+    var all=issues.concat(tips);
+    if(!all.length){fb.hidden=true;return;}
+    fb.hidden=false;
+    fb.innerHTML='<div class="feedback-title">📍 포지션 분석 (드래그해서 바꿔보세요)</div>'+
+      all.map(function(m){return '<div class="feedback-item'+(m.startsWith('⚠️')?' warn':' good')+'">'+m+'</div>';}).join('')+
+      '<div class="feedback-hint">선수를 끌어서 더 좋은 자리를 찾아보세요!</div>';
   }
 
   function renderRoutes(){
@@ -1930,7 +2078,7 @@ var DB = (function() { try { return (function() {
       st.completed.push.apply(st.completed, moves);
       st.planned = {}; st.moving = false;
       render(); showToast('이동 완료');
-    }, 2700);
+    }, 4200);
   }
 
   /* ── 초기화 ── */

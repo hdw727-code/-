@@ -430,33 +430,13 @@
 
     /* 피구 전술판 */
     .db-court{
-      position:relative;width:min(72vw,300px);padding-bottom:min(130%,calc(min(72vw,300px)*1.55));
-      background:linear-gradient(180deg,#c8a96e 0%,#c8a96e 14%,#6dbf6d 14%,#6dbf6d 50%,#5cb85c 50%,#5cb85c 86%,#b8904a 86%,#b8904a 100%);
-      border:3px solid #666;border-radius:12px;overflow:hidden;margin:0 auto;
+      position:relative;width:min(72vw,260px);padding-bottom:min(200%,calc(min(68vw,240px)*2.2));
+      background:#4a9e4a;
+      border:3px solid #555;border-radius:8px;overflow:hidden;margin:0 auto;
     }
     .db-court > *{position:absolute;}
     #db-tokenLayer,#db-targetLayer{inset:0;width:100%;height:100%;}
-    .db-zone-label{
-      width:100%;text-align:center;font-size:11px;font-weight:900;
-      z-index:8;pointer-events:none;letter-spacing:.2px;
-    }
-    .db-zone-label.away{top:2%;color:#3e2000;}
-    .db-zone-label.home{bottom:2%;color:#3e2000;}
-    .db-team-label{
-      width:100%;text-align:center;font-size:12px;font-weight:900;
-      z-index:8;pointer-events:none;
-    }
-    .db-team-label.away{top:22%;color:#1a5e1a;}
-    .db-team-label.home{bottom:22%;color:#1a5e1a;}
-    .db-net{
-      left:0;right:0;top:50%;height:3px;
-      background:repeating-linear-gradient(90deg,#555 0 8px,transparent 8px 14px);
-      z-index:9;display:flex;align-items:center;justify-content:center;
-    }
-    .db-net span{
-      background:#fff;padding:1px 8px;font-size:11px;font-weight:900;color:#444;
-      border:1px solid #aaa;border-radius:4px;white-space:nowrap;
-    }
+    #db-courtSvg{inset:0;width:100%;height:100%;z-index:1;pointer-events:none;}
     .db-token{
       position:absolute;z-index:5;
       width:clamp(26px,7vw,38px);height:clamp(26px,7vw,38px);
@@ -525,7 +505,34 @@
       background:#dc2626;color:#fff;padding:12px 16px;font-size:13px;font-weight:700;
       text-align:center;white-space:pre-wrap;}
     #errorBanner.show{display:block;}
-  </style>
+  
+  /* ── 동아리 선택 모달 ── */
+  #clubModal{
+    display:none;position:fixed;inset:0;z-index:9000;
+    background:rgba(15,23,42,0.72);
+    align-items:center;justify-content:center;
+  }
+  #clubModal.show{display:flex;}
+  .club-modal-box{
+    background:#fff;border-radius:20px;
+    padding:36px 28px 32px;width:min(92vw,360px);
+    text-align:center;box-shadow:0 20px 60px rgba(0,0,0,.25);
+  }
+  .club-modal-box h2{margin:0 0 6px;font-size:22px;color:#0f172a;}
+  .club-modal-box p{margin:0 0 28px;color:#64748b;font-size:14px;}
+  .club-btn-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px;}
+  .club-btn{
+    padding:28px 12px;border:2px solid #e2e8f0;border-radius:16px;
+    background:#f8fafc;font-size:18px;font-weight:700;cursor:pointer;
+    transition:border-color .15s,background .15s,transform .1s;
+    display:flex;flex-direction:column;align-items:center;gap:8px;
+  }
+  .club-btn span.icon{font-size:36px;}
+  .club-btn:hover{border-color:var(--blue);background:#eff6ff;transform:translateY(-2px);}
+  .club-btn.volleyball:hover{border-color:#3b82f6;background:#eff6ff;}
+  .club-btn.dodgeball:hover{border-color:#f59e0b;background:#fffbeb;}
+  .club-skip{margin-top:18px;font-size:13px;color:#94a3b8;cursor:pointer;text-decoration:underline;}
+</style>
 </head>
 <body class="theme-fresh">
 <div id="errorBanner"></div>
@@ -563,6 +570,24 @@
       </div>
     </div>
   </section>
+
+
+  <!-- ===== 동아리 선택 모달 ===== -->
+  <div id="clubModal">
+    <div class="club-modal-box">
+      <h2>내 동아리 선택</h2>
+      <p>어느 동아리 소속인가요?</p>
+      <div class="club-btn-grid">
+        <button class="club-btn volleyball" onclick="selectClubModal('배구')">
+          <span class="icon">🏐</span>배구
+        </button>
+        <button class="club-btn dodgeball" onclick="selectClubModal('피구')">
+          <span class="icon">🔴</span>피구
+        </button>
+      </div>
+      <div class="club-skip" onclick="selectClubModal('')">나중에 선택</div>
+    </div>
+  </div>
 
   <!-- ===== 학생 화면 (3탭) ===== -->
   <section id="studentScreen" class="screen">
@@ -745,14 +770,69 @@
               </div>
               <div class="vb-court-wrap">
                 <div id="db-court" class="db-court">
-                  <div class="db-zone-label away">외야 구역 (상대팀)</div>
-                  <div class="db-team-label away">상대팀 내야</div>
-                  <div class="db-net"><span>중앙선</span></div>
-                  <div class="db-team-label home">우리팀 내야</div>
-                  <div class="db-zone-label home">외야 구역 (우리팀)</div>
-                  <svg id="db-routeLayer" class="vb-layer" viewBox="0 0 100 100" preserveAspectRatio="none"></svg>
-                  <div id="db-targetLayer"></div>
-                  <div id="db-tokenLayer"></div>
+                  <!-- 코트 배경 SVG: 스포츠피구 실제 규격 (8m폭×16m높이, 내야10m×10m, 외야3m×상하) -->
+                  <svg id="db-courtSvg" viewBox="0 0 100 200" preserveAspectRatio="none" xmlns="http://www.w3.org/2000/svg">
+                    <!-- 기본 바탕(내야 사이드 빈 공간) - 어두운 회색 -->
+                    <rect x="0" y="0" width="100" height="200" fill="#2a2a2a"/>
+
+                    <!-- ■ 외야(상대팀): 전체 너비, 상단 19% -->
+                    <!-- D사각(좌): 외야 중 내야 바깥 -->
+                    <rect x="0"  y="0" width="19" height="37" fill="#7a5200"/>
+                    <!-- A구역(중앙): 진입가능 외야 -->
+                    <rect x="19" y="0" width="62" height="37" fill="#c8870a"/>
+                    <!-- E사각(우) -->
+                    <rect x="81" y="0" width="19" height="37" fill="#7a5200"/>
+
+                    <!-- ■ 내야: 중앙 62% 너비, 상하 19%~81% -->
+                    <rect x="19" y="37" width="62" height="63" fill="#3a8a3a"/>
+                    <rect x="19" y="100" width="62" height="63" fill="#358035"/>
+
+                    <!-- ■ 외야(우리팀): 전체 너비, 하단 19% -->
+                    <rect x="0"  y="163" width="19" height="37" fill="#7a5200"/>
+                    <rect x="19" y="163" width="62" height="37" fill="#c8870a"/>
+                    <rect x="81" y="163" width="19" height="37" fill="#7a5200"/>
+
+                    <!-- 내야 외곽선 -->
+                    <rect x="19" y="37" width="62" height="126" fill="none" stroke="white" stroke-width="1.2"/>
+
+                    <!-- 중앙선 (점선) -->
+                    <line x1="19" y1="100" x2="81" y2="100" stroke="white" stroke-width="1.5" stroke-dasharray="5,3"/>
+
+                    <!-- 외야/내야 경계선 -->
+                    <line x1="0" y1="37"  x2="100" y2="37"  stroke="rgba(255,255,255,0.7)" stroke-width="1"/>
+                    <line x1="0" y1="163" x2="100" y2="163" stroke="rgba(255,255,255,0.7)" stroke-width="1"/>
+
+                    <!-- D/E 구역 경계 (세로) -->
+                    <line x1="19" y1="0" x2="19" y2="37"  stroke="rgba(255,200,50,0.5)" stroke-width="0.8" stroke-dasharray="3,2"/>
+                    <line x1="81" y1="0" x2="81" y2="37"  stroke="rgba(255,200,50,0.5)" stroke-width="0.8" stroke-dasharray="3,2"/>
+                    <line x1="19" y1="163" x2="19" y2="200" stroke="rgba(255,200,50,0.5)" stroke-width="0.8" stroke-dasharray="3,2"/>
+                    <line x1="81" y1="163" x2="81" y2="200" stroke="rgba(255,200,50,0.5)" stroke-width="0.8" stroke-dasharray="3,2"/>
+
+                    <!-- 중앙 원 -->
+                    <circle cx="50" cy="100" r="9" fill="none" stroke="rgba(255,255,255,0.4)" stroke-width="1"/>
+
+                    <!-- 라벨: 외야 상대팀 -->
+                    <text x="50" y="14" text-anchor="middle" fill="white" font-size="5" font-weight="bold" font-family="sans-serif">외야 (상대팀)</text>
+                    <text x="50" y="22" text-anchor="middle" fill="rgba(255,240,180,0.9)" font-size="4" font-family="sans-serif">A구역 — B(좌) · C(우)</text>
+                    <text x="9"  y="20" text-anchor="middle" fill="#ffcc44" font-size="5.5" font-weight="bold" font-family="sans-serif">D</text>
+                    <text x="91" y="20" text-anchor="middle" fill="#ffcc44" font-size="5.5" font-weight="bold" font-family="sans-serif">E</text>
+                    <text x="9"  y="28" text-anchor="middle" fill="rgba(255,200,50,0.7)" font-size="3.5" font-family="sans-serif">진입불가</text>
+                    <text x="91" y="28" text-anchor="middle" fill="rgba(255,200,50,0.7)" font-size="3.5" font-family="sans-serif">진입불가</text>
+
+                    <!-- 라벨: 내야 -->
+                    <text x="50" y="72" text-anchor="middle" fill="rgba(255,255,255,0.4)" font-size="6" font-family="sans-serif">상대팀 내야</text>
+                    <text x="50" y="98" text-anchor="middle" fill="rgba(255,255,255,0.6)" font-size="4" font-family="sans-serif">중앙선</text>
+                    <text x="50" y="133" text-anchor="middle" fill="rgba(255,255,255,0.4)" font-size="6" font-family="sans-serif">우리팀 내야</text>
+
+                    <!-- 라벨: 외야 우리팀 -->
+                    <text x="50" y="178" text-anchor="middle" fill="white" font-size="5" font-weight="bold" font-family="sans-serif">외야 (우리팀)</text>
+                    <text x="50" y="186" text-anchor="middle" fill="rgba(255,240,180,0.9)" font-size="4" font-family="sans-serif">A구역 — B(좌) · C(우)</text>
+                    <text x="9"  y="182" text-anchor="middle" fill="#ffcc44" font-size="5.5" font-weight="bold" font-family="sans-serif">D</text>
+                    <text x="91" y="182" text-anchor="middle" fill="#ffcc44" font-size="5.5" font-weight="bold" font-family="sans-serif">E</text>
+                  </svg>
+                  <svg id="db-routeLayer" class="vb-layer" viewBox="0 0 100 100" preserveAspectRatio="none" style="z-index:3"></svg>
+                  <div id="db-targetLayer" style="z-index:4"></div>
+                  <div id="db-tokenLayer" style="z-index:5"></div>
                 </div>
               </div>
               <!-- 판정 버튼 -->
@@ -1002,6 +1082,11 @@ function runLocalPreview(fnName, args, onSuccess) {
 }
 
 function makeLocalDashboard(payload, club) {
+  // club이 비어 있으면 localStorage에서 마지막 선택 복원
+  if (!club) {
+    var sid = [payload.grade,payload.classNo,payload.number,payload.name].join('-');
+    club = localStorage.getItem('club_'+sid) || '';
+  }
   return {
     date: new Date().toISOString().slice(0,10),
     levels: ['초급','중급 전','중급','중급 후반','고급'],
@@ -1018,6 +1103,41 @@ function makeLocalDashboard(payload, club) {
 }
 
 function _gv(id){ var e=document.getElementById(id); return e ? e.value.trim() : ''; }
+
+
+/* ── 동아리 선택 모달 ── */
+var _pendingPayload = null;
+
+function showClubModal(payload) {
+  _pendingPayload = payload;
+  var modal = document.getElementById('clubModal');
+  // 이미 저장된 동아리 있으면 바로 진행
+  var sid = [payload.grade,payload.classNo,payload.number,payload.name].join('-');
+  var saved = '';
+  try { saved = localStorage.getItem('club_'+sid) || ''; } catch(e) {}
+  if (saved) {
+    _enterStudentScreen(payload, saved);
+  } else {
+    modal.classList.add('show');
+  }
+}
+
+function selectClubModal(club) {
+  var modal = document.getElementById('clubModal');
+  modal.classList.remove('show');
+  _enterStudentScreen(_pendingPayload, club);
+}
+
+function _enterStudentScreen(payload, club) {
+  _goStudentScreen(payload);
+  if (club) {
+    try { localStorage.setItem('club_'+ [payload.grade,payload.classNo,payload.number,payload.name].join('-'), club); } catch(e) {}
+  }
+  var data = makeLocalDashboard(payload, club);
+  try { renderStudent(data); } catch(e) {}
+  // 서버 데이터 반영은 doLogin에서 별도 처리
+  updateTacticTab(club);
+}
 
 function _goStudentScreen(payload) {
   /* 화면 전환 */
@@ -1037,8 +1157,7 @@ function _goStudentScreen(payload) {
 
 function doGuest() {
   var payload = {grade:'0', classNo:'0', number:'0', name:'게스트', gender:'선택 안 함', theme:'fresh'};
-  _goStudentScreen(payload);
-  try { renderStudent(makeLocalDashboard(payload, '배구')); } catch(e) {}
+  showClubModal(payload);
   showToast('게스트 모드 — 저장 없이 전술판·기능 체험 가능합니다');
 }
 
@@ -1056,15 +1175,17 @@ function doLogin() {
 
   var payload = {grade:grade, classNo:classNo, number:number, name:name, gender:gender, theme:'fresh'};
 
-  /* ── 즉시 화면 전환 + 캐시/로컬 데이터 표시 ── */
-  _goStudentScreen(payload);
+  /* ── 동아리 선택 후 화면 전환 ── */
   var cacheKey = dashboardCacheKey(payload);
   var cached   = readDashboardCache(cacheKey);
   if (cached) {
+    // 캐시 있으면 바로 진입
+    _goStudentScreen(payload);
     try { renderStudent(cached); } catch(e) {}
     showToast('저장된 데이터 표시 중 · 서버에서 업데이트 중...');
   } else {
-    try { renderStudent(makeLocalDashboard(payload, '배구')); } catch(e) {}
+    // 캐시 없으면 동아리 선택 후 진입
+    showClubModal(payload);
   }
 
   /* ── 백그라운드에서 GAS 서버 실제 데이터 로드 ── */
@@ -1123,10 +1244,8 @@ function renderStudent(data) {
     grade:data.student.grade, classNo:data.student.classNo,
     number:data.student.number, name:data.student.name
   }), data);
-  // 전술탭 활성화 상태면 업데이트
-  if (document.getElementById('tab-tactics').classList.contains('active')) {
-    updateTacticTab(data.student.club);
-  }
+  // 동아리 설정 시 전술탭 항상 준비
+  updateTacticTab(data.student.club);
 
   } catch(e) { showError('renderStudent 오류: ' + e.message + ' (line ' + (e.lineNumber||'?') + ')'); }
 }
@@ -1202,6 +1321,10 @@ function renderClubChoices(data) {
       document.querySelectorAll('#clubChoices .choice').forEach(b=>b.classList.remove('active','saving'));
       btn.classList.add('active','saving');
       document.getElementById('clubBadge').textContent = club;
+      if (currentStudent) {
+        var sid = currentStudent.studentId;
+        try { localStorage.setItem('club_'+sid, club); } catch(e) {}
+      }
       if (dashboard&&currentStudent) {
         dashboard.student.club = club; currentStudent.club = club;
         renderVisualSummary(dashboard);
@@ -1740,6 +1863,114 @@ var VB = (function() { try { return (function() {
   }
   function formation(key){applyFormation(key);}
   function tactic(key){applyTactic(key);}
+  /* ── 상태: 공격권 / 패스 / 타이머 ── */
+  var ruleState = { attackTeam:'home', passCount:0, timerInterval:null };
+
+  function updateStatusBar(){
+    var atk = $d('db-attack-ind');
+    var pc  = $d('db-pass-cnt');
+    if(atk) atk.textContent = ruleState.attackTeam==='home' ? '🔴 우리팀 공격' : '🔵 상대팀 공격';
+    if(pc)  pc.textContent  = '패스 ' + ruleState.passCount + '/3';
+  }
+
+  function clearTimer5(){
+    if(ruleState.timerInterval){ clearInterval(ruleState.timerInterval); ruleState.timerInterval=null; }
+    var t=$d('db-timer5'); if(t) t.textContent='⏱ -';
+  }
+
+  function startTimer5(){
+    clearTimer5();
+    var sec=5;
+    var t=$d('db-timer5');
+    if(t) t.textContent='⏱ '+sec+'s';
+    ruleState.timerInterval = setInterval(function(){
+      sec--;
+      if(t) t.textContent = sec>0 ? '⏱ '+sec+'s' : '⏱ 5초!';
+      if(sec<=0){ clearTimer5(); showFaultAlert('5초룰','5초 안에 던지지 않았습니다. 공격권이 넘어갑니다.'); changeAttackTeam(); }
+    }, 1000);
+  }
+
+  function changeAttackTeam(){
+    clearTimer5();
+    ruleState.passCount = 0;
+    ruleState.attackTeam = ruleState.attackTeam==='home' ? 'away' : 'home';
+    updateStatusBar();
+    showToast('공격권 전환: ' + (ruleState.attackTeam==='home'?'우리팀':'상대팀') + ' 공격');
+  }
+
+  function showFaultAlert(title, msg){
+    var el=$d('db-fault-alert');
+    if(!el) return;
+    el.hidden=false;
+    el.innerHTML='<strong>⚠️ '+title+'</strong> '+msg;
+    setTimeout(function(){ el.hidden=true; }, 4000);
+  }
+
+  /* ── init ── */
+  function init(){
+    if(DB.initialized) return;
+    DB.initialized = true;
+    seedPlayers('base');
+    render();
+    renderFormationButtons();
+    renderTacticButtons();
+    updateStatusBar();
+  }
+
+  /* ── formation (버튼 클릭) ── */
+  function formation(key){ applyFormation(key); }
+
+  /* ── tactic (버튼 클릭) ── */
+  function tactic(key){ applyTactic(key); }
+
+  /* ── action (모든 버튼) ── */
+  function action(name, arg){
+    if(name==='execute'){
+      if(Object.keys(st.planned).length===0){ showToast('이동 예정이 없습니다'); return; }
+      st.moving=true;
+      Object.keys(st.planned).forEach(function(id){
+        var p=playerById(id), m=st.planned[id];
+        if(p && m){ p.x=m.to[0]; p.y=m.to[1]; }
+      });
+      st.completed = Object.keys(st.planned);
+      st.planned={};
+      render();
+      setTimeout(function(){ st.completed=[]; render(); }, 4500);
+      return;
+    }
+    if(name==='reset'){ applyFormation('base'); return; }
+    if(name==='preview'){ st.planned={}; render(); return; }
+    if(name==='jumpball'){
+      ruleState.passCount=0; ruleState.attackTeam='home';
+      updateStatusBar(); clearTimer5();
+      showToast('점프볼! 우리팀 공격권으로 시작');
+      return;
+    }
+    if(name==='pass'){
+      ruleState.passCount++;
+      if(ruleState.passCount>=4){
+        showFaultAlert('포패스','4번 패스 — 공격권이 상대팀으로 넘어갑니다.');
+        ruleState.passCount=0; changeAttackTeam(); return;
+      }
+      updateStatusBar(); startTimer5(); return;
+    }
+    if(name==='changeAttack'){ changeAttackTeam(); return; }
+    if(name==='fault'){
+      var msgs={
+        headattack:['헤드어택','머리를 맞혔습니다. 상대팀이 공격권을 가집니다.'],
+        doublepass:['더블패스','내야끼리 또는 외야끼리 패스했습니다. 공격권 전환.'],
+        '4pass':['포패스','4번째 패스 — 공격권 전환.'],
+        '5sec':['5초룰','5초 초과 — 공격권 전환.'],
+        overline:['오버라인','선을 밟았습니다. 아웃.'],
+        holding:['홀딩','공을 5초 이상 잡고 있었습니다.']
+      };
+      var m=msgs[arg]||[arg,'파울 선언'];
+      showFaultAlert(m[0], m[1]);
+      if(['headattack','doublepass','4pass','5sec'].indexOf(arg)>=0) changeAttackTeam();
+      return;
+    }
+  }
+
   function panel(name){
     if(st.openPanel===name&&$v('vb-controls').classList.contains('open'))closeMobilePanel();
     else openPanel(name);
@@ -1765,30 +1996,38 @@ var DB = (function() { try { return (function() {
   /* 12인제 피구 (4-2-3-2-차단수 + 외야1)
      선수 간격: 실제 경기처럼 적당히 모여있음
      극단적인 좌우 끝 배치 없음 — 이동 거리가 짧아야 빠른 반응 가능 */
+  /* 코트 좌표계: y=0(상단외야) ~ y=13(내야상단경계) ~ y=50(중앙선) ~ y=87(내야하단경계) ~ y=100(하단외야)
+     외야A구역: y=3~10, x=22~78 / D사각지대: x<22, E사각지대: x>78 */
   var defaultPlayers = [
-    /* 우리팀 내야 1~11번 */
-    {id:'H1', label:'1', team:'home', role:'최전방(좌)',  x:22, y:57},
-    {id:'H2', label:'2', team:'home', role:'최전방(중좌)',x:38, y:57},
-    {id:'H3', label:'3', team:'home', role:'최전방(중우)',x:62, y:57},
-    {id:'H4', label:'4', team:'home', role:'최전방(우)',  x:78, y:57},
-    {id:'H5', label:'5', team:'home', role:'중전방(좌)',  x:26, y:65},
-    {id:'H6', label:'6', team:'home', role:'중전방(우)',  x:74, y:65},
-    {id:'H7', label:'7', team:'home', role:'중앙(좌)',    x:18, y:72},
-    {id:'H8', label:'8', team:'home', role:'중앙(중)',    x:50, y:72},
-    {id:'H9', label:'9', team:'home', role:'중앙(우)',    x:82, y:72},
-    {id:'H10',label:'10',team:'home', role:'중후반(좌)',  x:32, y:79},
-    {id:'H11',label:'11',team:'home', role:'차단수',      x:68, y:79},
-    /* 우리팀 외야 12번 - 상대 엔드라인 바깥 고정 */
-    {id:'H12',label:'12',team:'home', role:'외야',        x:50, y:6},
-    /* 상대팀 대표 선수 */
-    {id:'A1', label:'A1',team:'away', role:'최전방',      x:22, y:43},
-    {id:'A2', label:'A2',team:'away', role:'최전방',      x:38, y:43},
-    {id:'A3', label:'A3',team:'away', role:'최전방',      x:62, y:43},
-    {id:'A4', label:'A4',team:'away', role:'최전방',      x:78, y:43},
-    {id:'A5', label:'A5',team:'away', role:'중앙',        x:32, y:34},
-    {id:'A6', label:'A6',team:'away', role:'중앙',        x:68, y:34},
+    /* 우리팀 외야 12번: 상대팀 외야 A구역 중앙 */
+    {id:'H12',label:'12',team:'home', role:'외야(A)',     x:50, y:17},
+    /* 우리팀 내야 - 꿀팁: 일자배치, 사이드 강조, 뭉치지 않기 */
+    /* 1열 공격수(중앙선 바로 앞) */
+    {id:'H1', label:'1', team:'home', role:'공격(중좌)',  x:35, y:109},
+    {id:'H2', label:'2', team:'home', role:'공격(중우)',  x:65, y:109},
+    /* 2열 측면 공격수 */
+    {id:'H3', label:'3', team:'home', role:'공격(좌)',    x:18, y:119},
+    {id:'H4', label:'4', team:'home', role:'공격(우)',    x:82, y:119},
+    /* 3열 중앙 서포터 */
+    {id:'H5', label:'5', team:'home', role:'중앙(중좌)', x:40, y:129},
+    {id:'H6', label:'6', team:'home', role:'중앙(중우)', x:60, y:129},
+    /* 4열 넓은 사이드(B,C 포지션 - 꿀팁: 사이드에 줘서 혼란) */
+    {id:'H7', label:'7', team:'home', role:'사이드B(좌)',  x:12, y:139},
+    {id:'H8', label:'8', team:'home', role:'사이드C(우)',  x:88, y:139},
+    /* 5열 후위 */
+    {id:'H9', label:'9', team:'home', role:'후위(좌)',    x:28, y:149},
+    {id:'H10',label:'10',team:'home', role:'후위(우)',    x:72, y:149},
+    /* 차단수: 가장 깊은 곳 (상대 외야 공 차단) */
+    {id:'H11',label:'11',team:'home', role:'차단수',      x:50, y:158},
+    /* 상대팀 (6명 대표) */
+    {id:'A1', label:'A1',team:'away', role:'공격(좌)',    x:18, y:91},
+    {id:'A2', label:'A2',team:'away', role:'공격(중좌)', x:38, y:91},
+    {id:'A3', label:'A3',team:'away', role:'공격(중우)', x:62, y:91},
+    {id:'A4', label:'A4',team:'away', role:'공격(우)',    x:82, y:91},
+    {id:'A5', label:'A5',team:'away', role:'중앙(좌)',    x:30, y:76},
+    {id:'A6', label:'A6',team:'away', role:'중앙(우)',    x:70, y:76},
     /* 공 */
-    {id:'BALL',label:'●',team:'ball', role:'공',          x:50, y:50}
+    {id:'BALL',label:'●',team:'ball', role:'공',          x:50, y:100}
   ];
 
   /* ── 대형 정의 ── */
@@ -2131,95 +2370,28 @@ var DB = (function() { try { return (function() {
     document.querySelectorAll('[data-db-panel-body]').forEach(function(s){
       s.hidden = (s.dataset.dbPanelBody !== name);
     });
-    document.querySelectorAll('[data-db-panel]').forEach(function(b){
-      b.classList.toggle('active', b.dataset.dbPanel === name);
+    document.querySelectorAll('[data-db-panel]').forEach(function(btn){
+      btn.classList.toggle('active', btn.dataset.dbPanel === name);
     });
   }
-
-  function closeMobilePanel(){
+  function closePanel(){
     st.openPanel = null;
     var ctrl = $d('db-controls');
     if(ctrl) ctrl.classList.remove('open');
   }
+  function closeMobilePanel(){ closePanel(); }
 
-  /* ── 코트 클릭 ── */
-  function courtClick(ev){
-    var token = ev.target.closest('[data-db-player]');
-    if(token){
-      st.selected = token.dataset.dbPlayer;
-      renderTokens();
-      var p = playerById(st.selected);
-      if(p) showToast(p.id + ' - ' + p.role);
-      return;
-    }
-    if(!st.selected || ev.target.closest('button')) return;
-    var rect = $d('db-court').getBoundingClientRect();
-    var x = ((ev.clientX - rect.left) / rect.width) * 100;
-    var y = ((ev.clientY - rect.top)  / rect.height) * 100;
-    var p = playerById(st.selected);
-    if(!p) return;
-    st.planned[p.id] = {id:p.id, from:[p.x,p.y], to:[Math.max(4,Math.min(96,x)), Math.max(2,Math.min(98,y))], label:p.label};
-    render();
-    showToast('이동 예약됨');
-  }
-
-  /* ── 이동 실행 ── */
-  function executeMoves(){
-    if(st.moving) return;
-    var moves = Object.values(st.planned);
-    if(!moves.length){ showToast('예약된 이동이 없어요'); return; }
-    st.moving = true;
-    moves.forEach(function(m){
-      var p = playerById(m.id);
-      if(!p) return;
-      p.x = m.to[0]; p.y = m.to[1];
-    });
-    renderTokens();
-    setTimeout(function(){
-      st.completed.push.apply(st.completed, moves);
-      st.planned = {}; st.moving = false;
-      render(); showToast('이동 완료');
-    }, 4200);
-  }
-
-  /* ── 초기화 ── */
-  function init(){
-    initialized = true;
-    seedPlayers('base');
-    renderDetail(formations.base.title, formations.base.text);
-    render();
-    var court = $d('db-court');
-    if(court) court.addEventListener('click', courtClick);
-    showToast('피구 전술판 준비됨');
-  }
-
-  /* ── 영상 ── */
-  function renderVideos(videos){
-    var wrap = $d('dodgeRelatedVideos');
-    if(!wrap) return;
-    if(!videos || !videos.length){ wrap.hidden = true; return; }
-    wrap.hidden = false;
-    wrap.innerHTML = '<h3>📹 현재 단계 훈련 영상</h3><div class="video-pill-row">' +
-      videos.map(function(v){
-        return '<div class="video-pill"><div class="video-pill-info"><b>' + safe(v.title) + '</b><span>' + safe(v.focus) + '</span></div>' +
-          '<a href="' + safe(v.url) + '" target="_blank" rel="noopener">▶ 보기</a></div>';
-      }).join('') + '</div>';
-  }
-
-  /* ── 공개 API ── */
-  function action(name){
-    if(name==='execute') executeMoves();
-    else if(name==='preview'){ st.planned={}; render(); showToast('예정 삭제됨'); }
-    else if(name==='reset'){ applyFormation('base'); }
-  }
-  function formation(key){ applyFormation(key); }
-  function tactic(key){ applyTactic(key); }
   function panel(name){
-    if(st.openPanel===name && $d('db-controls') && $d('db-controls').classList.contains('open')) closeMobilePanel();
+    if(st.openPanel===name && $d('db-controls') && $d('db-controls').classList.contains('open')) closePanel();
     else openPanel(name);
   }
-  return { init:init, renderVideos:renderVideos, action:action, formation:formation, tactic:tactic, panel:panel, initialized: false };
-})(); } catch(e) { showError('DB 초기화 오류: '+(e.message||String(e))); return {init:function(){},renderVideos:function(){},action:function(){},formation:function(){},tactic:function(){},panel:function(){},initialized:false}; }
+  function renderVideos(vids){ /* 피구 영상은 별도 영역에서 처리 */ }
+  return { init:init, action:action, formation:formation, tactic:tactic, panel:panel, renderVideos:renderVideos, initialized: false };
+})();
+} catch(e) {
+  showError('DB 초기화 오류: '+(e.message||String(e)));
+  return {init:function(){},action:function(){},formation:function(){},tactic:function(){},panel:function(){},initialized:false};
+}
 })();
 
 </script>

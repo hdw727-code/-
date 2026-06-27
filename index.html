@@ -808,6 +808,22 @@
     }
     .pg-player.pg-hit1::before { content:"●"; position:absolute; top:-7px; right:-5px; font-size:10px; color:#ff6b6b; }
     .pg-player.pg-hit2::before { content:"●●"; position:absolute; top:-7px; right:-8px; font-size:9px; color:#ff2222; letter-spacing:-1px; }
+    /* 내야 아웃 순간 플래시 (내야에 있을 때만) */
+    @keyframes pgElimFlash {
+      0%   { opacity:1; filter:none; transform:translate(-50%,-50%) scale(1); }
+      40%  { opacity:0.15; filter:grayscale(1) brightness(.4); transform:translate(-50%,-50%) scale(.85); }
+      100% { opacity:0.1; filter:grayscale(1); transform:translate(-50%,-50%) scale(.8); }
+    }
+    .pg-player.pg-elim-flash {
+      animation: pgElimFlash .45s ease forwards;
+      pointer-events:none;
+    }
+    /* 외야 활동 중 (흐릿하지 않음, 금색 테두리) */
+    .pg-player.pg-in-outfield {
+      opacity:1 !important; filter:none !important;
+      box-shadow:0 0 0 3px #ffd700, 0 2px 8px rgba(0,0,0,.5) !important;
+    }
+    /* 호환용 stub (기존 pg-elim 은 이제 사용 안 함) */
     .pg-player.pg-elim { opacity:.22; filter:grayscale(1) brightness(.5); pointer-events:all; }
     .pg-player.pg-can-hit { cursor:crosshair; box-shadow:0 0 0 3px #ff4444, 0 5px 12px rgba(0,0,0,.35) !important; }
     .pg-player.pg-can-pass { cursor:pointer; box-shadow:0 0 0 3px #44ff88, 0 5px 12px rgba(0,0,0,.35) !important; }
@@ -1339,6 +1355,16 @@ function runLocalPreview(fnName, args, onSuccess) {
     return true;
   }
   if (['saveActionStatus','saveMissionStatus','markAttendance'].includes(fnName)) {
+    // 로컬에서도 대시보드 상태 실제 반영
+    if (fnName === 'markAttendance') {
+      if (dashboard) dashboard.attendanceStatus = args[1];
+    }
+    if (fnName === 'saveMissionStatus') {
+      if (dashboard) { dashboard.missionStatuses = dashboard.missionStatuses||{}; dashboard.missionStatuses[args[1]] = (args[2]===true||args[2]==='true'); }
+    }
+    if (fnName === 'saveActionStatus') {
+      if (dashboard) { dashboard.actionStatuses = dashboard.actionStatuses||{}; dashboard.actionStatuses[args[1]] = (args[2]===true||args[2]==='true'); }
+    }
     setTimeout(() => onSuccess(dashboard), 120);
     return true;
   }
@@ -1664,6 +1690,12 @@ function renderTraining(data) {
         var st = data.missionStatuses || {};
         var allDone = ms.length > 0 && ms.every(function(m,i){ return !!st[i]; });
         if (allDone && (!data.attendanceStatus || data.attendanceStatus === '미확인')) {
+          // dashboard 메모리 먼저 갱신 (중복 호출 방지)
+          if (dashboard) dashboard.attendanceStatus = '출석';
+          var ab = document.getElementById('attendanceBadge');
+          var qa = document.getElementById('quickAttendance');
+          if (ab) ab.textContent = '출석';
+          if (qa) qa.textContent = '출석';
           markAttendance('출석');
           showToast('🎉 미션 완료! 출석이 자동 처리됩니다.');
         }
@@ -1721,6 +1753,7 @@ function markAttendance(status) {
   showToast('출결 저장 중...');
   runServer('markAttendance', [currentStudent.studentId, status],
     data => {
+      if (dashboard) dashboard.attendanceStatus = status; // 메모리 즉시 갱신
       renderStudent(data);
       showToast(`${status} 저장 완료 ✓`);
     },
@@ -2515,70 +2548,81 @@ var DB = (function(){ try { return (function(){
     var topPct=parseFloat(el.style.top)||50;
     /* 우리팀 → 상단 외야로 스냅 (y < 22%) */
     if(pfx==='o' && topPct<22){
+      var origX=parseFloat(el.style.left)||50, origY=topPct;
       var slot=_outSlots.o[Math.min(_gs.outIdxO,_outSlots.o.length-1)];
       el.style.left=(slot.x/_W*100)+'%'; el.style.top=(slot.y/_H*100)+'%';
       _gs.outIdxO++;
-      _markElim(el,pfx+el.textContent);
+      _markElim(el,pfx+el.textContent, origX, origY);
     }
     /* 상대팀 → 하단 외야로 스냅 (y > 78%) */
     else if(pfx==='t' && topPct>78){
+      var origX=parseFloat(el.style.left)||50, origY=topPct;
       var slot=_outSlots.t[Math.min(_gs.outIdxT,_outSlots.t.length-1)];
       el.style.left=(slot.x/_W*100)+'%'; el.style.top=(slot.y/_H*100)+'%';
       _gs.outIdxT++;
-      _markElim(el,pfx+el.textContent);
+      _markElim(el,pfx+el.textContent, origX, origY);
     }
   }
 
-  function _markElim(el,id){
+  function _markElim(el,id,origX,origY){
     if(_gs.elim.has(id))return;
     _gs.elim.add(id);
-    el.classList.add('pg-elim');
+    /* 외야에서는 활성 상태 (흐릿하지 않음) */
+    el.classList.remove('pg-elim-flash','pg-elim');
+    el.classList.add('pg-in-outfield');
     _updateScore();
-    setTimeout(function(){_autoFill(id[0]);},500);
+    if(origX!==undefined&&origY!==undefined){
+      setTimeout(function(){_autoFillGentle(id[0],origX,origY);},550);
+    }
   }
 
   function _eliminatePlayer(id){
     var el=_$('pg-'+id);if(!el)return;
     if(_gs.elim.has(id))return;
-    /* 외야 슬롯으로 이동 */
-    var pfx=id[0];
-    var slots=pfx==='o'?_outSlots.o:_outSlots.t;
-    var idx=pfx==='o'?_gs.outIdxO:_gs.outIdxT;
-    var slot=slots[Math.min(idx,slots.length-1)];
-    el.style.left=(slot.x/_W*100)+'%'; el.style.top=(slot.y/_H*100)+'%';
-    if(pfx==='o') _gs.outIdxO++; else _gs.outIdxT++;
-    _markElim(el,id);
+    /* 원래 위치 저장 */
+    var origX=parseFloat(el.style.left)||50;
+    var origY=parseFloat(el.style.top)||50;
+    /* 내야에서 플래시 애니메이션 */
+    el.classList.add('pg-elim-flash');
+    /* 0.45초 후 외야 슬롯으로 이동 + 활성화 */
+    setTimeout(function(){
+      var pfx=id[0];
+      var slots=pfx==='o'?_outSlots.o:_outSlots.t;
+      var idx=pfx==='o'?_gs.outIdxO:_gs.outIdxT;
+      var slot=slots[Math.min(idx,slots.length-1)];
+      el.style.left=(slot.x/_W*100)+'%'; el.style.top=(slot.y/_H*100)+'%';
+      if(pfx==='o') _gs.outIdxO++; else _gs.outIdxT++;
+      _markElim(el,id,origX,origY);
+    }, 450);
   }
 
-  /* 자동 대형 재정렬 */
-  function _autoFill(pfx){
-    /* 내야 범위 (% of field height) */
-    var yMin=pfx==='o'?50:19, yMax=pfx==='o'?82:50;
-    var xMin=31.5, xMax=68.5; /* inner court x range */
-    var active=[];
+  /* 자동 대형 재정렬: 인접 1-2명만 미세 이동 */
+  function _autoFill(pfx){} /* 하위 호환 stub */
+  function _autoFillGentle(pfx, gapX, gapY){
+    if(gapX===undefined||gapY===undefined) return;
+    /* 같은 행(Y ±3.5% 이내)의 활성 선수만 찾기 */
+    var sameRow=[];
     for(var n=1;n<=11;n++){
       var id=pfx+n, el=_$('pg-'+id);
-      if(!el||_gs.elim.has(id))continue;
+      if(!el||_gs.elim.has(id)) continue;
       var y=parseFloat(el.style.top)||50;
-      if(y>=yMin&&y<=yMax) active.push({el:el,x:parseFloat(el.style.left)||50,y:y});
+      if(Math.abs(y-gapY)<3.5){
+        sameRow.push({el:el, x:parseFloat(el.style.left)||50});
+      }
     }
-    if(!active.length)return;
-    /* Y로 정렬 후 행 그루핑 */
-    active.sort(function(a,b){return a.y-b.y;});
-    var rows=[], row=[active[0]];
-    for(var i=1;i<active.length;i++){
-      if(Math.abs(active[i].y-row[0].y)<4) row.push(active[i]);
-      else{rows.push(row);row=[active[i]];}
+    if(!sameRow.length) return;
+    sameRow.sort(function(a,b){return a.x-b.x;});
+    /* 갭 좌우 가장 가까운 선수만 조금(35%) 이동 */
+    var leftOf = sameRow.filter(function(p){return p.x < gapX;});
+    var rightOf= sameRow.filter(function(p){return p.x > gapX;});
+    if(leftOf.length){
+      var near=leftOf[leftOf.length-1];
+      near.el.style.left = (near.x + (gapX-near.x)*0.35)+'%';
     }
-    rows.push(row);
-    /* 각 행 균등 배분 */
-    rows.forEach(function(r){
-      if(r.length<2)return;
-      var span=xMax-xMin, n=r.length;
-      r.forEach(function(p,i){
-        p.el.style.left=(xMin+span*i/(n-1))+'%';
-      });
-    });
+    if(rightOf.length){
+      var near=rightOf[0];
+      near.el.style.left = (near.x - (near.x-gapX)*0.35)+'%';
+    }
   }
 
   function _updateScore(){
@@ -2595,7 +2639,7 @@ var DB = (function(){ try { return (function(){
     var d={};
     document.querySelectorAll('.pg-player').forEach(function(el){
       d[el.id]={left:el.style.left,top:el.style.top,
-                 elim:el.classList.contains('pg-elim'),
+                 elim:el.classList.contains('pg-in-outfield'),
                  h1:el.classList.contains('pg-hit1'),
                  h2:el.classList.contains('pg-hit2')};
     });
@@ -2613,7 +2657,7 @@ var DB = (function(){ try { return (function(){
       if(id==='__ball'){var b=_$('pg-ball');if(b){b.style.left=d[id].left;b.style.top=d[id].top;}return;}
       var el=document.getElementById(id);if(!el)return;
       el.style.left=d[id].left;el.style.top=d[id].top;
-      el.classList.toggle('pg-elim',!!d[id].elim);
+      el.classList.toggle('pg-in-outfield',!!d[id].elim); if(d[id].elim) _gs.elim.add(id);
       el.classList.toggle('pg-hit1',!!d[id].h1);
       el.classList.toggle('pg-hit2',!!d[id].h2);
     });
@@ -2630,7 +2674,7 @@ var DB = (function(){ try { return (function(){
     _gs.ballSelected=false; _gs.ballOwner=null;
     var ball=_$('pg-ball');if(ball)ball.classList.remove('pg-ball-active');
     document.querySelectorAll('.pg-player').forEach(function(el){
-      el.classList.remove('pg-elim','pg-hit1','pg-hit2','pg-can-hit','pg-can-pass');
+      el.classList.remove('pg-elim','pg-elim-flash','pg-in-outfield','pg-hit1','pg-hit2','pg-can-hit','pg-can-pass');
     });
     _updateScore();
     _setDefaultEdit();
@@ -2642,7 +2686,7 @@ var DB = (function(){ try { return (function(){
       Object.keys(map).forEach(function(id){
         var el=_$('pg-'+id),pt=map[id];if(!el)return;
         var p=_pct(pt);el.style.left=p.left;el.style.top=p.top;
-        el.classList.remove('pg-hidden','pg-elim','pg-hit1','pg-hit2');
+        el.classList.remove('pg-hidden','pg-elim','pg-elim-flash','pg-in-outfield','pg-hit1','pg-hit2');
       });
     }
     place(oa);place(ta);
@@ -2718,7 +2762,7 @@ var DB = (function(){ try { return (function(){
         var el=_$('pg-'+e[0]),pt=e[1];if(!el)return;
         var p=_pct(pt);el.style.left=p.left;el.style.top=p.top;
         el.classList.toggle('pg-hidden',!!pt.hidden);
-        el.classList.remove('pg-elim','pg-hit1','pg-hit2');
+        el.classList.remove('pg-elim','pg-elim-flash','pg-in-outfield','pg-hit1','pg-hit2');
       });
       if(ballEl){ballEl.style.opacity='1';var bp=_pct(step.ball);ballEl.style.left=bp.left;ballEl.style.top=bp.top;}
       _drawArrows(step.arrows||[]);

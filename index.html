@@ -430,7 +430,7 @@
 
     /* 피구 전술판 */
     .db-court{
-      position:relative;width:min(72vw,260px);padding-bottom:min(200%,calc(min(68vw,240px)*2.2));
+      position:relative;width:min(72vw,260px);padding-bottom:min(150%,calc(min(72vw,260px)*1.7));
       background:#4a9e4a;
       border:3px solid #555;border-radius:8px;overflow:hidden;margin:0 auto;
     }
@@ -770,65 +770,57 @@
               </div>
               <div class="vb-court-wrap">
                 <div id="db-court" class="db-court">
-                  <!-- 코트 배경 SVG: 스포츠피구 실제 규격 (8m폭×16m높이, 내야10m×10m, 외야3m×상하) -->
-                  <svg id="db-courtSvg" viewBox="0 0 100 200" preserveAspectRatio="none" xmlns="http://www.w3.org/2000/svg">
-                    <!-- 기본 바탕(내야 사이드 빈 공간) - 어두운 회색 -->
-                    <rect x="0" y="0" width="100" height="200" fill="#2a2a2a"/>
+                  <!-- 코트 배경 SVG: 스포츠피구 규격 (전체 폭 직사각형) -->
+                  <svg id="db-courtSvg" viewBox="0 0 100 100" preserveAspectRatio="none" xmlns="http://www.w3.org/2000/svg">
+                    <!-- ■ 외야 (우리팀 12번 위치) - 상단 15% 전체 폭 -->
+                    <rect x="0" y="0" width="100" height="15" fill="#c8870a"/>
+                    <!-- D/E 모서리 (진입불가 구역) -->
+                    <rect x="0"  y="0" width="18" height="15" fill="#7a5200"/>
+                    <rect x="82" y="0" width="18" height="15" fill="#7a5200"/>
 
-                    <!-- ■ 외야(상대팀): 전체 너비, 상단 19% -->
-                    <!-- D사각(좌): 외야 중 내야 바깥 -->
-                    <rect x="0"  y="0" width="19" height="37" fill="#7a5200"/>
-                    <!-- A구역(중앙): 진입가능 외야 -->
-                    <rect x="19" y="0" width="62" height="37" fill="#c8870a"/>
-                    <!-- E사각(우) -->
-                    <rect x="81" y="0" width="19" height="37" fill="#7a5200"/>
+                    <!-- ■ 상대팀 내야 - y=15~50 -->
+                    <rect x="0" y="15" width="100" height="35" fill="#3a8a3a"/>
 
-                    <!-- ■ 내야: 중앙 62% 너비, 상하 19%~81% -->
-                    <rect x="19" y="37" width="62" height="63" fill="#3a8a3a"/>
-                    <rect x="19" y="100" width="62" height="63" fill="#358035"/>
+                    <!-- ■ 우리팀 내야 - y=50~85 -->
+                    <rect x="0" y="50" width="100" height="35" fill="#2f7a2f"/>
 
-                    <!-- ■ 외야(우리팀): 전체 너비, 하단 19% -->
-                    <rect x="0"  y="163" width="19" height="37" fill="#7a5200"/>
-                    <rect x="19" y="163" width="62" height="37" fill="#c8870a"/>
-                    <rect x="81" y="163" width="19" height="37" fill="#7a5200"/>
+                    <!-- ■ 외야 (상대팀 12번 위치) - 하단 15% 전체 폭 -->
+                    <rect x="0"  y="85" width="100" height="15" fill="#c8870a"/>
+                    <rect x="0"  y="85" width="18"  height="15" fill="#7a5200"/>
+                    <rect x="82" y="85" width="18"  height="15" fill="#7a5200"/>
 
                     <!-- 내야 외곽선 -->
-                    <rect x="19" y="37" width="62" height="126" fill="none" stroke="white" stroke-width="1.2"/>
-
+                    <line x1="0" y1="15" x2="100" y2="15" stroke="white" stroke-width="1.2"/>
+                    <line x1="0" y1="85" x2="100" y2="85" stroke="white" stroke-width="1.2"/>
+                    <!-- 사이드라인 -->
+                    <line x1="0"   y1="15" x2="0"   y2="85" stroke="rgba(255,255,255,0.6)" stroke-width="1"/>
+                    <line x1="100" y1="15" x2="100" y2="85" stroke="rgba(255,255,255,0.6)" stroke-width="1"/>
                     <!-- 중앙선 (점선) -->
-                    <line x1="19" y1="100" x2="81" y2="100" stroke="white" stroke-width="1.5" stroke-dasharray="5,3"/>
-
-                    <!-- 외야/내야 경계선 -->
-                    <line x1="0" y1="37"  x2="100" y2="37"  stroke="rgba(255,255,255,0.7)" stroke-width="1"/>
-                    <line x1="0" y1="163" x2="100" y2="163" stroke="rgba(255,255,255,0.7)" stroke-width="1"/>
-
-                    <!-- D/E 구역 경계 (세로) -->
-                    <line x1="19" y1="0" x2="19" y2="37"  stroke="rgba(255,200,50,0.5)" stroke-width="0.8" stroke-dasharray="3,2"/>
-                    <line x1="81" y1="0" x2="81" y2="37"  stroke="rgba(255,200,50,0.5)" stroke-width="0.8" stroke-dasharray="3,2"/>
-                    <line x1="19" y1="163" x2="19" y2="200" stroke="rgba(255,200,50,0.5)" stroke-width="0.8" stroke-dasharray="3,2"/>
-                    <line x1="81" y1="163" x2="81" y2="200" stroke="rgba(255,200,50,0.5)" stroke-width="0.8" stroke-dasharray="3,2"/>
-
+                    <line x1="2" y1="50" x2="98" y2="50" stroke="white" stroke-width="1.5" stroke-dasharray="5,3"/>
                     <!-- 중앙 원 -->
-                    <circle cx="50" cy="100" r="9" fill="none" stroke="rgba(255,255,255,0.4)" stroke-width="1"/>
+                    <circle cx="50" cy="50" r="9" fill="none" stroke="rgba(255,255,255,0.35)" stroke-width="1"/>
+                    <!-- D/E 경계선 -->
+                    <line x1="18" y1="0"  x2="18" y2="15"  stroke="rgba(255,200,50,0.5)" stroke-width="0.8" stroke-dasharray="3,2"/>
+                    <line x1="82" y1="0"  x2="82" y2="15"  stroke="rgba(255,200,50,0.5)" stroke-width="0.8" stroke-dasharray="3,2"/>
+                    <line x1="18" y1="85" x2="18" y2="100" stroke="rgba(255,200,50,0.5)" stroke-width="0.8" stroke-dasharray="3,2"/>
+                    <line x1="82" y1="85" x2="82" y2="100" stroke="rgba(255,200,50,0.5)" stroke-width="0.8" stroke-dasharray="3,2"/>
 
-                    <!-- 라벨: 외야 상대팀 -->
-                    <text x="50" y="14" text-anchor="middle" fill="white" font-size="5" font-weight="bold" font-family="sans-serif">외야 (상대팀)</text>
-                    <text x="50" y="22" text-anchor="middle" fill="rgba(255,240,180,0.9)" font-size="4" font-family="sans-serif">A구역 — B(좌) · C(우)</text>
-                    <text x="9"  y="20" text-anchor="middle" fill="#ffcc44" font-size="5.5" font-weight="bold" font-family="sans-serif">D</text>
-                    <text x="91" y="20" text-anchor="middle" fill="#ffcc44" font-size="5.5" font-weight="bold" font-family="sans-serif">E</text>
-                    <text x="9"  y="28" text-anchor="middle" fill="rgba(255,200,50,0.7)" font-size="3.5" font-family="sans-serif">진입불가</text>
-                    <text x="91" y="28" text-anchor="middle" fill="rgba(255,200,50,0.7)" font-size="3.5" font-family="sans-serif">진입불가</text>
+                    <!-- 라벨: 우리팀 외야 (상단) -->
+                    <text x="50" y="7"  text-anchor="middle" fill="white" font-size="4.5" font-weight="bold" font-family="sans-serif">우리팀 외야 (A구역)</text>
+                    <text x="50" y="12" text-anchor="middle" fill="rgba(255,240,180,0.85)" font-size="3.5" font-family="sans-serif">B(좌)&nbsp;&nbsp;·&nbsp;&nbsp;C(우)</text>
+                    <text x="9"  y="9"  text-anchor="middle" fill="#ffcc44" font-size="5"   font-weight="bold" font-family="sans-serif">D</text>
+                    <text x="91" y="9"  text-anchor="middle" fill="#ffcc44" font-size="5"   font-weight="bold" font-family="sans-serif">E</text>
 
                     <!-- 라벨: 내야 -->
-                    <text x="50" y="72" text-anchor="middle" fill="rgba(255,255,255,0.4)" font-size="6" font-family="sans-serif">상대팀 내야</text>
-                    <text x="50" y="98" text-anchor="middle" fill="rgba(255,255,255,0.6)" font-size="4" font-family="sans-serif">중앙선</text>
-                    <text x="50" y="133" text-anchor="middle" fill="rgba(255,255,255,0.4)" font-size="6" font-family="sans-serif">우리팀 내야</text>
+                    <text x="50" y="36" text-anchor="middle" fill="rgba(255,255,255,0.35)" font-size="6" font-family="sans-serif">상대팀 내야</text>
+                    <text x="50" y="49" text-anchor="middle" fill="rgba(255,255,255,0.6)"  font-size="3.5" font-family="sans-serif">중앙선</text>
+                    <text x="50" y="69" text-anchor="middle" fill="rgba(255,255,255,0.35)" font-size="6" font-family="sans-serif">우리팀 내야</text>
 
-                    <!-- 라벨: 외야 우리팀 -->
-                    <text x="50" y="178" text-anchor="middle" fill="white" font-size="5" font-weight="bold" font-family="sans-serif">외야 (우리팀)</text>
-                    <text x="50" y="186" text-anchor="middle" fill="rgba(255,240,180,0.9)" font-size="4" font-family="sans-serif">A구역 — B(좌) · C(우)</text>
-                    <text x="9"  y="182" text-anchor="middle" fill="#ffcc44" font-size="5.5" font-weight="bold" font-family="sans-serif">D</text>
-                    <text x="91" y="182" text-anchor="middle" fill="#ffcc44" font-size="5.5" font-weight="bold" font-family="sans-serif">E</text>
+                    <!-- 라벨: 상대팀 외야 (하단) -->
+                    <text x="50" y="93"  text-anchor="middle" fill="white" font-size="4.5" font-weight="bold" font-family="sans-serif">상대팀 외야 (A구역)</text>
+                    <text x="50" y="98"  text-anchor="middle" fill="rgba(255,240,180,0.85)" font-size="3.5" font-family="sans-serif">B(좌)&nbsp;&nbsp;·&nbsp;&nbsp;C(우)</text>
+                    <text x="9"  y="93"  text-anchor="middle" fill="#ffcc44" font-size="5" font-weight="bold" font-family="sans-serif">D</text>
+                    <text x="91" y="93"  text-anchor="middle" fill="#ffcc44" font-size="5" font-weight="bold" font-family="sans-serif">E</text>
                   </svg>
                   <svg id="db-routeLayer" class="vb-layer" viewBox="0 0 100 100" preserveAspectRatio="none" style="z-index:3"></svg>
                   <div id="db-targetLayer" style="z-index:4"></div>
@@ -2000,34 +1992,34 @@ var DB = (function() { try { return (function() {
      외야A구역: y=3~10, x=22~78 / D사각지대: x<22, E사각지대: x>78 */
   var defaultPlayers = [
     /* 우리팀 외야 12번: 상대팀 외야 A구역 중앙 */
-    {id:'H12',label:'12',team:'home', role:'외야(A)',     x:50, y:17},
+    {id:'H12',label:'12',team:'home', role:'외야(A)',     x:50, y:6},
     /* 우리팀 내야 - 꿀팁: 일자배치, 사이드 강조, 뭉치지 않기 */
     /* 1열 공격수(중앙선 바로 앞) */
-    {id:'H1', label:'1', team:'home', role:'공격(중좌)',  x:35, y:109},
-    {id:'H2', label:'2', team:'home', role:'공격(중우)',  x:65, y:109},
+    {id:'H1', label:'1', team:'home', role:'공격(중좌)',  x:35, y:55.3},
+    {id:'H2', label:'2', team:'home', role:'공격(중우)',  x:65, y:55.3},
     /* 2열 측면 공격수 */
-    {id:'H3', label:'3', team:'home', role:'공격(좌)',    x:18, y:119},
-    {id:'H4', label:'4', team:'home', role:'공격(우)',    x:82, y:119},
+    {id:'H3', label:'3', team:'home', role:'공격(좌)',    x:18, y:61.2},
+    {id:'H4', label:'4', team:'home', role:'공격(우)',    x:82, y:61.2},
     /* 3열 중앙 서포터 */
-    {id:'H5', label:'5', team:'home', role:'중앙(중좌)', x:40, y:129},
-    {id:'H6', label:'6', team:'home', role:'중앙(중우)', x:60, y:129},
+    {id:'H5', label:'5', team:'home', role:'중앙(중좌)', x:40, y:67},
+    {id:'H6', label:'6', team:'home', role:'중앙(중우)', x:60, y:67},
     /* 4열 넓은 사이드(B,C 포지션 - 꿀팁: 사이드에 줘서 혼란) */
-    {id:'H7', label:'7', team:'home', role:'사이드B(좌)',  x:12, y:139},
-    {id:'H8', label:'8', team:'home', role:'사이드C(우)',  x:88, y:139},
+    {id:'H7', label:'7', team:'home', role:'사이드B(좌)',  x:12, y:72.9},
+    {id:'H8', label:'8', team:'home', role:'사이드C(우)',  x:88, y:72.9},
     /* 5열 후위 */
-    {id:'H9', label:'9', team:'home', role:'후위(좌)',    x:28, y:149},
-    {id:'H10',label:'10',team:'home', role:'후위(우)',    x:72, y:149},
+    {id:'H9', label:'9', team:'home', role:'후위(좌)',    x:28, y:78.8},
+    {id:'H10',label:'10',team:'home', role:'후위(우)',    x:72, y:78.8},
     /* 차단수: 가장 깊은 곳 (상대 외야 공 차단) */
-    {id:'H11',label:'11',team:'home', role:'차단수',      x:50, y:158},
+    {id:'H11',label:'11',team:'home', role:'차단수',      x:50, y:84.1},
     /* 상대팀 (6명 대표) */
-    {id:'A1', label:'A1',team:'away', role:'공격(좌)',    x:18, y:91},
-    {id:'A2', label:'A2',team:'away', role:'공격(중좌)', x:38, y:91},
-    {id:'A3', label:'A3',team:'away', role:'공격(중우)', x:62, y:91},
-    {id:'A4', label:'A4',team:'away', role:'공격(우)',    x:82, y:91},
-    {id:'A5', label:'A5',team:'away', role:'중앙(좌)',    x:30, y:76},
-    {id:'A6', label:'A6',team:'away', role:'중앙(우)',    x:70, y:76},
+    {id:'A1', label:'A1',team:'away', role:'공격(좌)',    x:18, y:44.7},
+    {id:'A2', label:'A2',team:'away', role:'공격(중좌)', x:38, y:44.7},
+    {id:'A3', label:'A3',team:'away', role:'공격(중우)', x:62, y:44.7},
+    {id:'A4', label:'A4',team:'away', role:'공격(우)',    x:82, y:44.7},
+    {id:'A5', label:'A5',team:'away', role:'중앙(좌)',    x:30, y:35.9},
+    {id:'A6', label:'A6',team:'away', role:'중앙(우)',    x:70, y:35.9},
     /* 공 */
-    {id:'BALL',label:'●',team:'ball', role:'공',          x:50, y:100}
+    {id:'BALL',label:'●',team:'ball', role:'공',          x:50, y:50}
   ];
 
   /* ── 대형 정의 ── */
@@ -2385,12 +2377,77 @@ var DB = (function() { try { return (function() {
     if(st.openPanel===name && $d('db-controls') && $d('db-controls').classList.contains('open')) closePanel();
     else openPanel(name);
   }
+
+  /* ── 공개 API 함수 ── */
+  var ruleState = { attackTeam:'home', passCount:0, timerInterval:null };
+
+  function updateStatusBar(){
+    var ind = $d('db-attack-ind');
+    if(ind) ind.textContent = ruleState.attackTeam==='home' ? '우리팀 공격' : '상대팀 공격';
+    var cnt = $d('db-pass-cnt');
+    if(cnt) cnt.textContent = ruleState.passCount;
+  }
+
+  function clearTimer5(){
+    if(ruleState.timerInterval){ clearInterval(ruleState.timerInterval); ruleState.timerInterval=null; }
+    var el=$d('db-timer5'); if(el) el.textContent='5';
+  }
+
+  function changeAttackTeam(){
+    ruleState.attackTeam = ruleState.attackTeam==='home' ? 'away' : 'home';
+    ruleState.passCount = 0;
+    clearTimer5();
+    updateStatusBar();
+  }
+
+  function showFaultAlert(title, msg){
+    var el=$d('db-fault-alert');
+    if(!el) return;
+    el.querySelector('.fault-title').textContent = title;
+    el.querySelector('.fault-msg').textContent = msg;
+    el.style.display='block';
+    setTimeout(function(){ el.style.display='none'; }, 4000);
+  }
+
+  function init(){
+    if(DB && DB.initialized) return;
+    seedPlayers('base');
+    render();
+    renderFormationButtons();
+    renderTacticButtons();
+    updateStatusBar();
+    if(DB) DB.initialized = true;
+  }
+
+  function formation(key){ applyFormation(key); }
+  function tactic(key){ applyTactic(key); }
+
+  function action(name, arg){
+    if(name==='execute'){
+      seedPlayers(arg||'base'); render();
+    } else if(name==='reset'){
+      seedPlayers('base'); render(); clearTimer5(); updateStatusBar();
+    } else if(name==='preview'){
+      applyFormation(arg||'base');
+    } else if(name==='jumpball'){
+      seedPlayers('base'); render();
+    } else if(name==='pass'){
+      ruleState.passCount++;
+      if(ruleState.passCount>=3) showFaultAlert('3패스 초과!','같은 팀 선수에게 3번 이상 패스 불가');
+      updateStatusBar();
+    } else if(name==='changeAttack'){
+      changeAttackTeam();
+    } else if(name==='fault'){
+      showFaultAlert(arg||'반칙','규정 위반 상황');
+    }
+  }
+
   function renderVideos(vids){ /* 피구 영상은 별도 영역에서 처리 */ }
   return { init:init, action:action, formation:formation, tactic:tactic, panel:panel, renderVideos:renderVideos, initialized: false };
 })();
 } catch(e) {
   showError('DB 초기화 오류: '+(e.message||String(e)));
-  return {init:function(){},action:function(){},formation:function(){},tactic:function(){},panel:function(){},initialized:false};
+  return {init:function(){},action:function(){},formation:function(){},tactic:function(){},panel:function(){},renderVideos:function(){},initialized:false};
 }
 })();
 

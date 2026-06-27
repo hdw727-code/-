@@ -430,9 +430,9 @@
 
     /* 피구 전술판 */
     .db-court{
-      position:relative;width:100%;padding-bottom:155%;
-      background:linear-gradient(180deg,#c8e6c9 0%,#c8e6c9 14%,#e3f2fd 14%,#e3f2fd 50%,#ffe8e8 50%,#ffe8e8 86%,#f8bbd0 86%,#f8bbd0 100%);
-      border:3px solid #aaa;border-radius:12px;overflow:hidden;
+      position:relative;width:min(72vw,300px);padding-bottom:min(130%,calc(min(72vw,300px)*1.55));
+      background:linear-gradient(180deg,#c8a96e 0%,#c8a96e 14%,#6dbf6d 14%,#6dbf6d 50%,#5cb85c 50%,#5cb85c 86%,#b8904a 86%,#b8904a 100%);
+      border:3px solid #666;border-radius:12px;overflow:hidden;margin:0 auto;
     }
     .db-court > *{position:absolute;}
     #db-tokenLayer,#db-targetLayer{inset:0;width:100%;height:100%;}
@@ -440,14 +440,14 @@
       width:100%;text-align:center;font-size:11px;font-weight:900;
       z-index:8;pointer-events:none;letter-spacing:.2px;
     }
-    .db-zone-label.away{top:2%;color:#1b5e20;}
-    .db-zone-label.home{bottom:2%;color:#880e4f;}
+    .db-zone-label.away{top:2%;color:#3e2000;}
+    .db-zone-label.home{bottom:2%;color:#3e2000;}
     .db-team-label{
       width:100%;text-align:center;font-size:12px;font-weight:900;
       z-index:8;pointer-events:none;
     }
-    .db-team-label.away{top:22%;color:#1565c0;}
-    .db-team-label.home{bottom:22%;color:#b71c1c;}
+    .db-team-label.away{top:22%;color:#1a5e1a;}
+    .db-team-label.home{bottom:22%;color:#1a5e1a;}
     .db-net{
       left:0;right:0;top:50%;height:3px;
       background:repeating-linear-gradient(90deg,#555 0 8px,transparent 8px 14px);
@@ -1475,16 +1475,28 @@ var VB = (function() { try { return (function() {
   }
 
   function renderTokens(){
-    const layer=$v('vb-tokenLayer'); layer.innerHTML='';
+    const layer=$v('vb-tokenLayer');
+    const existing={};
+    Array.prototype.forEach.call(layer.querySelectorAll('[data-vb-player]'),function(el){
+      existing[el.dataset.vbPlayer]=el;
+    });
     Object.values(st.players).forEach(function(p){
-      const btn=document.createElement('button');
-      btn.type='button';
-      btn.className='vb-token '+p.team+(p.id===st.selected?' selected':'');
-      btn.setAttribute('data-vb-player',p.id);
-      btn.style.cssText=tokenStyle(p.x,p.y);
-      btn.title=p.role; btn.textContent=p.label;
-      if(p.team==='home') makeDraggable(btn,p,'vb-court',analyzeVBPositions);
-      layer.appendChild(btn);
+      var el=existing[p.id];
+      if(!el){
+        el=document.createElement('button');
+        el.type='button';
+        el.setAttribute('data-vb-player',p.id);
+        el.title=p.role; el.textContent=p.label;
+        if(p.team==='home') makeDraggable(el,p,'vb-court',analyzeVBPositions);
+        layer.appendChild(el);
+      }
+      el.className='vb-token '+p.team+(p.id===st.selected?' selected':'');
+      el.style.left=p.x+'%';
+      el.style.top=scaleY(p.y)+'%';
+    });
+    Object.keys(existing).forEach(function(id){
+      if(!st.players[id]&&!Object.values(st.players).find(function(p){return p.id===id;}))
+        layer.removeChild(existing[id]);
     });
   }
 
@@ -1707,53 +1719,90 @@ var DB = (function() { try { return (function() {
   function $d(id){ return document.getElementById(id); }
 
   /* ── 선수 초기 데이터 ── */
+  /* PDF 기반 12인제 포메이션 (4-2-3-2-차단수 / 외야1)
+     y축: 50%=중앙선, 86%=우리팀 엔드라인, 6%=상대팀 엔드라인(외야위치)
+     최전방4: 중앙선 바로 앞에 넓게 배치 (x: 10,37,63,90)
+     중전방2: 그 뒤 좌우 (x: 20,80)
+     중앙3: 더 뒤 좌중우 (x: 15,50,85)
+     중후반2: (x: 28,72)
+     차단수1: 중앙 깊숙이 (x: 50) */
   var defaultPlayers = [
-    {id:'H1',label:'H1',team:'home',role:'공격수',x:20,y:60},
-    {id:'H2',label:'H2',team:'home',role:'공격수',x:50,y:60},
-    {id:'H3',label:'H3',team:'home',role:'공격수',x:80,y:60},
-    {id:'H4',label:'H4',team:'home',role:'수비수',x:20,y:78},
-    {id:'H5',label:'H5',team:'home',role:'수비수',x:50,y:78},
-    {id:'H6',label:'H6',team:'home',role:'수비수',x:80,y:78},
-    {id:'A1',label:'A1',team:'away',role:'공격수',x:20,y:22},
-    {id:'A2',label:'A2',team:'away',role:'공격수',x:50,y:22},
-    {id:'A3',label:'A3',team:'away',role:'공격수',x:80,y:22},
-    {id:'A4',label:'A4',team:'away',role:'수비수',x:20,y:38},
-    {id:'A5',label:'A5',team:'away',role:'수비수',x:50,y:38},
-    {id:'A6',label:'A6',team:'away',role:'수비수',x:80,y:38},
-    {id:'BALL',label:'●',team:'ball',role:'공',x:50,y:50}
+    /* 우리팀 내야 (번호 1-11) */
+    {id:'H1', label:'1', team:'home', role:'최전방(좌)',  x:10, y:58},
+    {id:'H2', label:'2', team:'home', role:'최전방(중좌)',x:37, y:58},
+    {id:'H3', label:'3', team:'home', role:'최전방(중우)',x:63, y:58},
+    {id:'H4', label:'4', team:'home', role:'최전방(우)',  x:90, y:58},
+    {id:'H5', label:'5', team:'home', role:'중전방(좌)',  x:22, y:66},
+    {id:'H6', label:'6', team:'home', role:'중전방(우)',  x:78, y:66},
+    {id:'H7', label:'7', team:'home', role:'중앙(좌)',    x:14, y:73},
+    {id:'H8', label:'8', team:'home', role:'중앙(중)',    x:50, y:73},
+    {id:'H9', label:'9', team:'home', role:'중앙(우)',    x:84, y:73},
+    {id:'H10',label:'10',team:'home', role:'중후반(좌)',  x:28, y:80},
+    {id:'H11',label:'11',team:'home', role:'차단수',      x:72, y:80},
+    /* 우리팀 외야 (번호 12) - 상대편 엔드라인 뒤 */
+    {id:'H12',label:'12',team:'home', role:'외야',        x:50, y:6},
+    /* 상대팀 (6명 대표, away) */
+    {id:'A1', label:'A1',team:'away', role:'최전방',      x:10, y:42},
+    {id:'A2', label:'A2',team:'away', role:'최전방',      x:37, y:42},
+    {id:'A3', label:'A3',team:'away', role:'최전방',      x:63, y:42},
+    {id:'A4', label:'A4',team:'away', role:'최전방',      x:90, y:42},
+    {id:'A5', label:'A5',team:'away', role:'중앙',        x:28, y:33},
+    {id:'A6', label:'A6',team:'away', role:'중앙',        x:72, y:33},
+    /* 공 */
+    {id:'BALL',label:'●',team:'ball', role:'공',          x:50, y:50}
   ];
 
   /* ── 대형 정의 ── */
   var formations = {
     base:{
       title:'기본 대형',
-      text:'6명이 내야를 고르게 나눠 자리를 잡습니다. 공격수 3명이 앞(상대팀 쪽), 수비수 3명이 뒤에 위치합니다.',
-      pos:{H1:[20,60],H2:[50,60],H3:[80,60],H4:[20,78],H5:[50,78],H6:[80,78],
-           A1:[20,22],A2:[50,22],A3:[80,22],A4:[20,38],A5:[50,38],A6:[80,38],BALL:[50,50]}
+      text:'최전방 4명이 넓게, 중전방2→중앙3→중후반2→차단수 순으로 깊이 배치. 외야(12번)는 상대 엔드라인 뒤.',
+      pos:{H1:[10,58],H2:[37,58],H3:[63,58],H4:[90,58],
+           H5:[22,66],H6:[78,66],
+           H7:[14,73],H8:[50,73],H9:[84,73],
+           H10:[28,80],H11:[72,80],
+           H12:[50,6],
+           A1:[10,42],A2:[37,42],A3:[63,42],A4:[90,42],A5:[28,33],A6:[72,33],BALL:[50,50]}
     },
     attack:{
-      title:'전진 공격 대형',
-      text:'공격수들이 중앙선 가까이 전진합니다. 상대 내야를 압박하며 던지기 유리한 각도를 확보합니다.',
-      pos:{H1:[20,52],H2:[50,52],H3:[80,52],H4:[25,72],H5:[50,72],H6:[75,72],
-           A1:[20,22],A2:[50,22],A3:[80,22],A4:[20,38],A5:[50,38],A6:[80,38],BALL:[50,48]}
+      title:'전진 공격',
+      text:'최전방 4명이 중앙선 바로 앞까지 전진. 중전방2도 압박 지원. 외야(12번)와 앞뒤 협공 준비.',
+      pos:{H1:[10,53],H2:[37,53],H3:[63,53],H4:[90,53],
+           H5:[20,62],H6:[80,62],
+           H7:[14,69],H8:[50,69],H9:[84,69],
+           H10:[28,77],H11:[72,77],
+           H12:[50,6],
+           A1:[10,42],A2:[37,42],A3:[63,42],A4:[90,42],A5:[28,33],A6:[72,33],BALL:[50,50]}
     },
     defense:{
       title:'수비 대형',
-      text:'수비수들이 내야 뒤쪽으로 깊이 물러납니다. 공격 방향을 예측하며 피하기 쉬운 공간을 확보합니다.',
-      pos:{H1:[25,58],H2:[50,58],H3:[75,58],H4:[15,82],H5:[50,82],H6:[85,82],
-           A1:[20,22],A2:[50,22],A3:[80,22],A4:[20,38],A5:[50,38],A6:[80,38],BALL:[50,50]}
+      text:'최전방이 뒤로 물러나 중앙 수비 강화. 좌우 끝을 넓게 커버해 피할 공간 확보.',
+      pos:{H1:[15,63],H2:[38,62],H3:[62,62],H4:[85,63],
+           H5:[22,70],H6:[78,70],
+           H7:[10,76],H8:[50,76],H9:[90,76],
+           H10:[28,83],H11:[72,83],
+           H12:[50,6],
+           A1:[10,42],A2:[37,42],A3:[63,42],A4:[90,42],A5:[28,33],A6:[72,33],BALL:[50,50]}
     },
     wide:{
       title:'좌우 넓은 대형',
-      text:'선수들이 좌우로 최대한 펼쳐서 상대 공격 범위를 넓힙니다. 중앙 공백을 이용한 속공에 대비합니다.',
-      pos:{H1:[8,58],H2:[50,60],H3:[92,58],H4:[20,80],H5:[50,80],H6:[80,80],
-           A1:[8,22],A2:[50,22],A3:[92,22],A4:[20,38],A5:[50,38],A6:[80,38],BALL:[50,50]}
+      text:'전방 4명이 양 끝까지 펼쳐 공격 범위 최대화. 상대의 중앙 집중 공격을 분산시킵니다.',
+      pos:{H1:[4,58],H2:[32,58],H3:[68,58],H4:[96,58],
+           H5:[14,66],H6:[86,66],
+           H7:[8,73],H8:[50,73],H9:[92,73],
+           H10:[24,80],H11:[76,80],
+           H12:[50,6],
+           A1:[8,42],A2:[37,42],A3:[63,42],A4:[92,42],A5:[28,33],A6:[72,33],BALL:[50,50]}
     },
     pincer:{
       title:'협공 대형',
-      text:'공격수 둘이 양쪽 측면에 붙고 한 명이 중앙에 위치합니다. 동시에 던져 상대가 피하기 어렵게 합니다.',
-      pos:{H1:[12,54],H2:[50,56],H3:[88,54],H4:[25,76],H5:[50,76],H6:[75,76],
-           A1:[20,22],A2:[50,22],A3:[80,22],A4:[20,38],A5:[50,38],A6:[80,38],BALL:[50,50]}
+      text:'외야(12번)와 최전방이 앞뒤에서 동시 압박. 좌우도 좁혀 피할 공간을 최소화합니다.',
+      pos:{H1:[8,54],H2:[34,54],H3:[66,54],H4:[92,54],
+           H5:[18,63],H6:[82,63],
+           H7:[12,71],H8:[50,71],H9:[88,71],
+           H10:[26,79],H11:[74,79],
+           H12:[50,6],
+           A1:[10,42],A2:[37,42],A3:[63,42],A4:[90,42],A5:[28,33],A6:[72,33],BALL:[50,50]}
     }
   };
 
@@ -1761,38 +1810,38 @@ var DB = (function() { try { return (function() {
   var tactics = {
     centerThrow:{
       title:'중앙 집중 투구',
-      text:'3명이 동시에 중앙을 향해 던져 상대가 피할 공간을 없앱니다.',
-      moves:{H1:[30,53],H2:[50,51],H3:[70,53],BALL:[50,35]}
+      text:'4명이 중앙으로 모여 한꺼번에 던집니다. 상대가 좌우로 피할 공간이 사라집니다.',
+      moves:{H1:[25,53],H2:[40,52],H3:[60,52],H4:[75,53],BALL:[50,35]}
     },
     sideAttack:{
-      title:'측면 우선 공격',
-      text:'왼쪽 공격수가 오른쪽 끝을 노리고, 오른쪽 공격수가 왼쪽 끝을 노립니다. 교차 공격으로 혼란을 줍니다.',
-      moves:{H1:[75,53],H3:[25,53],H2:[50,52],BALL:[80,30]}
+      title:'측면 교차 공격',
+      text:'좌측 공격수가 우측 끝을 노리고 우측 공격수가 좌측 끝을 노립니다. 교차 공격으로 상대를 혼란시킵니다.',
+      moves:{H1:[80,53],H4:[20,53],H2:[38,54],H3:[62,54],BALL:[85,30]}
     },
     catchReturn:{
       title:'캐치 후 반격',
-      text:'수비수가 공을 잡으면 즉시 공격수에게 패스합니다. 공격수는 빠르게 던져 반격합니다.',
-      moves:{H5:[50,66],H2:[50,53],BALL:[50,53]}
+      text:'수비수가 공을 잡으면 즉시 앞에 있는 공격수에게 패스합니다. 빠르게 역습합니다.',
+      moves:{H5:[36,68],H2:[36,54],BALL:[36,54]}
     },
     splitDodge:{
       title:'분산 회피',
-      text:'공격이 들어오면 선수들이 좌우로 분산합니다. 한 방향으로 몰리지 않아 여러 명이 피할 수 있습니다.',
-      moves:{H1:[10,60],H2:[50,72],H3:[90,60],H4:[15,82],H5:[50,82],H6:[85,82]}
+      text:'공격이 들어오면 좌우로 분산합니다. 4명이 넓게 퍼지면 한번에 여럿을 맞추기 어렵습니다.',
+      moves:{H1:[5,62],H2:[30,74],H3:[70,74],H4:[95,62],H5:[22,83],H6:[78,83]}
     },
     outerPincer:{
       title:'외야 협공',
-      text:'외야 선수가 상대 내야 뒤쪽에서 던지고 내야 선수가 앞에서 동시에 던집니다. 앞뒤 협공입니다.',
-      moves:{H1:[50,93],H2:[50,54],H3:[80,55],BALL:[50,93]}
+      text:'외야 선수가 상대 뒤쪽에서 던지고 내야 공격수가 앞에서 동시에 던집니다. 앞뒤 협공입니다.',
+      moves:{H5:[30,93],H1:[13,54],H2:[36,54],H3:[64,54],H4:[87,54],BALL:[30,93]}
     },
     rushAll:{
       title:'전원 돌격',
-      text:'전체 선수가 동시에 중앙선 쪽으로 전진합니다. 빠른 투구 거리 확보로 기습 효과를 냅니다.',
-      moves:{H1:[18,52],H2:[50,52],H3:[82,52],H4:[22,66],H5:[50,66],H6:[78,66]}
+      text:'4명 공격수 모두 중앙선으로 최대한 전진합니다. 가까운 거리에서 빠르고 강하게 기습합니다.',
+      moves:{H1:[13,52],H2:[36,52],H3:[64,52],H4:[87,52],H5:[28,66],H6:[72,66]}
     },
     safeReturn:{
       title:'안전 복귀',
-      text:'공격 후 모든 선수가 안전한 기본 자리로 복귀합니다. 다음 공격을 위한 재정비입니다.',
-      moves:{H1:[20,60],H2:[50,60],H3:[80,60],H4:[20,78],H5:[50,78],H6:[80,78]}
+      text:'공격 후 전원 기본 자리로 복귀합니다. 4-2 기본 대형으로 재정비합니다.',
+      moves:{H1:[13,60],H2:[36,60],H3:[64,60],H4:[87,60],H5:[30,78],H6:[70,78]}
     }
   };
 
@@ -2119,8 +2168,4 @@ var DB = (function() { try { return (function() {
     else openPanel(name);
   }
   return { init:init, renderVideos:renderVideos, action:action, formation:formation, tactic:tactic, panel:panel, initialized: false };
-})(); } catch(e) { showError('DB 초기화 오류: '+(e.message||String(e))); return {init:function(){},renderVideos:function(){},action:function(){},formation:function(){},tactic:function(){},panel:function(){},initialized:false}; } })();
-
-</script>
-</body>
-</html>
+})(); } catch(e) { showError('DB 초기화 오류: '+(e.message||String(e))); return {init:function(){},renderVideos:function(){},action:function(){},formation:function(){},tactic:function(){},panel

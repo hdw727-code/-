@@ -543,31 +543,24 @@
   <section id="loginScreen" class="screen active">
     <div class="hero">
       <h1>배구·피구 동아리</h1>
-      <p>학년, 반, 번호, 이름으로 로그인하고 오늘의 출결, 훈련, 미션, 기록을 관리합니다.</p>
+      <p>학년, 반, 번호, 이름을 입력하고 로그인하세요.</p>
     </div>
     <div class="panel grid">
       <div class="grid two">
         <label>학년<select id="grade"><option value="">선택</option><option>1</option><option>2</option><option>3</option></select></label>
-        <label>반<input id="classNo" type="number" min="1" placeholder="예: 3"></label>
-        <label>번호<input id="number" type="number" min="1" placeholder="예: 12"></label>
+        <label>반<input id="classNo" type="number" min="1" max="20" placeholder="예: 3"></label>
+        <label>번호<input id="number" type="number" min="1" max="40" placeholder="예: 12"></label>
         <label>이름<input id="name" type="text" placeholder="홍길동"></label>
       </div>
-      <div class="grid two">
-        <label>성별
-          <select id="gender" onchange="syncThemeFromGender()">
-            <option>선택 안 함</option><option>남학생</option><option>여학생</option>
-          </select>
-        </label>
-        <label>화면 스타일
-          <input id="theme" type="hidden" value="fresh">
-          <div class="theme-picker" id="themePicker">
-            <button class="theme-card active" type="button" data-theme="fresh" onclick="chooseTheme('fresh')">프레시</button>
-            <button class="theme-card" type="button" data-theme="sporty" onclick="chooseTheme('sporty')">스포티</button>
-            <button class="theme-card" type="button" data-theme="soft" onclick="chooseTheme('soft')">소프트</button>
-          </div>
-        </label>
+      <label>성별
+        <select id="gender">
+          <option>선택 안 함</option><option>남학생</option><option>여학생</option>
+        </select>
+      </label>
+      <div style="display:flex;gap:8px;flex-wrap:wrap;">
+        <button class="btn" type="button" style="flex:2;min-width:120px" onclick="doLogin()">학생 로그인</button>
+        <button class="btn secondary" type="button" style="flex:1;min-width:80px" onclick="doGuest()">게스트 입장</button>
       </div>
-      <button class="btn" type="button" id="loginBtn" onclick="doLogin()">학생 로그인</button>
     </div>
   </section>
 
@@ -1024,66 +1017,75 @@ function makeLocalDashboard(payload, club) {
   };
 }
 
+function _gv(id){ var e=document.getElementById(id); return e ? e.value.trim() : ''; }
+
+function _goStudentScreen(payload) {
+  /* 화면 전환 */
+  document.querySelectorAll('.screen').forEach(function(s){ s.classList.remove('active'); });
+  document.getElementById('studentScreen').classList.add('active');
+  /* 헤더 업데이트 */
+  var h = document.getElementById('todayText');
+  if(h) h.textContent = new Date().toISOString().slice(0,10);
+  var t = document.getElementById('studentTitle');
+  if(t) t.textContent = (payload.name||'게스트') + ' 학생';
+  var sub = document.getElementById('studentSub');
+  if(sub) sub.textContent = (payload.grade?payload.grade+'학년 ':'')+
+    (payload.classNo?payload.classNo+'반 ':'')+
+    (payload.number?payload.number+'번 · ':'')+
+    (payload.gender||'선택 안 함');
+}
+
+function doGuest() {
+  var payload = {grade:'0', classNo:'0', number:'0', name:'게스트', gender:'선택 안 함', theme:'fresh'};
+  _goStudentScreen(payload);
+  try { renderStudent(makeLocalDashboard(payload, '배구')); } catch(e) {}
+  showToast('게스트 모드 — 저장 없이 전술판·기능 체험 가능합니다');
+}
+
 function doLogin() {
-  try {
-    var grade = val('grade'), classNo = val('classNo'), number = val('number'), name = val('name');
-    if (!grade || !classNo || !number || !name) {
-      alert('학년, 반, 번호, 이름을 모두 입력해주세요.');
-      return;
-    }
-    var gender = (document.getElementById('gender')||{value:''}).value||'선택 안 함';
-    var theme  = (document.getElementById('theme') ||{value:''}).value||'fresh';
-    var payload = { grade:grade, classNo:classNo, number:number, name:name, gender:gender, theme:theme };
+  var grade   = _gv('grade');
+  var classNo = _gv('classNo');
+  var number  = _gv('number');
+  var name    = _gv('name');
+  var gender  = _gv('gender') || '선택 안 함';
 
-    /* ── 1단계: 즉시 로컬 데이터로 화면 전환 (서버 없어도 작동) ── */
-    applyTheme(theme);
-    var el = function(id){ return document.getElementById(id); };
-    if(el('todayText'))       el('todayText').textContent       = new Date().toISOString().slice(0,10);
-    if(el('studentTitle'))    el('studentTitle').textContent    = name + ' 학생';
-    if(el('studentSub'))      el('studentSub').textContent      = grade+'학년 '+classNo+'반 '+number+'번 · '+gender+' · '+themeLabel(theme);
-    if(el('clubBadge'))       el('clubBadge').textContent       = '불러오는 중...';
-    if(el('levelBadge'))      el('levelBadge').textContent      = '...';
-    if(el('attendanceBadge')) el('attendanceBadge').textContent = '...';
-    if(el('programList'))     el('programList').innerHTML       = '<li style="color:var(--muted)">데이터 불러오는 중...</li>';
-    if(el('missionList'))     el('missionList').innerHTML       = '<div style="color:var(--muted);padding:8px">잠시만 기다려 주세요...</div>';
-    document.querySelectorAll('.screen').forEach(function(s){ s.classList.remove('active'); });
-    var ss = el('studentScreen');
-    if(ss) ss.classList.add('active');
-
-    /* ── 2단계: 캐시 데이터 즉시 렌더링 ── */
-    var cacheKey = dashboardCacheKey(payload);
-    var cached = readDashboardCache(cacheKey);
-    if (cached) {
-      try { renderStudent(cached); } catch(e) {}
-      showToast('저장된 데이터 표시 중...');
-    } else {
-      /* 캐시 없으면 로컬 데모 데이터로 화면 채움 */
-      try { renderStudent(makeLocalDashboard(payload, '배구')); } catch(e) {}
-    }
-
-    /* ── 3단계: GAS 서버에서 실제 데이터 백그라운드 업데이트 ── */
-    if (GAS_API_URL) {
-      fetch(GAS_API_URL, {
-        method:'POST',
-        headers:{'Content-Type':'text/plain'},
-        body: JSON.stringify({fn:'loginStudent', args:[payload]})
-      })
-      .then(function(r){ return r.json(); })
-      .then(function(r){
-        if(r.ok){
-          try { renderStudent(r.data); } catch(e){}
-          showToast('서버 데이터 업데이트됨 ✓');
-        } else {
-          showToast('서버 오류: ' + (r.error||'알 수 없음') + ' (로컬 데이터 표시 중)');
-        }
-      })
-      .catch(function(){
-        showToast('서버 연결 실패 — 로컬 데이터로 표시 중');
-      });
-    }
-  } catch(e) {
-    alert('로그인 오류: ' + e.message);
+  if (!grade || !classNo || !number || !name) {
+    alert('학년, 반, 번호, 이름을 모두 입력해주세요.');
+    return;
   }
+
+  var payload = {grade:grade, classNo:classNo, number:number, name:name, gender:gender, theme:'fresh'};
+
+  /* ── 즉시 화면 전환 + 캐시/로컬 데이터 표시 ── */
+  _goStudentScreen(payload);
+  var cacheKey = dashboardCacheKey(payload);
+  var cached   = readDashboardCache(cacheKey);
+  if (cached) {
+    try { renderStudent(cached); } catch(e) {}
+    showToast('저장된 데이터 표시 중 · 서버에서 업데이트 중...');
+  } else {
+    try { renderStudent(makeLocalDashboard(payload, '배구')); } catch(e) {}
+  }
+
+  /* ── 백그라운드에서 GAS 서버 실제 데이터 로드 ── */
+  if (!GAS_API_URL) return;
+  fetch(GAS_API_URL, {
+    method:'POST',
+    headers:{'Content-Type':'text/plain'},
+    body: JSON.stringify({fn:'loginStudent', args:[payload]})
+  })
+  .then(function(r){ return r.json(); })
+  .then(function(r){
+    if(r.ok){
+      try { renderStudent(r.data); } catch(e){}
+      showToast('서버 데이터 불러옴 ✓');
+    } else {
+      showToast('서버 오류 (로컬 데이터 사용 중): ' + (r.error||''));
+    }
+  })
+  .catch(function(e){
+    showToast('서버 연결 실패 — 로컬 데이터로 표시 중');
+  });
 }
 
 function dashboardCacheKey(p) {
@@ -1105,10 +1107,10 @@ function writeDashboardCache(key, data) {
 function renderStudent(data) {
   try {
   dashboard = data; currentStudent = data.student;
-  applyTheme(data.student.theme || 'fresh');
-  document.getElementById('todayText').textContent = data.date;
-  document.getElementById('studentTitle').textContent = `${data.student.name} 학생`;
-  document.getElementById('studentSub').textContent = `${data.student.grade}학년 ${data.student.classNo}반 ${data.student.number}번 · ${data.student.gender||'선택 안 함'} · ${themeLabel(data.student.theme||'fresh')}`;
+  var todayEl = document.getElementById('todayText');
+  if(todayEl) todayEl.textContent = data.date;
+  document.getElementById('studentTitle').textContent = data.student.name + ' 학생';
+  document.getElementById('studentSub').textContent = data.student.grade+'학년 '+data.student.classNo+'반 '+data.student.number+'번 · '+(data.student.gender||'선택 안 함');
   document.getElementById('clubBadge').textContent = data.student.club || '미선택';
   document.getElementById('levelBadge').textContent = data.student.level || '초급';
   document.getElementById('attendanceBadge').textContent = data.attendanceStatus || '미확인';
@@ -1188,22 +1190,7 @@ function completeMustAction() {
   runServer('saveActionStatus', [currentStudent.studentId, String(must.index), true], renderStudent);
 }
 
-function chooseTheme(theme) {
-  document.getElementById('theme').value = theme;
-  applyTheme(theme);
-  document.querySelectorAll('.theme-card').forEach(btn => btn.classList.toggle('active', btn.dataset.theme===theme));
-}
-function syncThemeFromGender() {
-  const g = val('gender');
-  if (g==='남학생') chooseTheme('sporty');
-  else if (g==='여학생') chooseTheme('soft');
-  else chooseTheme('fresh');
-}
-function applyTheme(theme) {
-  document.body.classList.remove('theme-sporty','theme-soft','theme-fresh');
-  document.body.classList.add(`theme-${theme||'fresh'}`);
-}
-function themeLabel(t) { return ({sporty:'스포티',soft:'소프트',fresh:'프레시'})[t]||'프레시'; }
+/* 테마는 fresh 단일 고정 */
 
 function renderClubChoices(data) {
   const box = document.getElementById('clubChoices'); box.innerHTML = '';

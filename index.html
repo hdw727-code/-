@@ -2219,4 +2219,9 @@ var DB = (function() { try { return (function() {
     else openPanel(name);
   }
   return { init:init, renderVideos:renderVideos, action:action, formation:formation, tactic:tactic, panel:panel, initialized: false };
-})(); } catch(e) { showError('DB 초기화 오류: '+(e.message||String(e))); return {init:function(){},renderVideos:function(){},action:function(){},formation:function(){},tactic:function(){},panel
+})(); } catch(e) { showError('DB 초기화 오류: '+(e.message||String(e))); return {init:function(){},renderVideos:function(){},action:function(){},formation:function(){},tactic:function(){},panel:function(){},initialized:false}; }
+})();
+
+</script>
+</body>
+</html>

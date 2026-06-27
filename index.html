@@ -795,6 +795,46 @@
       border-radius: 6px; padding: 4px 9px; font-size: 11px; font-weight: 800; cursor: pointer;
     }
 
+  
+    /* 공 게임모드 */
+    .pg-ball { cursor: pointer; }
+    .pg-ball.pg-ball-active {
+      box-shadow: 0 0 0 5px #fff456, 0 0 24px rgba(255,220,0,.9), 0 5px 12px rgba(0,0,0,.4);
+      animation: pgBallPulse .7s ease-in-out infinite;
+    }
+    @keyframes pgBallPulse {
+      0%,100% { transform: translate(-50%,-50%) scale(1); }
+      50% { transform: translate(-50%,-50%) scale(1.22); }
+    }
+    .pg-player.pg-hit1::before { content:"●"; position:absolute; top:-7px; right:-5px; font-size:10px; color:#ff6b6b; }
+    .pg-player.pg-hit2::before { content:"●●"; position:absolute; top:-7px; right:-8px; font-size:9px; color:#ff2222; letter-spacing:-1px; }
+    .pg-player.pg-elim { opacity:.22; filter:grayscale(1) brightness(.5); pointer-events:all; }
+    .pg-player.pg-can-hit { cursor:crosshair; box-shadow:0 0 0 3px #ff4444, 0 5px 12px rgba(0,0,0,.35) !important; }
+    .pg-player.pg-can-pass { cursor:pointer; box-shadow:0 0 0 3px #44ff88, 0 5px 12px rgba(0,0,0,.35) !important; }
+    .pg-mode-toggle { display:flex; gap:5px; margin-bottom:6px; }
+    .pg-mode-toggle button {
+      flex:1; border:1px solid #526176; background:#111a28; color:#aebbd0;
+      border-radius:6px; padding:6px; font-size:12px; font-weight:800; cursor:pointer;
+    }
+    .pg-mode-toggle button.pg-mode-on { background:#2c94ff; border-color:#2c94ff; color:#fff; }
+    .pg-score-bar {
+      display:flex; gap:8px; align-items:center; background:#0d121c;
+      border:1px solid #39465b; border-radius:8px; padding:7px 10px; margin-bottom:6px;
+      font-size:13px; font-weight:800;
+    }
+    .pg-score-bar .pg-s-us { color:#60a5fa; flex:1; }
+    .pg-score-bar .pg-s-th { color:#f87171; flex:1; text-align:right; }
+    .pg-score-bar .pg-s-mid { color:#aebbd0; font-size:11px; }
+    .pg-hit-sel { background:#121a28; border:1px solid #4a5970; color:#f3f7ff;
+                  border-radius:6px; padding:4px 6px; font-size:12px; font-weight:800; }
+    .pg-sim-btns { display:flex; gap:5px; flex-wrap:wrap; margin-top:6px; }
+    .pg-sim-btns button {
+      flex:1; min-width:60px; border:1px solid #526176; background:#111a28; color:#f3f7ff;
+      border-radius:6px; padding:6px 4px; font-size:12px; font-weight:800; cursor:pointer;
+    }
+    .pg-sim-btns .pg-save-ok { background:#19b46b; border-color:#19b46b; color:#fff; }
+    .pg-out-snap { border:1px dashed rgba(255,189,125,.5); border-radius:4px; }
+
   </style>
 </head>
 <body class="theme-fresh">
@@ -905,16 +945,7 @@
       </div>
 
       <div class="panel">
-        <div class="section-title"><h2>오늘의 출결</h2><span class="badge" id="attendanceBadge">미확인</span></div>
-        <div class="btn-row">
-          <button class="btn green" onclick="markAttendance('출석')">출석</button>
-          <button class="btn yellow" onclick="markAttendance('지각')">지각</button>
-          <button class="btn red" onclick="markAttendance('결석')">결석</button>
-        </div>
-      </div>
-
-      <div class="panel">
-        <div class="section-title"><h2>오늘의 미션 체크</h2></div>
+        <div class="section-title"><h2>오늘의 미션 체크</h2><span class="badge" id="attendanceBadge" style="margin-left:auto;">미확인</span></div>
         <div class="grid" id="missionList"></div>
       </div>
 
@@ -1069,24 +1100,37 @@
                   </div>
                 </div>
               </div>
-              <!-- 자유 편집: 저장/제거 컨트롤 -->
+              <!-- 자유 편집/시뮬 패널 -->
               <div id="pg-edit-panel" style="display:none;">
-                <div class="pg-elim-bar">
-                  <span>선수 더블클릭 → 아웃/복귀</span>
-                  <button id="pg-elimResetBtn" type="button">전원 복귀</button>
+                <div class="pg-mode-toggle">
+                  <button id="pg-modeDrag" class="pg-mode-on" type="button">✏️ 편집</button>
+                  <button id="pg-modeGame" type="button">⚽ 시뮬</button>
                 </div>
-                <div class="pg-save-bar">
-                  <span id="pg-saveLabel">저장 없음</span>
+                <div class="pg-score-bar" id="pg-scoreBar">
+                  <span class="pg-s-us" id="pg-scoreUs">우리팀 12명</span>
+                  <span class="pg-s-mid">vs</span>
+                  <span class="pg-s-th" id="pg-scoreTh">상대팀 12명</span>
+                </div>
+                <div style="display:flex;align-items:center;gap:6px;margin-bottom:6px;color:#aebbd0;font-size:12px;font-weight:800;">
+                  <span>아웃 조건</span>
+                  <select id="pg-hitSel" class="pg-hit-sel">
+                    <option value="1">1회 피격</option>
+                    <option value="2">2회 피격</option>
+                  </select>
+                  <button id="pg-elimResetBtn" style="margin-left:auto;border:1px solid #526176;background:#111a28;color:#f3f7ff;border-radius:6px;padding:4px 8px;font-size:11px;font-weight:800;cursor:pointer;" type="button">전원복귀</button>
+                </div>
+                <div id="pg-simHint" style="color:#aebbd0;font-size:12px;padding:6px 0;">
+                  선수를 드래그해 위치를 조정하세요. 더블클릭 또는 외야 영역으로 드래그 → 아웃
+                </div>
+                <div id="pg-gameHint" style="display:none;color:#ffd84d;font-size:12px;padding:6px 0;">
+                  🟡 공 클릭 → 번호 클릭으로 패스/공격 · 더블클릭 선수 → 아웃
+                </div>
+                <div class="pg-sim-btns">
                   <button id="pg-saveBtn" type="button">💾 저장</button>
                   <button id="pg-loadBtn" type="button">📂 불러오기</button>
                   <button id="pg-editResetBtn" type="button">초기화</button>
                 </div>
-                <div class="pg-bottom" style="margin-top:6px;">
-                  <div class="pg-copy">
-                    <h3 id="pg-editTitle"></h3>
-                    <p style="color:#aebbd0;font-size:12px;margin:0;">선수를 드래그해서 원하는 위치로 이동하세요.</p>
-                  </div>
-                </div>
+                <div style="color:#aebbd0;font-size:11px;margin-top:4px;" id="pg-saveLabel">저장 없음</div>
               </div>
             </aside>
           </div>
@@ -1330,16 +1374,9 @@ var _pendingPayload = null;
 
 function showClubModal(payload) {
   _pendingPayload = payload;
+  // 항상 동아리 선택 모달 표시
   var modal = document.getElementById('clubModal');
-  // 이미 저장된 동아리 있으면 바로 진행
-  var sid = [payload.grade,payload.classNo,payload.number,payload.name].join('-');
-  var saved = '';
-  try { saved = localStorage.getItem('club_'+sid) || ''; } catch(e) {}
-  if (saved) {
-    _enterStudentScreen(payload, saved);
-  } else {
-    modal.classList.add('show');
-  }
+  if (modal) modal.classList.add('show');
 }
 
 function selectClubModal(club) {
@@ -1620,7 +1657,17 @@ function renderTraining(data) {
       dashboard.missionStatuses = dashboard.missionStatuses||{};
       dashboard.missionStatuses[index] = e.target.checked;
       renderVisualSummary(dashboard);
-      runServer('saveMissionStatus', [currentStudent.studentId, String(index), e.target.checked], renderStudent);
+      runServer('saveMissionStatus', [currentStudent.studentId, String(index), e.target.checked], function(data) {
+        renderStudent(data);
+        // 미션 전체 완료 → 자동 출석
+        var ms = data.training ? data.training.missions : [];
+        var st = data.missionStatuses || {};
+        var allDone = ms.length > 0 && ms.every(function(m,i){ return !!st[i]; });
+        if (allDone && (!data.attendanceStatus || data.attendanceStatus === '미확인')) {
+          markAttendance('출석');
+          showToast('🎉 미션 완료! 출석이 자동 처리됩니다.');
+        }
+      });
     };
     missionList.appendChild(label);
   });
@@ -2199,187 +2246,193 @@ var VB = (function() { try { return (function() {
 /* ============================================================
    피구 전술 시뮬레이터 (DB 네임스페이스)
    ============================================================ */
-var DB = (function() { try { return (function() {
+var DB = (function(){ try { return (function(){
   "use strict";
   var _W=520, _H=820;
   var _activeTab='field', _stepIndex=0, _speed=1, _timer=null, _mode='12';
   var _initialized=false;
-  var _FIELD_TAB = 'field';
-  var _editTabs = {attack:true, defense:true, outfield:true, flow:true};
+  var _editMode='drag'; // 'drag' | 'game'
 
-  var _tabDefs = [
-    {id:'field',   label:'필드 설명'},
-    {id:'attack',  label:'공격 전술'},
-    {id:'defense', label:'수비 전술'},
+  /* 게임 상태 */
+  var _gs = {
+    ballSelected: false,
+    ballOwner: null,   /* 'o5', 't3' 등 */
+    hits: {},          /* id → count */
+    hitsToElim: 1,
+    elim: new Set(),
+    outIdxO: 0, outIdxT: 0
+  };
+
+  var _tabDefs=[
+    {id:'field',label:'필드 설명'},
+    {id:'attack',label:'공격 전술'},
+    {id:'defense',label:'수비 전술'},
     {id:'outfield',label:'외야 활용'},
-    {id:'flow',    label:'경기 흐름'}
+    {id:'flow',label:'경기 흐름'}
   ];
+  var _P={
+    ours12:{x:260,y:132},theirs12:{x:260,y:690},
+    ballTop:{x:260,y:126},ballBottom:{x:260,y:694},
+    tL:{x:194,y:300},tR:{x:326,y:306},center:{x:260,y:410}
+  };
 
-  var _P = {
-    ours12:{x:260,y:132}, theirs12:{x:260,y:690},
-    ballTop:{x:260,y:126}, ballBottom:{x:260,y:694},
-    targetLeft:{x:194,y:300}, targetRight:{x:326,y:306}, center:{x:260,y:410}
+  /* 외야 슬롯 (SVG 좌표) */
+  var _outSlots={
+    o:[{x:130,y:138},{x:158,y:138},{x:186,y:138},{x:214,y:138},{x:242,y:138},
+       {x:270,y:138},{x:298,y:138},{x:326,y:138},{x:354,y:138},{x:382,y:138}],
+    t:[{x:382,y:682},{x:354,y:682},{x:326,y:682},{x:298,y:682},{x:270,y:682},
+       {x:242,y:682},{x:214,y:682},{x:186,y:682},{x:158,y:682},{x:130,y:682}]
   };
 
   function _oursAttack(){
-    return {
-      o10:{x:176,y:486},o9:{x:198,y:526},o8:{x:220,y:562},o7:{x:242,y:594},
-      o1:{x:224,y:486},o2:{x:296,y:486},o3:{x:278,y:594},o4:{x:300,y:562},
-      o5:{x:322,y:526},o6:{x:344,y:486},o11:{x:260,y:642},o12:_P.ours12
-    };
+    return {o10:{x:176,y:486},o9:{x:198,y:526},o8:{x:220,y:562},o7:{x:242,y:594},
+            o1:{x:224,y:486},o2:{x:296,y:486},o3:{x:278,y:594},o4:{x:300,y:562},
+            o5:{x:322,y:526},o6:{x:344,y:486},o11:{x:260,y:642},o12:_P.ours12};
   }
   function _theirsAttack(){
-    return {
-      t10:{x:344,y:334},t9:{x:322,y:294},t8:{x:300,y:258},t7:{x:278,y:226},
-      t1:{x:296,y:334},t2:{x:224,y:334},t3:{x:242,y:226},t4:{x:220,y:258},
-      t5:{x:198,y:294},t6:{x:176,y:334},t11:{x:260,y:178},t12:_P.theirs12
-    };
+    return {t10:{x:344,y:334},t9:{x:322,y:294},t8:{x:300,y:258},t7:{x:278,y:226},
+            t1:{x:296,y:334},t2:{x:224,y:334},t3:{x:242,y:226},t4:{x:220,y:258},
+            t5:{x:198,y:294},t6:{x:176,y:334},t11:{x:260,y:178},t12:_P.theirs12};
   }
   function _oursFlat(){
     var o={};
-    [['o10',176],['o9',194],['o8',212],['o7',230],['o1',248],['o2',272],['o3',290],['o4',308],['o5',326],['o6',344]]
-      .forEach(function(p){o[p[0]]={x:p[1],y:594};});
+    [['o10',176],['o9',194],['o8',212],['o7',230],['o1',248],
+     ['o2',272],['o3',290],['o4',308],['o5',326],['o6',344]
+    ].forEach(function(p){o[p[0]]={x:p[1],y:594};});
     o.o11={x:260,y:632};o.o12=_P.ours12;return o;
   }
   function _theirsFlat(){
     var o={};
-    [['t10',344],['t9',326],['t8',308],['t7',290],['t1',272],['t2',248],['t3',230],['t4',212],['t5',194],['t6',176]]
-      .forEach(function(p){o[p[0]]={x:p[1],y:226};});
+    [['t10',344],['t9',326],['t8',308],['t7',290],['t1',272],
+     ['t2',248],['t3',230],['t4',212],['t5',194],['t6',176]
+    ].forEach(function(p){o[p[0]]={x:p[1],y:226};});
     o.t11={x:260,y:188};o.t12=_P.theirs12;return o;
   }
   function _oursU(){
     var o={};
     [['o10',176,570],['o9',194,586],['o8',214,604],['o7',236,616],['o1',252,622],
-     ['o2',268,622],['o3',284,616],['o4',306,604],['o5',326,586],['o6',344,570]]
-      .forEach(function(p){o[p[0]]={x:p[1],y:p[2]};});
+     ['o2',268,622],['o3',284,616],['o4',306,604],['o5',326,586],['o6',344,570]
+    ].forEach(function(p){o[p[0]]={x:p[1],y:p[2]};});
     o.o11={x:260,y:642};o.o12=_P.ours12;return o;
   }
-  function _oursShield(){ var f=_oursFlat();f.o1={x:238,y:526};f.o2={x:282,y:526};return f; }
-  function _theirsShield(){ var f=_theirsFlat();f.t1={x:282,y:294};f.t2={x:238,y:294};return f; }
+  function _oursShield(){var f=_oursFlat();f.o1={x:238,y:526};f.o2={x:282,y:526};return f;}
 
-  function _applyMode(base,prefix){
-    var count=Number(_mode),visible=new Set();
-    if(count===12){for(var i=1;i<=11;i++)visible.add(prefix+i);visible.add(prefix+'12');}
-    else if(count===8){for(var i=3;i<=11;i++)visible.add(prefix+i);visible.add(prefix+'12');}
-    else if(count===5){['1','2','3','4','11','12'].forEach(function(n){visible.add(prefix+n);});}
-    else if(count===3){['1','2','12'].forEach(function(n){visible.add(prefix+n);});}
+  function _applyMode(base,pfx){
+    var count=Number(_mode),vis=new Set();
+    if(count===12){for(var i=1;i<=11;i++)vis.add(pfx+i);vis.add(pfx+'12');}
+    else if(count===8){for(var i=3;i<=11;i++)vis.add(pfx+i);vis.add(pfx+'12');}
+    else if(count===5){['1','2','3','4','11','12'].forEach(function(n){vis.add(pfx+n);});}
+    else{['1','2','12'].forEach(function(n){vis.add(pfx+n);});}
     var out={};
-    Object.keys(base).forEach(function(id){out[id]=Object.assign({},base[id],{hidden:!visible.has(id)});});
+    Object.keys(base).forEach(function(id){
+      out[id]=Object.assign({},base[id],{hidden:!vis.has(id)});
+    });
     return out;
   }
-  function _scene(ours,theirs,ballAt,arrows){
-    arrows=arrows||[];
-    return {positions:Object.assign({},_applyMode(ours,'o'),_applyMode(theirs,'t')),ball:ballAt,arrows:arrows};
+  function _scene(oa,ta,ball,arr){
+    arr=arr||[];
+    return {positions:Object.assign({},_applyMode(oa,'o'),_applyMode(ta,'t')),ball:ball,arrows:arr};
   }
-
   function _makeData(){
     var oa=_oursAttack(),ta=_theirsAttack(),of_=_oursFlat(),tf=_theirsFlat(),ou=_oursU(),os=_oursShield();
     return {
       field:[
-        {title:'세로형 피구장 구조',desc:'위쪽 주황 = 우리팀 외야, 아래쪽 주황 = 상대팀 외야. 초록 내야가 양쪽 사이에 위치.',
+        {title:'세로형 피구장 구조',desc:'위쪽 주황 = 우리팀 외야, 아래쪽 주황 = 상대팀 외야.',
          ..._scene(of_,tf,_P.center)},
         {title:'우리팀 12번 (외야)',desc:'12번은 상대 내야 뒤 외야에 고정. 잡으면 바로 내야 공격.',
-         ..._scene(oa,tf,_P.ballTop,[{from:_P.ours12,to:_P.targetLeft}])},
+         ..._scene(oa,tf,_P.ballTop,[{from:_P.ours12,to:_P.tL}])},
         {title:'상대팀 12번 (외야)',desc:'상대 12번은 우리 내야 뒤 외야에 위치.',
          ..._scene(of_,ta,_P.ballBottom,[{from:_P.theirs12,to:{x:326,y:520}}])}
       ],
       attack:[
-        {title:'V자 공격대형',desc:'1번 좌측: 7,8,9,10번 / 2번 우측: 3,4,5,6번. 1,2번이 중앙선 방향으로 올라섭니다.',
+        {title:'V자 공격대형',desc:'1번 좌측: 7,8,9,10번 / 2번 우측: 3,4,5,6번.',
          ..._scene(oa,tf,_P.ballTop)},
-        {title:'12번 직접 공격',desc:'외야 12번이 잡으면 패스 없이 바로 상대 빈 공간 공격.',
-         ..._scene(oa,tf,_P.targetLeft,[{from:_P.ours12,to:_P.targetLeft}])},
-        {title:'1번 전면 공격',desc:'1번이 잡으면 2번에게 넘기지 않고 즉시 공격.',
-         ..._scene(oa,tf,_P.targetRight,[{from:oa.o1,to:_P.targetRight}])},
-        {title:'십자포화',desc:'12번과 내야 공격수가 서로 다른 각도에서 동시 압박.',
-         ..._scene(oa,tf,_P.targetLeft,[{from:_P.ours12,to:_P.targetLeft},{from:oa.o2,to:_P.targetRight}])},
-        {title:'시간차 공격',desc:'앞선 공격 직후 반대쪽에서 늦게 들어오는 공으로 집중 분산.',
-         ..._scene(oa,tf,_P.targetLeft,[{from:oa.o10,to:_P.targetLeft}])}
+        {title:'12번 직접 공격',desc:'외야 12번이 잡으면 바로 상대 빈 공간 공격.',
+         ..._scene(oa,tf,_P.tL,[{from:_P.ours12,to:_P.tL}])},
+        {title:'십자포화',desc:'12번과 내야 공격수가 다른 각도에서 동시 압박.',
+         ..._scene(oa,tf,_P.tL,[{from:_P.ours12,to:_P.tL},{from:oa.o2,to:_P.tR}])}
       ],
       defense:[
-        {title:'ㅡ자 수비대형',desc:'왼쪽부터 10,9,8,7,1,2,3,4,5,6번. V자 공격으로 빠르게 전환 가능.',
+        {title:'ㅡ자 수비대형',desc:'왼쪽부터 10,9,8,7,1,2,3,4,5,6번.',
          ..._scene(of_,ta,_P.ballBottom,[{from:_P.theirs12,to:{x:194,y:520}}])},
-        {title:'U자 수비대형',desc:'양 끝이 올라가고 중앙이 뒤로 빠져 공간 확보.',
+        {title:'U자 수비대형',desc:'양 끝 올라가고 중앙이 뒤로 빠져 공간 확보.',
          ..._scene(ou,ta,{x:326,y:520},[{from:ta.t1,to:{x:326,y:520}}])},
-        {title:'방패 전술',desc:'캐치 좋은 1~2번이 앞에서 받고 나머지는 뒤에서 공간 확보.',
-         ..._scene(os,ta,{x:260,y:526},[{from:_P.theirs12,to:{x:260,y:526}}])},
-        {title:'벽타기',desc:'뒤 라인 쪽으로 이동, 구석에 몰리지 않게 중앙 탈출 방향 유지.',
-         ..._scene(Object.assign({},of_,{o10:{x:184,y:624},o6:{x:336,y:624}}),ta,_P.targetLeft,[{from:ta.t2,to:_P.targetLeft}])}
+        {title:'방패 전술',desc:'1~2번이 앞에서 받고 나머지는 뒤에서 공간 확보.',
+         ..._scene(os,ta,{x:260,y:526},[{from:_P.theirs12,to:{x:260,y:526}}])}
       ],
       outfield:[
-        {title:'외야 직접 공격',desc:'12번은 공 잡는 즉시 상대 내야 빈 공간 직접 공격.',
-         ..._scene(oa,tf,_P.targetLeft,[{from:_P.ours12,to:_P.targetLeft}])},
-        {title:'삼각 압박 위치',desc:'12번, 1번, 2번이 삼각 위치 유지. 공 가진 학생이 바로 공격.',
-         ..._scene(oa,tf,_P.targetRight,[{from:_P.ours12,to:_P.targetLeft},{from:oa.o1,to:_P.targetRight}])},
-        {title:'외야 속공',desc:'아웃 직후 수비 정비 전에 빠르게 공격 기회.',
-         ..._scene(Object.assign({},oa,{o3:{x:210,y:132}}),tf,_P.targetLeft,[{from:{x:210,y:132},to:_P.targetLeft}])}
+        {title:'외야 직접 공격',desc:'12번이 잡으면 즉시 상대 내야 직접 공격.',
+         ..._scene(oa,tf,_P.tL,[{from:_P.ours12,to:_P.tL}])},
+        {title:'삼각 압박',desc:'12번, 1번, 2번 삼각 위치로 압박.',
+         ..._scene(oa,tf,_P.tR,[{from:_P.ours12,to:_P.tL},{from:oa.o1,to:_P.tR}])}
       ],
       flow:[
         {title:'우리 공격 / 상대 수비',desc:'우리팀 V자 공격, 상대팀 ㅡ자 수비.',
          ..._scene(oa,tf,_P.ballTop)},
-        {title:'상대 공격 전환',desc:'공격권이 넘어가면 상대도 V자, 우리는 ㅡ자 수비.',
+        {title:'상대 공격 전환',desc:'공격권 전환 시 우리는 수비 대형으로.',
          ..._scene(of_,ta,_P.ballBottom,[{from:_P.theirs12,to:{x:326,y:520}}])},
-        {title:'8명 모드',desc:'1,2번 외야 상황. 3~10번 중심 라인 구성.',
-         ..._scene(of_,ta,_P.ballBottom)},
-        {title:'3명 생존 전략',desc:'삼각 위치 유지, 생존 우선. 공 잡은 학생이 바로 공격.',
-         ..._scene(oa,tf,_P.ballTop,[{from:_P.ours12,to:_P.targetLeft},{from:oa.o1,to:_P.targetRight}])}
+        {title:'3명 생존 전략',desc:'삼각 위치 유지, 공 잡으면 즉시 공격.',
+         ..._scene(oa,tf,_P.ballTop,[{from:_P.ours12,to:_P.tL},{from:oa.o1,to:_P.tR}])}
       ]
     };
   }
 
   function _$(id){return document.getElementById(id);}
+  function _pct(pt){return{left:(pt.x/_W*100)+'%',top:(pt.y/_H*100)+'%'};}
 
+  /* ── 선수 생성 ── */
   function _createPlayers(){
-    var layer=_$('pg-playerLayer');
-    if(!layer)return;
+    var layer=_$('pg-playerLayer');if(!layer)return;
     layer.innerHTML='';
-    ['o','t'].forEach(function(prefix){
+    ['o','t'].forEach(function(pfx){
       for(var n=1;n<=12;n++){
         var el=document.createElement('div');
-        el.className='pg-player '+(prefix==='o'?'pg-ours':'pg-theirs');
+        el.className='pg-player '+(pfx==='o'?'pg-ours':'pg-theirs');
         if(n===1||n===2)el.classList.add('pg-attacker');
         if(n===11)el.classList.add('pg-blocker');
         if(n===12)el.classList.add('pg-outfielder');
-        el.id='pg-'+prefix+n;
-        el.textContent=n;
+        el.id='pg-'+pfx+n; el.textContent=n;
         layer.appendChild(el);
-        _makeDraggable(el);
-        el.addEventListener('dblclick',function(ev){
-          ev.preventDefault();
-          ev.stopPropagation();
-          this.classList.toggle('pg-elim');
-        });
+        _attachPlayer(el, pfx, n);
       }
     });
   }
 
-  function _makeDraggable(el){
-    var dragging=false,startX,startY,startLeft,startTop;
+  /* ── 드래그 + 클릭 이벤트 ── */
+  function _attachPlayer(el, pfx, n){
+    var dragging=false, moved=false, sx,sy,sl,st;
     function getWrap(){return _$('pg-fieldWrap');}
+
     function onStart(e){
-      if(_activeTab===_FIELD_TAB)return; // 필드 설명 탭은 드래그 비활성
       e.preventDefault();
-      dragging=true;
+      dragging=true; moved=false;
       el.classList.add('pg-dragging');
-      var touch=e.touches?e.touches[0]:e;
-      startX=touch.clientX; startY=touch.clientY;
-      startLeft=parseFloat(el.style.left)||50;
-      startTop=parseFloat(el.style.top)||50;
+      var tc=e.touches?e.touches[0]:e;
+      sx=tc.clientX; sy=tc.clientY;
+      sl=parseFloat(el.style.left)||50;
+      st=parseFloat(el.style.top)||50;
     }
     function onMove(e){
       if(!dragging)return;
-      var touch=e.touches?e.touches[0]:e;
-      var wrap=getWrap();
-      if(!wrap)return;
-      var rect=wrap.getBoundingClientRect();
-      var dx=(touch.clientX-startX)/rect.width*100;
-      var dy=(touch.clientY-startY)/rect.height*100;
-      el.style.left=Math.max(1,Math.min(99,startLeft+dx))+'%';
-      el.style.top=Math.max(1,Math.min(99,startTop+dy))+'%';
+      var tc=e.touches?e.touches[0]:e;
+      var dx=tc.clientX-sx, dy=tc.clientY-sy;
+      if(Math.abs(dx)>4||Math.abs(dy)>4) moved=true;
+      if(!moved)return;
+      var wrap=getWrap();if(!wrap)return;
+      var r=wrap.getBoundingClientRect();
+      el.style.left=Math.max(1,Math.min(99,sl+dx/r.width*100))+'%';
+      el.style.top =Math.max(1,Math.min(99,st+dy/r.height*100))+'%';
     }
-    function onEnd(){
-      if(!dragging)return;
-      dragging=false;
+    function onEnd(e){
+      if(!dragging)return; dragging=false;
       el.classList.remove('pg-dragging');
+      if(!moved){
+        /* 클릭 */
+        _onPlayerClick(el,pfx,n);
+      } else {
+        /* 드래그 종료: 외야 스냅 */
+        _snapOutfield(el,pfx);
+      }
     }
     el.addEventListener('mousedown',onStart);
     el.addEventListener('touchstart',onStart,{passive:false});
@@ -2387,178 +2440,301 @@ var DB = (function() { try { return (function() {
     document.addEventListener('touchmove',onMove,{passive:false});
     document.addEventListener('mouseup',onEnd);
     document.addEventListener('touchend',onEnd);
-  }
 
-  function _pct(pt){return{left:(pt.x/_W*100)+'%',top:(pt.y/_H*100)+'%'};}
-
-  function _setDuration(){
-    var d=(900/_speed)+'ms';
-    document.querySelectorAll('.pg-player,.pg-ball').forEach(function(el){
-      el.style.transitionDuration=d;
+    /* 더블클릭 → 아웃 */
+    var lastTap=0;
+    el.addEventListener('click',function(){
+      var now=Date.now();
+      if(now-lastTap<400){ _eliminatePlayer(pfx+n); }
+      lastTap=now;
     });
   }
 
-  function _drawArrows(arrows){
-    var svg=_$('pg-arrowSvg');
-    if(!svg)return;
+  /* 플레이어 클릭 (게임 모드) */
+  function _onPlayerClick(el,pfx,n){
+    if(_activeTab==='field') return;
+    if(_editMode==='drag') return;
+    /* 게임 모드 */
+    var id=pfx+n;
+    if(_gs.elim.has(id)) return;
+    if(_gs.ballSelected){
+      /* 공 이동 */
+      _moveBall(el);
+      var ownerPfx=_gs.ballOwner?_gs.ballOwner[0]:null;
+      /* 상대팀 → 공격 */
+      if(ownerPfx && ownerPfx!==pfx){
+        _registerHit(el,id,pfx,n);
+      }
+      _gs.ballOwner=id;
+      /* 공 선택 유지 (연속 패스 허용) - 공 이동 후 자동 해제 */
+      _setBallSelected(false);
+    }
+  }
+
+  function _moveBall(playerEl){
+    var ball=_$('pg-ball');if(!ball)return;
+    ball.style.left=playerEl.style.left;
+    ball.style.top =playerEl.style.top;
+  }
+
+  function _setBallSelected(on){
+    _gs.ballSelected=on;
+    var ball=_$('pg-ball');if(!ball)return;
+    ball.classList.toggle('pg-ball-active',on);
+    /* 상대 선수 하이라이트 */
+    var ownerPfx=_gs.ballOwner?_gs.ballOwner[0]:null;
+    document.querySelectorAll('.pg-player').forEach(function(el){
+      el.classList.remove('pg-can-hit','pg-can-pass');
+      if(!on)return;
+      var id=el.id.replace('pg-','');
+      if(_gs.elim.has(id))return;
+      if(ownerPfx && id[0]!==ownerPfx) el.classList.add('pg-can-hit');
+      else el.classList.add('pg-can-pass');
+    });
+  }
+
+  function _registerHit(el,id,pfx,n){
+    _gs.hits[id]=(_gs.hits[id]||0)+1;
+    /* 피격 플래시 */
+    var orig=el.style.background;
+    el.style.background='#ff2222';
+    setTimeout(function(){el.style.background=orig;},350);
+    /* 명중 표시 */
+    el.classList.remove('pg-hit1','pg-hit2');
+    if(_gs.hits[id]===1) el.classList.add('pg-hit1');
+    if(_gs.hits[id]>=2)  el.classList.add('pg-hit2');
+    /* 아웃 판정 */
+    if(_gs.hits[id]>=_gs.hitsToElim){
+      setTimeout(function(){_eliminatePlayer(id);},400);
+    }
+    _updateScore();
+  }
+
+  /* 외야 스냅 */
+  function _snapOutfield(el,pfx){
+    var topPct=parseFloat(el.style.top)||50;
+    /* 우리팀 → 상단 외야로 스냅 (y < 22%) */
+    if(pfx==='o' && topPct<22){
+      var slot=_outSlots.o[Math.min(_gs.outIdxO,_outSlots.o.length-1)];
+      el.style.left=(slot.x/_W*100)+'%'; el.style.top=(slot.y/_H*100)+'%';
+      _gs.outIdxO++;
+      _markElim(el,pfx+el.textContent);
+    }
+    /* 상대팀 → 하단 외야로 스냅 (y > 78%) */
+    else if(pfx==='t' && topPct>78){
+      var slot=_outSlots.t[Math.min(_gs.outIdxT,_outSlots.t.length-1)];
+      el.style.left=(slot.x/_W*100)+'%'; el.style.top=(slot.y/_H*100)+'%';
+      _gs.outIdxT++;
+      _markElim(el,pfx+el.textContent);
+    }
+  }
+
+  function _markElim(el,id){
+    if(_gs.elim.has(id))return;
+    _gs.elim.add(id);
+    el.classList.add('pg-elim');
+    _updateScore();
+    setTimeout(function(){_autoFill(id[0]);},500);
+  }
+
+  function _eliminatePlayer(id){
+    var el=_$('pg-'+id);if(!el)return;
+    if(_gs.elim.has(id))return;
+    /* 외야 슬롯으로 이동 */
+    var pfx=id[0];
+    var slots=pfx==='o'?_outSlots.o:_outSlots.t;
+    var idx=pfx==='o'?_gs.outIdxO:_gs.outIdxT;
+    var slot=slots[Math.min(idx,slots.length-1)];
+    el.style.left=(slot.x/_W*100)+'%'; el.style.top=(slot.y/_H*100)+'%';
+    if(pfx==='o') _gs.outIdxO++; else _gs.outIdxT++;
+    _markElim(el,id);
+  }
+
+  /* 자동 대형 재정렬 */
+  function _autoFill(pfx){
+    /* 내야 범위 (% of field height) */
+    var yMin=pfx==='o'?50:19, yMax=pfx==='o'?82:50;
+    var xMin=31.5, xMax=68.5; /* inner court x range */
+    var active=[];
+    for(var n=1;n<=11;n++){
+      var id=pfx+n, el=_$('pg-'+id);
+      if(!el||_gs.elim.has(id))continue;
+      var y=parseFloat(el.style.top)||50;
+      if(y>=yMin&&y<=yMax) active.push({el:el,x:parseFloat(el.style.left)||50,y:y});
+    }
+    if(!active.length)return;
+    /* Y로 정렬 후 행 그루핑 */
+    active.sort(function(a,b){return a.y-b.y;});
+    var rows=[], row=[active[0]];
+    for(var i=1;i<active.length;i++){
+      if(Math.abs(active[i].y-row[0].y)<4) row.push(active[i]);
+      else{rows.push(row);row=[active[i]];}
+    }
+    rows.push(row);
+    /* 각 행 균등 배분 */
+    rows.forEach(function(r){
+      if(r.length<2)return;
+      var span=xMax-xMin, n=r.length;
+      r.forEach(function(p,i){
+        p.el.style.left=(xMin+span*i/(n-1))+'%';
+      });
+    });
+  }
+
+  function _updateScore(){
+    var ou=0,ot=0;
+    _gs.elim.forEach(function(id){if(id[0]==='o')ou++;else ot++;});
+    var su=_$('pg-scoreUs'),st=_$('pg-scoreTh');
+    if(su) su.textContent='우리팀 '+(12-ou)+'명';
+    if(st) st.textContent='상대팀 '+(12-ot)+'명';
+  }
+
+  /* 저장 */
+  function _storageKey(tab){return 'pg_save_'+tab;}
+  function _savePos(tab){
+    var d={};
+    document.querySelectorAll('.pg-player').forEach(function(el){
+      d[el.id]={left:el.style.left,top:el.style.top,
+                 elim:el.classList.contains('pg-elim'),
+                 h1:el.classList.contains('pg-hit1'),
+                 h2:el.classList.contains('pg-hit2')};
+    });
+    var ball=_$('pg-ball');
+    if(ball) d['__ball']={left:ball.style.left,top:ball.style.top};
+    try{localStorage.setItem(_storageKey(tab),JSON.stringify(d));}catch(e){}
+    _updateSaveLabel(tab);
+    if(typeof showToast==='function') showToast('✅ 저장 완료');
+  }
+  function _loadPos(tab){
+    var raw;try{raw=localStorage.getItem(_storageKey(tab));}catch(e){}
+    if(!raw)return false;
+    var d=JSON.parse(raw);
+    Object.keys(d).forEach(function(id){
+      if(id==='__ball'){var b=_$('pg-ball');if(b){b.style.left=d[id].left;b.style.top=d[id].top;}return;}
+      var el=document.getElementById(id);if(!el)return;
+      el.style.left=d[id].left;el.style.top=d[id].top;
+      el.classList.toggle('pg-elim',!!d[id].elim);
+      el.classList.toggle('pg-hit1',!!d[id].h1);
+      el.classList.toggle('pg-hit2',!!d[id].h2);
+    });
+    _updateSaveLabel(tab);return true;
+  }
+  function _hasSave(tab){try{return!!localStorage.getItem(_storageKey(tab));}catch(e){return false;}}
+  function _updateSaveLabel(tab){
+    var l=_$('pg-saveLabel');if(l)l.textContent=_hasSave(tab)?'✅ 저장된 배치 있음':'저장 없음';
+  }
+
+  /* 전체 복귀 */
+  function _resetAll(){
+    _gs.hits={}; _gs.elim=new Set(); _gs.outIdxO=0; _gs.outIdxT=0;
+    _gs.ballSelected=false; _gs.ballOwner=null;
+    var ball=_$('pg-ball');if(ball)ball.classList.remove('pg-ball-active');
+    document.querySelectorAll('.pg-player').forEach(function(el){
+      el.classList.remove('pg-elim','pg-hit1','pg-hit2','pg-can-hit','pg-can-pass');
+    });
+    _updateScore();
+    _setDefaultEdit();
+  }
+
+  function _setDefaultEdit(){
+    var oa=_oursAttack(),ta=_theirsAttack();
+    function place(map){
+      Object.keys(map).forEach(function(id){
+        var el=_$('pg-'+id),pt=map[id];if(!el)return;
+        var p=_pct(pt);el.style.left=p.left;el.style.top=p.top;
+        el.classList.remove('pg-hidden','pg-elim','pg-hit1','pg-hit2');
+      });
+    }
+    place(oa);place(ta);
+    var ball=_$('pg-ball');
+    if(ball){ball.style.left='50%';ball.style.top='15%';ball.style.opacity='1';}
+  }
+
+  /* 렌더 */
+  function _setDuration(){
+    var d=(900/_speed)+'ms';
+    document.querySelectorAll('.pg-player,.pg-ball').forEach(function(el){el.style.transitionDuration=d;});
+  }
+  function _drawArrows(arr){
+    var svg=_$('pg-arrowSvg');if(!svg)return;
     svg.querySelectorAll('.pg-drawn').forEach(function(el){el.remove();});
-    (arrows||[]).forEach(function(a,i){
+    (arr||[]).forEach(function(a,i){
       var line=document.createElementNS('http://www.w3.org/2000/svg','line');
       line.classList.add('pg-drawn');
-      line.setAttribute('x1',a.from.x);line.setAttribute('y1',a.from.y);
-      line.setAttribute('x2',a.to.x);line.setAttribute('y2',a.to.y);
-      line.setAttribute('stroke',i%2?'#ffffff':'#fff456');
-      line.setAttribute('stroke-width','6');
-      line.setAttribute('stroke-linecap','round');
-      line.setAttribute('marker-end','url(#pg-arrowHead)');
-      line.setAttribute('opacity','.88');
+      ['x1','y1','x2','y2'].forEach(function(k,j){
+        line.setAttribute(k,[a.from.x,a.from.y,a.to.x,a.to.y][j]);
+      });
+      line.setAttribute('stroke',i%2?'#fff':'#fff456');
+      line.setAttribute('stroke-width','6');line.setAttribute('stroke-linecap','round');
+      line.setAttribute('marker-end','url(#pg-arrowHead)');line.setAttribute('opacity','.88');
       svg.appendChild(line);
     });
   }
-
   function _renderTabs(){
-    var nav=document.querySelector('.pg-tabs');
-    if(!nav)return;
+    var nav=document.querySelector('.pg-tabs');if(!nav)return;
     nav.innerHTML='';
     _tabDefs.forEach(function(tab){
-      var btn=document.createElement('button');
-      btn.type='button';
+      var btn=document.createElement('button');btn.type='button';
       btn.className='pg-tab'+(tab.id===_activeTab?' pg-active':'');
       btn.textContent=tab.label;
-      btn.addEventListener('click',function(){
-        _activeTab=tab.id;_stepIndex=0;_stopAuto();_render();
-      });
+      btn.addEventListener('click',function(){_activeTab=tab.id;_stepIndex=0;_stopAuto();_render();});
       nav.appendChild(btn);
     });
   }
-
   function _renderStepList(steps){
-    var list=_$('pg-stepList');
-    if(!list)return;
+    var list=_$('pg-stepList');if(!list)return;
     list.innerHTML='';
     steps.forEach(function(step,i){
-      var btn=document.createElement('button');
-      btn.type='button';
+      var btn=document.createElement('button');btn.type='button';
       btn.className='pg-step-item'+(i===_stepIndex?' pg-step-active':'');
       btn.textContent=(i+1)+'. '+step.title;
       btn.addEventListener('click',function(){_stepIndex=i;_stopAuto();_render();});
       list.appendChild(btn);
     });
   }
-
-  /* 저장/불러오기 */
-  function _storageKey(tabId){return 'pg_save_'+tabId;}
-  function _savePositions(tabId){
-    var data={};
-    document.querySelectorAll('.pg-player').forEach(function(el){
-      data[el.id]={left:el.style.left,top:el.style.top,elim:el.classList.contains('pg-elim')};
-    });
-    var ballEl=_$('pg-ball');
-    if(ballEl) data['__ball']={left:ballEl.style.left,top:ballEl.style.top};
-    try{localStorage.setItem(_storageKey(tabId),JSON.stringify(data));}catch(e){}
-    _updateSaveLabel(tabId);
-    if(typeof showToast==='function') showToast('✅ 저장 완료');
-  }
-  function _loadPositions(tabId){
-    var raw;
-    try{raw=localStorage.getItem(_storageKey(tabId));}catch(e){}
-    if(!raw) return false;
-    var data=JSON.parse(raw);
-    Object.keys(data).forEach(function(id){
-      if(id==='__ball'){
-        var b=_$('pg-ball');
-        if(b){b.style.left=data[id].left;b.style.top=data[id].top;}
-        return;
-      }
-      var el=document.getElementById(id);
-      if(!el)return;
-      el.style.left=data[id].left;el.style.top=data[id].top;
-      el.classList.toggle('pg-elim',!!data[id].elim);
-    });
-    _updateSaveLabel(tabId);
-    return true;
-  }
-  function _hasSave(tabId){
-    try{return !!localStorage.getItem(_storageKey(tabId));}catch(e){return false;}
-  }
-  function _updateSaveLabel(tabId){
-    var lbl=_$('pg-saveLabel');
-    if(!lbl)return;
-    lbl.textContent=_hasSave(tabId)?'저장된 배치 있음':'저장 없음';
-  }
-  function _clearElim(){
-    document.querySelectorAll('.pg-player.pg-elim').forEach(function(el){el.classList.remove('pg-elim');});
-  }
-
-  function _isEditTab(){return _editTabs[_activeTab]||false;}
+  function _isEdit(){return _activeTab!=='field';}
 
   function _render(){
     if(!_$('pg-playerLayer'))return;
-    var isEdit=_isEditTab();
-    /* 패널 전환 */
-    var fp=_$('pg-field-panel'), ep=_$('pg-edit-panel');
-    if(fp) fp.style.display=isEdit?'none':'block';
-    if(ep) ep.style.display=isEdit?'block':'none';
+    var isEdit=_isEdit();
+    var fp=_$('pg-field-panel'),ep=_$('pg-edit-panel');
+    if(fp)fp.style.display=isEdit?'none':'block';
+    if(ep)ep.style.display=isEdit?'block':'none';
     /* 드래그 커서 */
+    var canDrag=isEdit;
     document.querySelectorAll('.pg-player').forEach(function(el){
-      el.style.cursor=isEdit?'grab':'default';
-      el.style.pointerEvents=isEdit?'all':'none';
+      el.style.cursor=canDrag?'grab':'default';
+      el.style.pointerEvents=canDrag?'all':'none';
     });
+    var ballEl=_$('pg-ball');
+    if(ballEl) ballEl.style.pointerEvents=isEdit?'all':'none';
 
-    if(isEdit){
-      /* 편집 탭: 기본 포지션으로 세팅 (저장된 것 없으면) */
-      _renderTabs();
-      var et=_$('pg-editTitle');
-      if(et) et.textContent={attack:'공격 전술 편집',defense:'수비 전술 편집',outfield:'외야 활용 편집',flow:'경기 흐름 편집'}[_activeTab]||'편집';
-      _updateSaveLabel(_activeTab);
-      /* 저장된 배치 있으면 불러오기, 없으면 기본 배치 */
-      if(!_loadPositions(_activeTab)){
-        _setDefaultEdit();
-      }
-      /* 화살표 지우기 */
-      _drawArrows([]);
-      /* 공 숨기기 */
-      var ball=_$('pg-ball');
-      if(ball){ball.style.left='50%';ball.style.top='50%';ball.style.opacity='0';}
-    } else {
-      /* 필드 설명 탭: 스텝별 애니메이션 */
-      var data=_makeData(), steps=data[_activeTab], step=steps[_stepIndex];
-      _renderTabs(); _renderStepList(steps); _setDuration();
+    _renderTabs();
+    if(!isEdit){
+      /* 필드 설명 탭 */
+      var data=_makeData(),steps=data[_activeTab],step=steps[_stepIndex];
+      _renderStepList(steps);_setDuration();
       Object.entries(step.positions).forEach(function(e){
-        var el=_$('pg-'+e[0]), pt=e[1];
-        if(!el)return;
-        var p=_pct(pt);
-        el.style.left=p.left;el.style.top=p.top;
+        var el=_$('pg-'+e[0]),pt=e[1];if(!el)return;
+        var p=_pct(pt);el.style.left=p.left;el.style.top=p.top;
         el.classList.toggle('pg-hidden',!!pt.hidden);
-        el.classList.remove('pg-elim');
+        el.classList.remove('pg-elim','pg-hit1','pg-hit2');
       });
-      var ball=_$('pg-ball');
-      if(ball){
-        ball.style.opacity='1';
-        var bp=_pct(step.ball);ball.style.left=bp.left;ball.style.top=bp.top;
-      }
+      if(ballEl){ballEl.style.opacity='1';var bp=_pct(step.ball);ballEl.style.left=bp.left;ballEl.style.top=bp.top;}
       _drawArrows(step.arrows||[]);
       var t=_$('pg-stepTitle'),d=_$('pg-stepDesc');
-      if(t)t.textContent=step.title;
-      if(d)d.textContent=step.desc;
+      if(t)t.textContent=step.title;if(d)d.textContent=step.desc;
+    } else {
+      /* 편집/시뮬 탭 */
+      _updateScore();_updateSaveLabel(_activeTab);
+      /* 게임/편집 힌트 */
+      var sh=_$('pg-simHint'),gh=_$('pg-gameHint');
+      if(sh)sh.style.display=_editMode==='drag'?'block':'none';
+      if(gh)gh.style.display=_editMode==='game'?'block':'none';
+      /* 저장된 배치 있으면 불러오기, 없으면 기본 배치 */
+      if(!_loadPos(_activeTab)) _setDefaultEdit();
+      _drawArrows([]);
     }
-  }
-
-  function _setDefaultEdit(){
-    /* 양팀 12명 기본 배치 */
-    var oa=_oursAttack(), ta=_theirsAttack();
-    Object.keys(oa).forEach(function(id){
-      var el=_$('pg-'+id), pt=oa[id]; if(!el)return;
-      var p=_pct(pt);el.style.left=p.left;el.style.top=p.top;
-      el.classList.remove('pg-hidden','pg-elim');
-    });
-    Object.keys(ta).forEach(function(id){
-      var el=_$('pg-'+id), pt=ta[id]; if(!el)return;
-      var p=_pct(pt);el.style.left=p.left;el.style.top=p.top;
-      el.classList.remove('pg-hidden','pg-elim');
-    });
-    var ball=_$('pg-ball');
-    if(ball){ball.style.left='50%';ball.style.top='12%';ball.style.opacity='1';}
   }
 
   function _nextStep(){
@@ -2568,57 +2744,77 @@ var DB = (function() { try { return (function() {
     else{_stopAuto();return;}
     _render();
   }
-  function _stopAuto(){
-    if(_timer)clearInterval(_timer);_timer=null;
-    var pb=_$('pg-playBtn');if(pb)pb.textContent='재생';
-  }
-  function _startAuto(){
-    _stopAuto();
-    var pb=_$('pg-playBtn');if(pb)pb.textContent='정지';
-    _timer=setInterval(_nextStep,2600/_speed);
-  }
+  function _stopAuto(){if(_timer)clearInterval(_timer);_timer=null;var pb=_$('pg-playBtn');if(pb)pb.textContent='재생';}
+  function _startAuto(){_stopAuto();var pb=_$('pg-playBtn');if(pb)pb.textContent='정지';_timer=setInterval(_nextStep,2600/_speed);}
 
   function _bindEvents(){
     var nb=_$('pg-nextBtn'),pb=_$('pg-playBtn'),rb=_$('pg-resetBtn');
     var ms=_$('pg-modeSelect'),sb=_$('pg-speedButtons');
-    var saveBtn=_$('pg-saveBtn'),loadBtn=_$('pg-loadBtn'),erBtn=_$('pg-editResetBtn');
-    var elimReset=_$('pg-elimResetBtn');
     if(nb)nb.addEventListener('click',_nextStep);
     if(pb)pb.addEventListener('click',function(){_timer?_stopAuto():_startAuto();});
     if(rb)rb.addEventListener('click',function(){_stepIndex=0;_stopAuto();_render();});
-    if(ms)ms.addEventListener('change',function(){_mode=ms.value;if(!_isEditTab())_render();});
+    if(ms)ms.addEventListener('change',function(){_mode=ms.value;});
     if(sb)sb.addEventListener('click',function(e){
       var btn=e.target.closest('[data-pgspeed]');if(!btn)return;
       _speed=Number(btn.dataset.pgspeed);
       sb.querySelectorAll('button').forEach(function(b){b.classList.toggle('pg-speed-active',b===btn);});
       _setDuration();if(_timer)_startAuto();
     });
-    if(saveBtn)saveBtn.addEventListener('click',function(){_savePositions(_activeTab);});
-    if(loadBtn)loadBtn.addEventListener('click',function(){
-      if(_hasSave(_activeTab)){_loadPositions(_activeTab);}
-      else{if(typeof showToast==='function')showToast('저장된 배치가 없습니다');}
+    /* 공 클릭 */
+    var ball=_$('pg-ball');
+    if(ball){
+      ball.addEventListener('click',function(){
+        if(!_isEdit()||_editMode!=='game')return;
+        _setBallSelected(!_gs.ballSelected);
+      });
+    }
+    /* 모드 토글 */
+    var mdBtn=_$('pg-modeDrag'),mgBtn=_$('pg-modeGame');
+    if(mdBtn)mdBtn.addEventListener('click',function(){
+      _editMode='drag';
+      mdBtn.classList.add('pg-mode-on');if(mgBtn)mgBtn.classList.remove('pg-mode-on');
+      _setBallSelected(false);
+      var sh=_$('pg-simHint'),gh=_$('pg-gameHint');
+      if(sh)sh.style.display='block';if(gh)gh.style.display='none';
     });
-    if(erBtn)erBtn.addEventListener('click',function(){_clearElim();_setDefaultEdit();try{localStorage.removeItem(_storageKey(_activeTab));}catch(e){}_updateSaveLabel(_activeTab);});
-    if(elimReset)elimReset.addEventListener('click',function(){_clearElim();});
+    if(mgBtn)mgBtn.addEventListener('click',function(){
+      _editMode='game';
+      mgBtn.classList.add('pg-mode-on');if(mdBtn)mdBtn.classList.remove('pg-mode-on');
+      var sh=_$('pg-simHint'),gh=_$('pg-gameHint');
+      if(sh)sh.style.display='none';if(gh)gh.style.display='block';
+    });
+    /* 아웃 조건 */
+    var hs=_$('pg-hitSel');
+    if(hs)hs.addEventListener('change',function(){_gs.hitsToElim=Number(hs.value);});
+    /* 전원 복귀 */
+    var er=_$('pg-elimResetBtn');if(er)er.addEventListener('click',_resetAll);
+    /* 저장/불러오기 */
+    var sv=_$('pg-saveBtn'),ld=_$('pg-loadBtn'),rst=_$('pg-editResetBtn');
+    if(sv)sv.addEventListener('click',function(){_savePos(_activeTab);});
+    if(ld)ld.addEventListener('click',function(){
+      if(_hasSave(_activeTab))_loadPos(_activeTab);
+      else if(typeof showToast==='function') showToast('저장된 배치가 없습니다');
+    });
+    if(rst)rst.addEventListener('click',function(){
+      _resetAll();try{localStorage.removeItem(_storageKey(_activeTab));}catch(e){}
+      _updateSaveLabel(_activeTab);
+    });
   }
 
   function init(){
-    if(_initialized)return;
-    _initialized=true;
-    _createPlayers();
-    _bindEvents();
-    _render();
+    if(_initialized)return;_initialized=true;
+    _createPlayers();_bindEvents();_render();
   }
-  function renderVideos(vids){}
-  function action(name,arg){}
-  function formation(key){}
-  function tactic(key){}
-  function panel(name){}
+  function renderVideos(){}
+  function action(){}
+  function formation(){}
+  function tactic(){}
+  function panel(){}
 
-  return {init:init,action:action,formation:formation,tactic:tactic,panel:panel,renderVideos:renderVideos,initialized:false};
-})(); } catch(e) {
+  return{init:init,action:action,formation:formation,tactic:tactic,panel:panel,renderVideos:renderVideos,initialized:false};
+})(); } catch(e){
   showError('DB 초기화 오류: '+(e.message||String(e)));
-  return {init:function(){},action:function(){},formation:function(){},tactic:function(){},panel:function(){},renderVideos:function(){},initialized:false};
+  return{init:function(){},action:function(){},formation:function(){},tactic:function(){},panel:function(){},renderVideos:function(){},initialized:false};
 }
 })();
 </script>

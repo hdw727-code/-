@@ -538,7 +538,7 @@
       display: grid;
       grid-template-rows: auto 1fr;
       height: 100%;
-      min-height: 500px;
+      min-height: 560px;
       gap: 8px;
       padding: 10px;
       background: #121722;
@@ -591,7 +591,7 @@
     }
     .pg-main {
       display: grid;
-      grid-template-columns: 1fr 300px;
+      grid-template-columns: 1fr 240px;
       gap: 10px;
       min-height: 0;
       overflow: hidden;
@@ -766,6 +766,33 @@
     @media (max-width: 760px) {
       .pg-main { grid-template-columns: 1fr; }
       .pg-info { max-height: 260px; }
+    }
+
+  
+    /* 피구 드래그·제거·저장 */
+    .pg-player { cursor: grab; user-select: none; touch-action: none; }
+    .pg-player:active { cursor: grabbing; z-index: 100; }
+    .pg-player.pg-elim { opacity: 0.18; filter: grayscale(1) brightness(.6); pointer-events: all; }
+    .pg-player.pg-dragging { z-index: 200; transition: none !important; box-shadow: 0 0 0 3px #fff456, 0 8px 20px rgba(0,0,0,.5); }
+    .pg-save-bar {
+      display: flex; gap: 6px; align-items: center; flex-wrap: wrap;
+      padding: 8px 10px; background: #1b2331; border: 1px solid #39465b;
+      border-radius: 8px; margin-bottom: 6px;
+    }
+    .pg-save-bar span { color: #aebbd0; font-size: 12px; font-weight: 800; flex: 1; }
+    .pg-save-bar button {
+      border: 1px solid #526176; background: #111a28; color: #f3f7ff;
+      border-radius: 6px; padding: 5px 10px; font-size: 12px; font-weight: 800; cursor: pointer;
+    }
+    .pg-save-bar button.pg-save-ok { background: #19b46b; border-color: #19b46b; color: #fff; }
+    .pg-elim-bar {
+      display: flex; gap: 6px; align-items: center; flex-wrap: wrap;
+      padding: 6px 10px; background: #1a1520; border: 1px solid #39465b;
+      border-radius: 8px; margin-bottom: 4px; font-size: 12px; color: #aebbd0; font-weight: 800;
+    }
+    .pg-elim-bar button {
+      border: 1px solid #526176; background: #111a28; color: #f3f7ff;
+      border-radius: 6px; padding: 4px 9px; font-size: 11px; font-weight: 800; cursor: pointer;
     }
 
   </style>
@@ -1020,23 +1047,45 @@
               </div>
             </div>
             <aside class="pg-info">
-              <div class="pg-step-list" id="pg-stepList"></div>
-              <div class="pg-bottom">
-                <div class="pg-copy">
-                  <h3 id="pg-stepTitle"></h3>
-                  <p id="pg-stepDesc"></p>
-                </div>
-                <div class="pg-actions">
-                  <button class="pg-primary" id="pg-nextBtn" type="button">다음 ▶</button>
-                  <button id="pg-playBtn" type="button">재생</button>
-                  <button id="pg-resetBtn" type="button">처음</button>
-                  <div class="pg-speed" id="pg-speedButtons">
-                    <button type="button" data-pgspeed="0.5">0.5x</button>
-                    <button class="pg-speed-active" type="button" data-pgspeed="1">1x</button>
-                    <button type="button" data-pgspeed="1.5">1.5x</button>
-                    <button type="button" data-pgspeed="2">2x</button>
+              <!-- 필드 설명: 스텝 리스트 + 재생 컨트롤 -->
+              <div id="pg-field-panel">
+                <div class="pg-step-list" id="pg-stepList"></div>
+                <div class="pg-bottom">
+                  <div class="pg-copy">
+                    <h3 id="pg-stepTitle"></h3>
+                    <p id="pg-stepDesc"></p>
                   </div>
-                  <label class="pg-loop"><input id="pg-loopCheck" type="checkbox"> 자동반복</label>
+                  <div class="pg-actions">
+                    <button class="pg-primary" id="pg-nextBtn" type="button">다음 ▶</button>
+                    <button id="pg-playBtn" type="button">재생</button>
+                    <button id="pg-resetBtn" type="button">처음</button>
+                    <div class="pg-speed" id="pg-speedButtons">
+                      <button type="button" data-pgspeed="0.5">0.5x</button>
+                      <button class="pg-speed-active" type="button" data-pgspeed="1">1x</button>
+                      <button type="button" data-pgspeed="1.5">1.5x</button>
+                      <button type="button" data-pgspeed="2">2x</button>
+                    </div>
+                    <label class="pg-loop"><input id="pg-loopCheck" type="checkbox"> 자동반복</label>
+                  </div>
+                </div>
+              </div>
+              <!-- 자유 편집: 저장/제거 컨트롤 -->
+              <div id="pg-edit-panel" style="display:none;">
+                <div class="pg-elim-bar">
+                  <span>선수 더블클릭 → 아웃/복귀</span>
+                  <button id="pg-elimResetBtn" type="button">전원 복귀</button>
+                </div>
+                <div class="pg-save-bar">
+                  <span id="pg-saveLabel">저장 없음</span>
+                  <button id="pg-saveBtn" type="button">💾 저장</button>
+                  <button id="pg-loadBtn" type="button">📂 불러오기</button>
+                  <button id="pg-editResetBtn" type="button">초기화</button>
+                </div>
+                <div class="pg-bottom" style="margin-top:6px;">
+                  <div class="pg-copy">
+                    <h3 id="pg-editTitle"></h3>
+                    <p style="color:#aebbd0;font-size:12px;margin:0;">선수를 드래그해서 원하는 위치로 이동하세요.</p>
+                  </div>
                 </div>
               </div>
             </aside>
@@ -1349,14 +1398,10 @@ function doLogin() {
   /* ── 동아리 선택 후 화면 전환 ── */
   var cacheKey = dashboardCacheKey(payload);
   var cached   = readDashboardCache(cacheKey);
+  // 항상 동아리 선택 모달을 거쳐 진입 (localStorage에 저장된 동아리 있으면 자동 스킵)
+  showClubModal(payload);
   if (cached) {
-    // 캐시 있으면 바로 진입
-    _goStudentScreen(payload);
-    try { renderStudent(cached); } catch(e) {}
     showToast('저장된 데이터 표시 중 · 서버에서 업데이트 중...');
-  } else {
-    // 캐시 없으면 동아리 선택 후 진입
-    showClubModal(payload);
   }
 
   /* ── 백그라운드에서 GAS 서버 실제 데이터 로드 ── */
@@ -2156,225 +2201,212 @@ var VB = (function() { try { return (function() {
    ============================================================ */
 var DB = (function() { try { return (function() {
   "use strict";
-  var _W = 520, _H = 820;
+  var _W=520, _H=820;
+  var _activeTab='field', _stepIndex=0, _speed=1, _timer=null, _mode='12';
+  var _initialized=false;
+  var _FIELD_TAB = 'field';
+  var _editTabs = {attack:true, defense:true, outfield:true, flow:true};
+
   var _tabDefs = [
-    { id: 'field',   label: '필드 설명' },
-    { id: 'attack',  label: '공격 전술' },
-    { id: 'defense', label: '수비 전술' },
-    { id: 'outfield',label: '외야 활용' },
-    { id: 'flow',    label: '경기 흐름' }
+    {id:'field',   label:'필드 설명'},
+    {id:'attack',  label:'공격 전술'},
+    {id:'defense', label:'수비 전술'},
+    {id:'outfield',label:'외야 활용'},
+    {id:'flow',    label:'경기 흐름'}
   ];
-  var _activeTab = 'field', _stepIndex = 0, _speed = 1, _timer = null, _mode = '12';
-  var _initialized = false;
 
   var _P = {
-    ours12:    { x: 260, y: 132 },
-    theirs12:  { x: 260, y: 690 },
-    ballTop:   { x: 260, y: 126 },
-    ballBottom:{ x: 260, y: 694 },
-    targetLeft:{ x: 194, y: 300 },
-    targetRight:{ x: 326, y: 306 },
-    center:    { x: 260, y: 410 }
+    ours12:{x:260,y:132}, theirs12:{x:260,y:690},
+    ballTop:{x:260,y:126}, ballBottom:{x:260,y:694},
+    targetLeft:{x:194,y:300}, targetRight:{x:326,y:306}, center:{x:260,y:410}
   };
 
-  function _oursAttack() {
+  function _oursAttack(){
     return {
-      o10:{x:176,y:486}, o9:{x:198,y:526},
-      o8:{x:220,y:562},  o7:{x:242,y:594},
-      o1:{x:224,y:486},  o2:{x:296,y:486},
-      o3:{x:278,y:594},  o4:{x:300,y:562},
-      o5:{x:322,y:526},  o6:{x:344,y:486},
-      o11:{x:260,y:642}, o12:_P.ours12
+      o10:{x:176,y:486},o9:{x:198,y:526},o8:{x:220,y:562},o7:{x:242,y:594},
+      o1:{x:224,y:486},o2:{x:296,y:486},o3:{x:278,y:594},o4:{x:300,y:562},
+      o5:{x:322,y:526},o6:{x:344,y:486},o11:{x:260,y:642},o12:_P.ours12
     };
   }
-  function _theirsAttack() {
+  function _theirsAttack(){
     return {
-      t10:{x:344,y:334}, t9:{x:322,y:294},
-      t8:{x:300,y:258},  t7:{x:278,y:226},
-      t1:{x:296,y:334},  t2:{x:224,y:334},
-      t3:{x:242,y:226},  t4:{x:220,y:258},
-      t5:{x:198,y:294},  t6:{x:176,y:334},
-      t11:{x:260,y:178}, t12:_P.theirs12
+      t10:{x:344,y:334},t9:{x:322,y:294},t8:{x:300,y:258},t7:{x:278,y:226},
+      t1:{x:296,y:334},t2:{x:224,y:334},t3:{x:242,y:226},t4:{x:220,y:258},
+      t5:{x:198,y:294},t6:{x:176,y:334},t11:{x:260,y:178},t12:_P.theirs12
     };
   }
-  function _oursFlat() {
-    var out = {};
-    [['o10',176],['o9',194],['o8',212],['o7',230],['o1',248],
-     ['o2',272],['o3',290],['o4',308],['o5',326],['o6',344]
-    ].forEach(function(p){ out[p[0]]={x:p[1],y:594}; });
-    out.o11={x:260,y:632}; out.o12=_P.ours12;
-    return out;
+  function _oursFlat(){
+    var o={};
+    [['o10',176],['o9',194],['o8',212],['o7',230],['o1',248],['o2',272],['o3',290],['o4',308],['o5',326],['o6',344]]
+      .forEach(function(p){o[p[0]]={x:p[1],y:594};});
+    o.o11={x:260,y:632};o.o12=_P.ours12;return o;
   }
-  function _theirsFlat() {
-    var out = {};
-    [['t10',344],['t9',326],['t8',308],['t7',290],['t1',272],
-     ['t2',248],['t3',230],['t4',212],['t5',194],['t6',176]
-    ].forEach(function(p){ out[p[0]]={x:p[1],y:226}; });
-    out.t11={x:260,y:188}; out.t12=_P.theirs12;
-    return out;
+  function _theirsFlat(){
+    var o={};
+    [['t10',344],['t9',326],['t8',308],['t7',290],['t1',272],['t2',248],['t3',230],['t4',212],['t5',194],['t6',176]]
+      .forEach(function(p){o[p[0]]={x:p[1],y:226};});
+    o.t11={x:260,y:188};o.t12=_P.theirs12;return o;
   }
-  function _oursU() {
-    var out = {};
+  function _oursU(){
+    var o={};
     [['o10',176,570],['o9',194,586],['o8',214,604],['o7',236,616],['o1',252,622],
-     ['o2',268,622],['o3',284,616],['o4',306,604],['o5',326,586],['o6',344,570]
-    ].forEach(function(p){ out[p[0]]={x:p[1],y:p[2]}; });
-    out.o11={x:260,y:642}; out.o12=_P.ours12;
-    return out;
+     ['o2',268,622],['o3',284,616],['o4',306,604],['o5',326,586],['o6',344,570]]
+      .forEach(function(p){o[p[0]]={x:p[1],y:p[2]};});
+    o.o11={x:260,y:642};o.o12=_P.ours12;return o;
   }
-  function _oursShield() {
-    var f=_oursFlat(); f.o1={x:238,y:526}; f.o2={x:282,y:526}; return f;
-  }
-  function _theirsShield() {
-    var f=_theirsFlat(); f.t1={x:282,y:294}; f.t2={x:238,y:294}; return f;
-  }
+  function _oursShield(){ var f=_oursFlat();f.o1={x:238,y:526};f.o2={x:282,y:526};return f; }
+  function _theirsShield(){ var f=_theirsFlat();f.t1={x:282,y:294};f.t2={x:238,y:294};return f; }
 
-  function _applyMode(base, prefix) {
-    var count=Number(_mode), visible=new Set();
-    for(var i=1;i<=Math.min(count===8?10:count===5?4:count===3?2:10,10);i++) visible.add(prefix+i);
-    if(count>=5&&count!==3) visible.add(prefix+'11');
-    visible.add(prefix+'12');
-    if(count===8){ visible.delete(prefix+'1'); visible.delete(prefix+'2');
-      for(var j=3;j<=10;j++) visible.add(prefix+j); visible.add(prefix+'11'); }
-    if(count===5) ['1','2','3','4','11','12'].forEach(function(n){ visible.add(prefix+n); });
-    if(count===3) ['1','2','12'].forEach(function(n){ visible.add(prefix+n); });
+  function _applyMode(base,prefix){
+    var count=Number(_mode),visible=new Set();
+    if(count===12){for(var i=1;i<=11;i++)visible.add(prefix+i);visible.add(prefix+'12');}
+    else if(count===8){for(var i=3;i<=11;i++)visible.add(prefix+i);visible.add(prefix+'12');}
+    else if(count===5){['1','2','3','4','11','12'].forEach(function(n){visible.add(prefix+n);});}
+    else if(count===3){['1','2','12'].forEach(function(n){visible.add(prefix+n);});}
     var out={};
-    Object.keys(base).forEach(function(id){
-      out[id]=Object.assign({},base[id],{hidden:!visible.has(id)});
-    });
+    Object.keys(base).forEach(function(id){out[id]=Object.assign({},base[id],{hidden:!visible.has(id)});});
     return out;
   }
-
-  function _scene(ours, theirs, ballAt, arrows) {
-    arrows = arrows || [];
-    var pos = Object.assign({}, _applyMode(ours,'o'), _applyMode(theirs,'t'));
-    return { positions: pos, ball: ballAt, arrows: arrows };
+  function _scene(ours,theirs,ballAt,arrows){
+    arrows=arrows||[];
+    return {positions:Object.assign({},_applyMode(ours,'o'),_applyMode(theirs,'t')),ball:ballAt,arrows:arrows};
   }
 
-  function _makeData() {
-    var oa=_oursAttack(), ta=_theirsAttack();
-    var of_=_oursFlat(), tf=_theirsFlat();
-    var ou=_oursU(), os=_oursShield(), ts=_theirsShield();
+  function _makeData(){
+    var oa=_oursAttack(),ta=_theirsAttack(),of_=_oursFlat(),tf=_theirsFlat(),ou=_oursU(),os=_oursShield();
     return {
-      field: [
-        { title:'세로형 피구장 구조',
-          desc:'위쪽 주황 = 우리팀 외야, 아래쪽 주황 = 상대팀 외야. 초록 내야가 양쪽 외야 사이에 위치합니다.',
-          ...(_scene(of_,tf,_P.center)) },
-        { title:'우리팀 12번 (외야)',
-          desc:'12번은 상대팀 내야 뒤 외야에 고정됩니다. 공을 잡으면 바로 상대 내야를 공격합니다.',
-          ...(_scene(_oursAttack(),tf,_P.ballTop,[{from:_P.ours12,to:_P.targetLeft}])) },
-        { title:'상대팀 12번 (외야)',
-          desc:'상대 12번은 우리 내야 뒤 외야에 위치합니다.',
-          ...(_scene(of_,_theirsAttack(),_P.ballBottom,[{from:_P.theirs12,to:{x:326,y:520}}])) }
+      field:[
+        {title:'세로형 피구장 구조',desc:'위쪽 주황 = 우리팀 외야, 아래쪽 주황 = 상대팀 외야. 초록 내야가 양쪽 사이에 위치.',
+         ..._scene(of_,tf,_P.center)},
+        {title:'우리팀 12번 (외야)',desc:'12번은 상대 내야 뒤 외야에 고정. 잡으면 바로 내야 공격.',
+         ..._scene(oa,tf,_P.ballTop,[{from:_P.ours12,to:_P.targetLeft}])},
+        {title:'상대팀 12번 (외야)',desc:'상대 12번은 우리 내야 뒤 외야에 위치.',
+         ..._scene(of_,ta,_P.ballBottom,[{from:_P.theirs12,to:{x:326,y:520}}])}
       ],
-      attack: [
-        { title:'V자 공격대형',
-          desc:'1번 왼쪽: 7,8,9,10번 / 2번 오른쪽: 3,4,5,6번. 1,2번이 중앙선 방향으로 올라섭니다.',
-          ...(_scene(oa,tf,_P.ballTop)) },
-        { title:'12번 외야 직접 공격',
-          desc:'외야 12번이 공을 잡으면 패스 없이 바로 상대 내야 빈 공간을 공격합니다.',
-          ...(_scene(oa,tf,_P.targetLeft,[{from:_P.ours12,to:_P.targetLeft}])) },
-        { title:'1번 전면 공격',
-          desc:'1번이 공을 잡으면 2번에게 넘기지 않고 바로 상대를 공격합니다.',
-          ...(_scene(oa,tf,_P.targetRight,[{from:oa.o1,to:_P.targetRight}])) },
-        { title:'2번 반대각 공격',
-          desc:'2번도 잡는 즉시 반대쪽 빈 공간을 바로 공략합니다.',
-          ...(_scene(oa,tf,_P.targetLeft,[{from:oa.o2,to:_P.targetLeft}])) },
-        { title:'십자포화',
-          desc:'외야 12번과 내야 공격수가 서로 다른 각도에서 동시에 압박합니다.',
-          ...(_scene(oa,tf,_P.targetLeft,[{from:_P.ours12,to:_P.targetLeft},{from:oa.o2,to:_P.targetRight}])) },
-        { title:'시간차 공격',
-          desc:'앞선 공격 직후 반대쪽에서 늦게 들어오는 공으로 집중을 분산합니다.',
-          ...(_scene(oa,tf,_P.targetLeft,[{from:oa.o10,to:_P.targetLeft}])) },
-        { title:'타겟 집중 공격',
-          desc:'수비라인 한 지점을 여러 명이 동시에 노립니다.',
-          ...(_scene(oa,tf,_P.targetRight,[{from:oa.o1,to:_P.targetRight},{from:_P.ours12,to:_P.targetRight}])) }
+      attack:[
+        {title:'V자 공격대형',desc:'1번 좌측: 7,8,9,10번 / 2번 우측: 3,4,5,6번. 1,2번이 중앙선 방향으로 올라섭니다.',
+         ..._scene(oa,tf,_P.ballTop)},
+        {title:'12번 직접 공격',desc:'외야 12번이 잡으면 패스 없이 바로 상대 빈 공간 공격.',
+         ..._scene(oa,tf,_P.targetLeft,[{from:_P.ours12,to:_P.targetLeft}])},
+        {title:'1번 전면 공격',desc:'1번이 잡으면 2번에게 넘기지 않고 즉시 공격.',
+         ..._scene(oa,tf,_P.targetRight,[{from:oa.o1,to:_P.targetRight}])},
+        {title:'십자포화',desc:'12번과 내야 공격수가 서로 다른 각도에서 동시 압박.',
+         ..._scene(oa,tf,_P.targetLeft,[{from:_P.ours12,to:_P.targetLeft},{from:oa.o2,to:_P.targetRight}])},
+        {title:'시간차 공격',desc:'앞선 공격 직후 반대쪽에서 늦게 들어오는 공으로 집중 분산.',
+         ..._scene(oa,tf,_P.targetLeft,[{from:oa.o10,to:_P.targetLeft}])}
       ],
-      defense: [
-        { title:'ㅡ자 수비대형',
-          desc:'왼쪽부터 10,9,8,7,1,2,3,4,5,6번. 이 순서 그대로 V자 공격으로 빠르게 전환 가능합니다.',
-          ...(_scene(of_,ta,_P.ballBottom,[{from:_P.theirs12,to:{x:194,y:520}}])) },
-        { title:'U자 수비대형',
-          desc:'양 끝이 올라가고 중앙이 뒤로 빠져 중앙 공격을 받아낼 공간을 확보합니다.',
-          ...(_scene(ou,ta,{x:326,y:520},[{from:ta.t1,to:{x:326,y:520}}])) },
-        { title:'방패 전술',
-          desc:'캐치가 좋은 1~2번이 앞에서 공을 보고 나머지는 뒤에서 공간을 확보합니다.',
-          ...(_scene(os,ta,{x:260,y:526},[{from:_P.theirs12,to:{x:260,y:526}}])) },
-        { title:'벽타기',
-          desc:'뒤 라인 쪽으로 이동하되 구석에 몰리지 않게 중앙 탈출 방향을 남깁니다.',
-          ...(_scene(Object.assign({},of_,{o10:{x:184,y:624},o6:{x:336,y:624}}),ta,_P.targetLeft,[{from:ta.t2,to:_P.targetLeft}])) },
-        { title:'콜 플레이',
-          desc:'공 방향을 보는 학생이 크게 외치고 라인 전체가 한 덩어리처럼 이동합니다.',
-          ...(_scene(of_,ta,_P.targetRight,[{from:ta.t1,to:_P.targetRight}])) }
+      defense:[
+        {title:'ㅡ자 수비대형',desc:'왼쪽부터 10,9,8,7,1,2,3,4,5,6번. V자 공격으로 빠르게 전환 가능.',
+         ..._scene(of_,ta,_P.ballBottom,[{from:_P.theirs12,to:{x:194,y:520}}])},
+        {title:'U자 수비대형',desc:'양 끝이 올라가고 중앙이 뒤로 빠져 공간 확보.',
+         ..._scene(ou,ta,{x:326,y:520},[{from:ta.t1,to:{x:326,y:520}}])},
+        {title:'방패 전술',desc:'캐치 좋은 1~2번이 앞에서 받고 나머지는 뒤에서 공간 확보.',
+         ..._scene(os,ta,{x:260,y:526},[{from:_P.theirs12,to:{x:260,y:526}}])},
+        {title:'벽타기',desc:'뒤 라인 쪽으로 이동, 구석에 몰리지 않게 중앙 탈출 방향 유지.',
+         ..._scene(Object.assign({},of_,{o10:{x:184,y:624},o6:{x:336,y:624}}),ta,_P.targetLeft,[{from:ta.t2,to:_P.targetLeft}])}
       ],
-      outfield: [
-        { title:'외야 직접 공격',
-          desc:'12번은 공을 잡는 즉시 상대 내야 빈 공간을 직접 공격합니다.',
-          ...(_scene(oa,tf,_P.targetLeft,[{from:_P.ours12,to:_P.targetLeft}])) },
-        { title:'삼각 압박 위치',
-          desc:'12번, 1번, 2번이 삼각 위치를 유지합니다. 공 가진 학생이 바로 공격합니다.',
-          ...(_scene(oa,tf,_P.targetRight,[{from:_P.ours12,to:_P.targetLeft},{from:oa.o1,to:_P.targetRight}])) },
-        { title:'외야 속공',
-          desc:'아웃 직후 수비 정비 전에 빠르게 공격 기회를 만듭니다.',
-          ...(_scene(Object.assign({},oa,{o3:{x:210,y:132}}),tf,_P.targetLeft,[{from:{x:210,y:132},to:_P.targetLeft}])) }
+      outfield:[
+        {title:'외야 직접 공격',desc:'12번은 공 잡는 즉시 상대 내야 빈 공간 직접 공격.',
+         ..._scene(oa,tf,_P.targetLeft,[{from:_P.ours12,to:_P.targetLeft}])},
+        {title:'삼각 압박 위치',desc:'12번, 1번, 2번이 삼각 위치 유지. 공 가진 학생이 바로 공격.',
+         ..._scene(oa,tf,_P.targetRight,[{from:_P.ours12,to:_P.targetLeft},{from:oa.o1,to:_P.targetRight}])},
+        {title:'외야 속공',desc:'아웃 직후 수비 정비 전에 빠르게 공격 기회.',
+         ..._scene(Object.assign({},oa,{o3:{x:210,y:132}}),tf,_P.targetLeft,[{from:{x:210,y:132},to:_P.targetLeft}])}
       ],
-      flow: [
-        { title:'우리 공격 / 상대 수비',
-          desc:'우리팀 V자 공격, 상대팀 ㅡ자 수비.',
-          ...(_scene(oa,tf,_P.ballTop)) },
-        { title:'상대 공격 전환',
-          desc:'공격권이 넘어가면 상대도 V자, 우리는 ㅡ자 수비로 내려옵니다.',
-          ...(_scene(of_,ta,_P.ballBottom,[{from:_P.theirs12,to:{x:326,y:520}}])) },
-        { title:'8명 모드',
-          desc:'1,2번이 외야로 빠진 상황. 3~10번 중심으로 라인을 만듭니다.',
-          ...(_scene(of_,ta,_P.ballBottom)) },
-        { title:'5명 모드',
-          desc:'11번도 내야로 들어와 공격·수비를 함께 보조합니다.',
-          ...(_scene(of_,ta,_P.ballBottom)) },
-        { title:'3명 생존 전략',
-          desc:'삼각 위치 유지, 생존 우선. 공 잡은 학생이 바로 공격 기회를 만듭니다.',
-          ...(_scene(oa,tf,_P.ballTop,[{from:_P.ours12,to:_P.targetLeft},{from:oa.o1,to:_P.targetRight}])) }
+      flow:[
+        {title:'우리 공격 / 상대 수비',desc:'우리팀 V자 공격, 상대팀 ㅡ자 수비.',
+         ..._scene(oa,tf,_P.ballTop)},
+        {title:'상대 공격 전환',desc:'공격권이 넘어가면 상대도 V자, 우리는 ㅡ자 수비.',
+         ..._scene(of_,ta,_P.ballBottom,[{from:_P.theirs12,to:{x:326,y:520}}])},
+        {title:'8명 모드',desc:'1,2번 외야 상황. 3~10번 중심 라인 구성.',
+         ..._scene(of_,ta,_P.ballBottom)},
+        {title:'3명 생존 전략',desc:'삼각 위치 유지, 생존 우선. 공 잡은 학생이 바로 공격.',
+         ..._scene(oa,tf,_P.ballTop,[{from:_P.ours12,to:_P.targetLeft},{from:oa.o1,to:_P.targetRight}])}
       ]
     };
   }
 
-  function _$(id){ return document.getElementById(id); }
+  function _$(id){return document.getElementById(id);}
 
-  function _createPlayers() {
-    var layer = _$('pg-playerLayer');
-    if(!layer) return;
-    layer.innerHTML = '';
-    ['o','t'].forEach(function(prefix) {
+  function _createPlayers(){
+    var layer=_$('pg-playerLayer');
+    if(!layer)return;
+    layer.innerHTML='';
+    ['o','t'].forEach(function(prefix){
       for(var n=1;n<=12;n++){
         var el=document.createElement('div');
         el.className='pg-player '+(prefix==='o'?'pg-ours':'pg-theirs');
-        if(n===1||n===2) el.classList.add('pg-attacker');
-        if(n===11) el.classList.add('pg-blocker');
-        if(n===12) el.classList.add('pg-outfielder');
+        if(n===1||n===2)el.classList.add('pg-attacker');
+        if(n===11)el.classList.add('pg-blocker');
+        if(n===12)el.classList.add('pg-outfielder');
         el.id='pg-'+prefix+n;
         el.textContent=n;
         layer.appendChild(el);
+        _makeDraggable(el);
+        el.addEventListener('dblclick',function(ev){
+          ev.preventDefault();
+          ev.stopPropagation();
+          this.classList.toggle('pg-elim');
+        });
       }
     });
   }
 
-  function _pct(pt){ return { left:(pt.x/_W*100)+'%', top:(pt.y/_H*100)+'%' }; }
+  function _makeDraggable(el){
+    var dragging=false,startX,startY,startLeft,startTop;
+    function getWrap(){return _$('pg-fieldWrap');}
+    function onStart(e){
+      if(_activeTab===_FIELD_TAB)return; // 필드 설명 탭은 드래그 비활성
+      e.preventDefault();
+      dragging=true;
+      el.classList.add('pg-dragging');
+      var touch=e.touches?e.touches[0]:e;
+      startX=touch.clientX; startY=touch.clientY;
+      startLeft=parseFloat(el.style.left)||50;
+      startTop=parseFloat(el.style.top)||50;
+    }
+    function onMove(e){
+      if(!dragging)return;
+      var touch=e.touches?e.touches[0]:e;
+      var wrap=getWrap();
+      if(!wrap)return;
+      var rect=wrap.getBoundingClientRect();
+      var dx=(touch.clientX-startX)/rect.width*100;
+      var dy=(touch.clientY-startY)/rect.height*100;
+      el.style.left=Math.max(1,Math.min(99,startLeft+dx))+'%';
+      el.style.top=Math.max(1,Math.min(99,startTop+dy))+'%';
+    }
+    function onEnd(){
+      if(!dragging)return;
+      dragging=false;
+      el.classList.remove('pg-dragging');
+    }
+    el.addEventListener('mousedown',onStart);
+    el.addEventListener('touchstart',onStart,{passive:false});
+    document.addEventListener('mousemove',onMove);
+    document.addEventListener('touchmove',onMove,{passive:false});
+    document.addEventListener('mouseup',onEnd);
+    document.addEventListener('touchend',onEnd);
+  }
 
-  function _setDuration() {
+  function _pct(pt){return{left:(pt.x/_W*100)+'%',top:(pt.y/_H*100)+'%'};}
+
+  function _setDuration(){
     var d=(900/_speed)+'ms';
     document.querySelectorAll('.pg-player,.pg-ball').forEach(function(el){
       el.style.transitionDuration=d;
     });
   }
 
-  function _drawArrows(arrows) {
+  function _drawArrows(arrows){
     var svg=_$('pg-arrowSvg');
-    if(!svg) return;
-    svg.querySelectorAll('.pg-drawn').forEach(function(el){ el.remove(); });
-    arrows.forEach(function(a,i){
+    if(!svg)return;
+    svg.querySelectorAll('.pg-drawn').forEach(function(el){el.remove();});
+    (arrows||[]).forEach(function(a,i){
       var line=document.createElementNS('http://www.w3.org/2000/svg','line');
       line.classList.add('pg-drawn');
-      line.setAttribute('x1',a.from.x); line.setAttribute('y1',a.from.y);
-      line.setAttribute('x2',a.to.x);   line.setAttribute('y2',a.to.y);
+      line.setAttribute('x1',a.from.x);line.setAttribute('y1',a.from.y);
+      line.setAttribute('x2',a.to.x);line.setAttribute('y2',a.to.y);
       line.setAttribute('stroke',i%2?'#ffffff':'#fff456');
       line.setAttribute('stroke-width','6');
       line.setAttribute('stroke-linecap','round');
@@ -2384,9 +2416,9 @@ var DB = (function() { try { return (function() {
     });
   }
 
-  function _renderTabs() {
+  function _renderTabs(){
     var nav=document.querySelector('.pg-tabs');
-    if(!nav) return;
+    if(!nav)return;
     nav.innerHTML='';
     _tabDefs.forEach(function(tab){
       var btn=document.createElement('button');
@@ -2394,99 +2426,201 @@ var DB = (function() { try { return (function() {
       btn.className='pg-tab'+(tab.id===_activeTab?' pg-active':'');
       btn.textContent=tab.label;
       btn.addEventListener('click',function(){
-        _activeTab=tab.id; _stepIndex=0; _stopAuto(); _render();
+        _activeTab=tab.id;_stepIndex=0;_stopAuto();_render();
       });
       nav.appendChild(btn);
     });
   }
 
-  function _renderStepList(steps) {
+  function _renderStepList(steps){
     var list=_$('pg-stepList');
-    if(!list) return;
+    if(!list)return;
     list.innerHTML='';
     steps.forEach(function(step,i){
       var btn=document.createElement('button');
       btn.type='button';
       btn.className='pg-step-item'+(i===_stepIndex?' pg-step-active':'');
       btn.textContent=(i+1)+'. '+step.title;
-      btn.addEventListener('click',function(){
-        _stepIndex=i; _stopAuto(); _render();
-      });
+      btn.addEventListener('click',function(){_stepIndex=i;_stopAuto();_render();});
       list.appendChild(btn);
     });
   }
 
-  function _render() {
-    if(!_$('pg-playerLayer')) return;
-    var data=_makeData(), steps=data[_activeTab], step=steps[_stepIndex];
-    _renderTabs(); _renderStepList(steps); _setDuration();
-    Object.entries(step.positions).forEach(function(e){
-      var el=_$('pg-'+e[0]), pt=e[1];
-      if(!el) return;
-      var p=_pct(pt);
-      el.style.left=p.left; el.style.top=p.top;
-      el.classList.toggle('pg-hidden',!!pt.hidden);
+  /* 저장/불러오기 */
+  function _storageKey(tabId){return 'pg_save_'+tabId;}
+  function _savePositions(tabId){
+    var data={};
+    document.querySelectorAll('.pg-player').forEach(function(el){
+      data[el.id]={left:el.style.left,top:el.style.top,elim:el.classList.contains('pg-elim')};
     });
-    var ball=_$('pg-ball');
-    if(ball){ var bp=_pct(step.ball); ball.style.left=bp.left; ball.style.top=bp.top; }
-    _drawArrows(step.arrows||[]);
-    var t=_$('pg-stepTitle'), d=_$('pg-stepDesc');
-    if(t) t.textContent=step.title;
-    if(d) d.textContent=step.desc;
+    var ballEl=_$('pg-ball');
+    if(ballEl) data['__ball']={left:ballEl.style.left,top:ballEl.style.top};
+    try{localStorage.setItem(_storageKey(tabId),JSON.stringify(data));}catch(e){}
+    _updateSaveLabel(tabId);
+    if(typeof showToast==='function') showToast('✅ 저장 완료');
+  }
+  function _loadPositions(tabId){
+    var raw;
+    try{raw=localStorage.getItem(_storageKey(tabId));}catch(e){}
+    if(!raw) return false;
+    var data=JSON.parse(raw);
+    Object.keys(data).forEach(function(id){
+      if(id==='__ball'){
+        var b=_$('pg-ball');
+        if(b){b.style.left=data[id].left;b.style.top=data[id].top;}
+        return;
+      }
+      var el=document.getElementById(id);
+      if(!el)return;
+      el.style.left=data[id].left;el.style.top=data[id].top;
+      el.classList.toggle('pg-elim',!!data[id].elim);
+    });
+    _updateSaveLabel(tabId);
+    return true;
+  }
+  function _hasSave(tabId){
+    try{return !!localStorage.getItem(_storageKey(tabId));}catch(e){return false;}
+  }
+  function _updateSaveLabel(tabId){
+    var lbl=_$('pg-saveLabel');
+    if(!lbl)return;
+    lbl.textContent=_hasSave(tabId)?'저장된 배치 있음':'저장 없음';
+  }
+  function _clearElim(){
+    document.querySelectorAll('.pg-player.pg-elim').forEach(function(el){el.classList.remove('pg-elim');});
   }
 
-  function _nextStep() {
+  function _isEditTab(){return _editTabs[_activeTab]||false;}
+
+  function _render(){
+    if(!_$('pg-playerLayer'))return;
+    var isEdit=_isEditTab();
+    /* 패널 전환 */
+    var fp=_$('pg-field-panel'), ep=_$('pg-edit-panel');
+    if(fp) fp.style.display=isEdit?'none':'block';
+    if(ep) ep.style.display=isEdit?'block':'none';
+    /* 드래그 커서 */
+    document.querySelectorAll('.pg-player').forEach(function(el){
+      el.style.cursor=isEdit?'grab':'default';
+      el.style.pointerEvents=isEdit?'all':'none';
+    });
+
+    if(isEdit){
+      /* 편집 탭: 기본 포지션으로 세팅 (저장된 것 없으면) */
+      _renderTabs();
+      var et=_$('pg-editTitle');
+      if(et) et.textContent={attack:'공격 전술 편집',defense:'수비 전술 편집',outfield:'외야 활용 편집',flow:'경기 흐름 편집'}[_activeTab]||'편집';
+      _updateSaveLabel(_activeTab);
+      /* 저장된 배치 있으면 불러오기, 없으면 기본 배치 */
+      if(!_loadPositions(_activeTab)){
+        _setDefaultEdit();
+      }
+      /* 화살표 지우기 */
+      _drawArrows([]);
+      /* 공 숨기기 */
+      var ball=_$('pg-ball');
+      if(ball){ball.style.left='50%';ball.style.top='50%';ball.style.opacity='0';}
+    } else {
+      /* 필드 설명 탭: 스텝별 애니메이션 */
+      var data=_makeData(), steps=data[_activeTab], step=steps[_stepIndex];
+      _renderTabs(); _renderStepList(steps); _setDuration();
+      Object.entries(step.positions).forEach(function(e){
+        var el=_$('pg-'+e[0]), pt=e[1];
+        if(!el)return;
+        var p=_pct(pt);
+        el.style.left=p.left;el.style.top=p.top;
+        el.classList.toggle('pg-hidden',!!pt.hidden);
+        el.classList.remove('pg-elim');
+      });
+      var ball=_$('pg-ball');
+      if(ball){
+        ball.style.opacity='1';
+        var bp=_pct(step.ball);ball.style.left=bp.left;ball.style.top=bp.top;
+      }
+      _drawArrows(step.arrows||[]);
+      var t=_$('pg-stepTitle'),d=_$('pg-stepDesc');
+      if(t)t.textContent=step.title;
+      if(d)d.textContent=step.desc;
+    }
+  }
+
+  function _setDefaultEdit(){
+    /* 양팀 12명 기본 배치 */
+    var oa=_oursAttack(), ta=_theirsAttack();
+    Object.keys(oa).forEach(function(id){
+      var el=_$('pg-'+id), pt=oa[id]; if(!el)return;
+      var p=_pct(pt);el.style.left=p.left;el.style.top=p.top;
+      el.classList.remove('pg-hidden','pg-elim');
+    });
+    Object.keys(ta).forEach(function(id){
+      var el=_$('pg-'+id), pt=ta[id]; if(!el)return;
+      var p=_pct(pt);el.style.left=p.left;el.style.top=p.top;
+      el.classList.remove('pg-hidden','pg-elim');
+    });
+    var ball=_$('pg-ball');
+    if(ball){ball.style.left='50%';ball.style.top='12%';ball.style.opacity='1';}
+  }
+
+  function _nextStep(){
     var steps=_makeData()[_activeTab];
-    if(_stepIndex<steps.length-1){ _stepIndex++; }
-    else if(_$('pg-loopCheck')&&_$('pg-loopCheck').checked){ _stepIndex=0; }
-    else { _stopAuto(); return; }
+    if(_stepIndex<steps.length-1){_stepIndex++;}
+    else if(_$('pg-loopCheck')&&_$('pg-loopCheck').checked){_stepIndex=0;}
+    else{_stopAuto();return;}
     _render();
   }
   function _stopAuto(){
-    if(_timer) clearInterval(_timer); _timer=null;
-    var pb=_$('pg-playBtn'); if(pb) pb.textContent='재생';
+    if(_timer)clearInterval(_timer);_timer=null;
+    var pb=_$('pg-playBtn');if(pb)pb.textContent='재생';
   }
   function _startAuto(){
     _stopAuto();
-    var pb=_$('pg-playBtn'); if(pb) pb.textContent='정지';
-    _timer=setInterval(_nextStep, 2600/_speed);
+    var pb=_$('pg-playBtn');if(pb)pb.textContent='정지';
+    _timer=setInterval(_nextStep,2600/_speed);
   }
 
-  function _bindEvents() {
-    var nb=_$('pg-nextBtn'), pb=_$('pg-playBtn'), rb=_$('pg-resetBtn');
-    var ms=_$('pg-modeSelect'), sb=_$('pg-speedButtons');
-    if(nb) nb.addEventListener('click',_nextStep);
-    if(pb) pb.addEventListener('click',function(){ _timer?_stopAuto():_startAuto(); });
-    if(rb) rb.addEventListener('click',function(){ _stepIndex=0; _stopAuto(); _render(); });
-    if(ms) ms.addEventListener('change',function(){ _mode=ms.value; _render(); });
-    if(sb) sb.addEventListener('click',function(e){
-      var btn=e.target.closest('[data-pgspeed]'); if(!btn) return;
+  function _bindEvents(){
+    var nb=_$('pg-nextBtn'),pb=_$('pg-playBtn'),rb=_$('pg-resetBtn');
+    var ms=_$('pg-modeSelect'),sb=_$('pg-speedButtons');
+    var saveBtn=_$('pg-saveBtn'),loadBtn=_$('pg-loadBtn'),erBtn=_$('pg-editResetBtn');
+    var elimReset=_$('pg-elimResetBtn');
+    if(nb)nb.addEventListener('click',_nextStep);
+    if(pb)pb.addEventListener('click',function(){_timer?_stopAuto():_startAuto();});
+    if(rb)rb.addEventListener('click',function(){_stepIndex=0;_stopAuto();_render();});
+    if(ms)ms.addEventListener('change',function(){_mode=ms.value;if(!_isEditTab())_render();});
+    if(sb)sb.addEventListener('click',function(e){
+      var btn=e.target.closest('[data-pgspeed]');if(!btn)return;
       _speed=Number(btn.dataset.pgspeed);
-      sb.querySelectorAll('button').forEach(function(b){ b.classList.toggle('pg-speed-active',b===btn); });
-      _setDuration(); if(_timer) _startAuto();
+      sb.querySelectorAll('button').forEach(function(b){b.classList.toggle('pg-speed-active',b===btn);});
+      _setDuration();if(_timer)_startAuto();
     });
+    if(saveBtn)saveBtn.addEventListener('click',function(){_savePositions(_activeTab);});
+    if(loadBtn)loadBtn.addEventListener('click',function(){
+      if(_hasSave(_activeTab)){_loadPositions(_activeTab);}
+      else{if(typeof showToast==='function')showToast('저장된 배치가 없습니다');}
+    });
+    if(erBtn)erBtn.addEventListener('click',function(){_clearElim();_setDefaultEdit();try{localStorage.removeItem(_storageKey(_activeTab));}catch(e){}_updateSaveLabel(_activeTab);});
+    if(elimReset)elimReset.addEventListener('click',function(){_clearElim();});
   }
 
-  function init() {
-    if(_initialized) return;
+  function init(){
+    if(_initialized)return;
     _initialized=true;
     _createPlayers();
     _bindEvents();
     _render();
   }
-  function renderVideos(vids){ /* 피구 영상 영역 별도 처리 */ }
-  function action(name, arg){ /* stub */ }
-  function formation(key){ /* stub */ }
-  function tactic(key){ /* stub */ }
-  function panel(name){ /* stub */ }
+  function renderVideos(vids){}
+  function action(name,arg){}
+  function formation(key){}
+  function tactic(key){}
+  function panel(name){}
 
-  return { init:init, action:action, formation:formation, tactic:tactic, panel:panel, renderVideos:renderVideos, initialized:false };
+  return {init:init,action:action,formation:formation,tactic:tactic,panel:panel,renderVideos:renderVideos,initialized:false};
 })(); } catch(e) {
   showError('DB 초기화 오류: '+(e.message||String(e)));
   return {init:function(){},action:function(){},formation:function(){},tactic:function(){},panel:function(){},renderVideos:function(){},initialized:false};
 }
 })();
-
 </script>
 </body>
 </html>

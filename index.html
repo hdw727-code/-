@@ -489,6 +489,20 @@
     .dodge-placeholder .big-ico{font-size:52px;margin-bottom:12px;}
     .dodge-placeholder h3{font-size:20px;font-weight:950;margin:0 0 8px;}
     .dodge-placeholder p{color:var(--muted);line-height:1.55;margin:0 0 18px;font-size:14px;}
+    /* 피구 상태바 */
+    .db-statusbar{display:flex;gap:8px;flex-wrap:wrap;padding:6px 0;margin-bottom:6px;}
+    .db-atk-badge{background:#fee2e2;color:#991b1b;padding:3px 10px;border-radius:20px;font-weight:900;font-size:12px;}
+    .db-pass-badge{background:#fef3c7;color:#92400e;padding:3px 10px;border-radius:20px;font-weight:900;font-size:12px;}
+    .db-timer-badge{background:#ede9fe;color:#5b21b6;padding:3px 10px;border-radius:20px;font-weight:900;font-size:12px;}
+    /* 판정 버튼 바 */
+    .db-judgment-bar{display:flex;flex-wrap:wrap;gap:5px;margin:6px 0;}
+    .db-fault-btn{font-size:11px;padding:4px 9px;border-radius:8px;border:1.5px solid #f87171;
+      background:#fff;color:#b91c1c;cursor:pointer;font-weight:700;}
+    .db-fault-btn:active{background:#fee2e2;}
+    /* 판정 알림 */
+    .db-fault-alert{background:#fef2f2;border:2px solid #f87171;border-radius:10px;
+      padding:8px 12px;font-size:13px;font-weight:700;color:#991b1b;margin:6px 0;}
+
 
     @media(max-width:720px){
       .app{padding:14px 12px 28px;}
@@ -730,26 +744,46 @@
               </section>
             </div>
             <div>
+              <!-- 상태바: 공격권 / 패스카운터 / 5초타이머 -->
+              <div class="db-statusbar">
+                <span id="db-attack-ind" class="db-atk-badge">🔴 우리팀 공격</span>
+                <span id="db-pass-cnt" class="db-pass-badge">패스 0/3</span>
+                <span id="db-timer5" class="db-timer-badge">⏱ -</span>
+              </div>
               <div class="vb-court-wrap">
                 <div id="db-court" class="db-court">
-                  <div class="db-zone-label away">외야 (상대팀)</div>
+                  <div class="db-zone-label away">외야 구역 (상대팀)</div>
                   <div class="db-team-label away">상대팀 내야</div>
                   <div class="db-net"><span>중앙선</span></div>
                   <div class="db-team-label home">우리팀 내야</div>
-                  <div class="db-zone-label home">외야 (우리팀)</div>
+                  <div class="db-zone-label home">외야 구역 (우리팀)</div>
                   <svg id="db-routeLayer" class="vb-layer" viewBox="0 0 100 100" preserveAspectRatio="none"></svg>
                   <div id="db-targetLayer"></div>
                   <div id="db-tokenLayer"></div>
                 </div>
               </div>
+              <!-- 판정 버튼 -->
+              <div class="db-judgment-bar">
+                <button type="button" onclick="DB.action('fault','headattack')" class="db-fault-btn">헤드어택</button>
+                <button type="button" onclick="DB.action('fault','doublepass')" class="db-fault-btn">더블패스</button>
+                <button type="button" onclick="DB.action('fault','4pass')" class="db-fault-btn">포패스</button>
+                <button type="button" onclick="DB.action('fault','5sec')" class="db-fault-btn">5초룰</button>
+                <button type="button" onclick="DB.action('fault','overline')" class="db-fault-btn">오버라인</button>
+                <button type="button" onclick="DB.action('fault','holding')" class="db-fault-btn">홀딩</button>
+              </div>
+              <div id="db-fault-alert" class="db-fault-alert" hidden></div>
+              <!-- 주요 버튼 -->
               <div class="vb-actions">
+                <button type="button" onclick="DB.action('jumpball')" class="vb-primary">⭕ 점프볼</button>
+                <button type="button" onclick="DB.action('changeAttack')">🔄 공격권</button>
+                <button type="button" onclick="DB.action('pass')">📤 패스+1</button>
                 <button type="button" class="vb-primary" onclick="DB.action('execute')">▶ 이동 실행</button>
                 <button type="button" onclick="DB.action('preview')">예정 삭제</button>
                 <button type="button" onclick="DB.action('reset')">초기화</button>
               </div>
               <div class="panel vb-detail">
-                <h3 id="db-detailTitle">기본 대형</h3>
-                <p id="db-detailText">6명이 내야를 고르게 나눠 자리를 잡습니다.</p>
+                <h3 id="db-detailTitle">12인제 피구 전술판</h3>
+                <p id="db-detailText">대형을 선택하거나 선수를 드래그하세요. 1~11번은 내야, 12번은 상대편 외야에 고정.</p>
               </div>
               <div class="panel" style="margin-top:8px;">
                 <div class="vb-legend-row">
@@ -1618,10 +1652,17 @@ var VB = (function() { try { return (function() {
   /* ---- 배치/전술 적용 ---- */
   function applyFormation(key){
     if(!positions[key])return;
-    seedPlayers(key);
+    var pos=positions[key].pos;
+    if(!pos){ seedPlayers(key); renderDetail(positions[key].title,positions[key].text); render(); closeMobilePanel(); return; }
+    st.planned={};
+    Object.values(st.players).forEach(function(p){
+      var to=pos[p.id];
+      if(to && (Math.abs(p.x-to[0])>0.5||Math.abs(p.y-to[1])>0.5))
+        st.planned[p.id]={id:p.id,from:[p.x,p.y],to:to,label:p.label};
+    });
     renderDetail(positions[key].title,positions[key].text);
     render(); closeMobilePanel();
-    showToast('배치 적용: '+positions[key].title);
+    showToast('이동 예약 완료 — ▶ 이동 실행 누르세요');
   }
 
   function applyTactic(key){
@@ -1719,35 +1760,31 @@ var DB = (function() { try { return (function() {
   function $d(id){ return document.getElementById(id); }
 
   /* ── 선수 초기 데이터 ── */
-  /* PDF 기반 12인제 포메이션 (4-2-3-2-차단수 / 외야1)
-     y축: 50%=중앙선, 86%=우리팀 엔드라인, 6%=상대팀 엔드라인(외야위치)
-     최전방4: 중앙선 바로 앞에 넓게 배치 (x: 10,37,63,90)
-     중전방2: 그 뒤 좌우 (x: 20,80)
-     중앙3: 더 뒤 좌중우 (x: 15,50,85)
-     중후반2: (x: 28,72)
-     차단수1: 중앙 깊숙이 (x: 50) */
+  /* 12인제 피구 (4-2-3-2-차단수 + 외야1)
+     선수 간격: 실제 경기처럼 적당히 모여있음
+     극단적인 좌우 끝 배치 없음 — 이동 거리가 짧아야 빠른 반응 가능 */
   var defaultPlayers = [
-    /* 우리팀 내야 (번호 1-11) */
-    {id:'H1', label:'1', team:'home', role:'최전방(좌)',  x:10, y:58},
-    {id:'H2', label:'2', team:'home', role:'최전방(중좌)',x:37, y:58},
-    {id:'H3', label:'3', team:'home', role:'최전방(중우)',x:63, y:58},
-    {id:'H4', label:'4', team:'home', role:'최전방(우)',  x:90, y:58},
-    {id:'H5', label:'5', team:'home', role:'중전방(좌)',  x:22, y:66},
-    {id:'H6', label:'6', team:'home', role:'중전방(우)',  x:78, y:66},
-    {id:'H7', label:'7', team:'home', role:'중앙(좌)',    x:14, y:73},
-    {id:'H8', label:'8', team:'home', role:'중앙(중)',    x:50, y:73},
-    {id:'H9', label:'9', team:'home', role:'중앙(우)',    x:84, y:73},
-    {id:'H10',label:'10',team:'home', role:'중후반(좌)',  x:28, y:80},
-    {id:'H11',label:'11',team:'home', role:'차단수',      x:72, y:80},
-    /* 우리팀 외야 (번호 12) - 상대편 엔드라인 뒤 */
+    /* 우리팀 내야 1~11번 */
+    {id:'H1', label:'1', team:'home', role:'최전방(좌)',  x:22, y:57},
+    {id:'H2', label:'2', team:'home', role:'최전방(중좌)',x:38, y:57},
+    {id:'H3', label:'3', team:'home', role:'최전방(중우)',x:62, y:57},
+    {id:'H4', label:'4', team:'home', role:'최전방(우)',  x:78, y:57},
+    {id:'H5', label:'5', team:'home', role:'중전방(좌)',  x:26, y:65},
+    {id:'H6', label:'6', team:'home', role:'중전방(우)',  x:74, y:65},
+    {id:'H7', label:'7', team:'home', role:'중앙(좌)',    x:18, y:72},
+    {id:'H8', label:'8', team:'home', role:'중앙(중)',    x:50, y:72},
+    {id:'H9', label:'9', team:'home', role:'중앙(우)',    x:82, y:72},
+    {id:'H10',label:'10',team:'home', role:'중후반(좌)',  x:32, y:79},
+    {id:'H11',label:'11',team:'home', role:'차단수',      x:68, y:79},
+    /* 우리팀 외야 12번 - 상대 엔드라인 바깥 고정 */
     {id:'H12',label:'12',team:'home', role:'외야',        x:50, y:6},
-    /* 상대팀 (6명 대표, away) */
-    {id:'A1', label:'A1',team:'away', role:'최전방',      x:10, y:42},
-    {id:'A2', label:'A2',team:'away', role:'최전방',      x:37, y:42},
-    {id:'A3', label:'A3',team:'away', role:'최전방',      x:63, y:42},
-    {id:'A4', label:'A4',team:'away', role:'최전방',      x:90, y:42},
-    {id:'A5', label:'A5',team:'away', role:'중앙',        x:28, y:33},
-    {id:'A6', label:'A6',team:'away', role:'중앙',        x:72, y:33},
+    /* 상대팀 대표 선수 */
+    {id:'A1', label:'A1',team:'away', role:'최전방',      x:22, y:43},
+    {id:'A2', label:'A2',team:'away', role:'최전방',      x:38, y:43},
+    {id:'A3', label:'A3',team:'away', role:'최전방',      x:62, y:43},
+    {id:'A4', label:'A4',team:'away', role:'최전방',      x:78, y:43},
+    {id:'A5', label:'A5',team:'away', role:'중앙',        x:32, y:34},
+    {id:'A6', label:'A6',team:'away', role:'중앙',        x:68, y:34},
     /* 공 */
     {id:'BALL',label:'●',team:'ball', role:'공',          x:50, y:50}
   ];
@@ -1756,53 +1793,65 @@ var DB = (function() { try { return (function() {
   var formations = {
     base:{
       title:'기본 대형',
-      text:'최전방 4명이 넓게, 중전방2→중앙3→중후반2→차단수 순으로 깊이 배치. 외야(12번)는 상대 엔드라인 뒤.',
-      pos:{H1:[10,58],H2:[37,58],H3:[63,58],H4:[90,58],
-           H5:[22,66],H6:[78,66],
-           H7:[14,73],H8:[50,73],H9:[84,73],
-           H10:[28,80],H11:[72,80],
+      text:'최전방4→중전방2→중앙3→중후반2→차단수 구조. 선수간 간격 유지하며 공 위치에 따라 슬라이드.',
+      pos:{H1:[22,57],H2:[38,57],H3:[62,57],H4:[78,57],
+           H5:[26,65],H6:[74,65],
+           H7:[18,72],H8:[50,72],H9:[82,72],
+           H10:[32,79],H11:[68,79],
            H12:[50,6],
-           A1:[10,42],A2:[37,42],A3:[63,42],A4:[90,42],A5:[28,33],A6:[72,33],BALL:[50,50]}
+           A1:[22,43],A2:[38,43],A3:[62,43],A4:[78,43],A5:[32,34],A6:[68,34],BALL:[50,50]}
     },
     attack:{
       title:'전진 공격',
-      text:'최전방 4명이 중앙선 바로 앞까지 전진. 중전방2도 압박 지원. 외야(12번)와 앞뒤 협공 준비.',
-      pos:{H1:[10,53],H2:[37,53],H3:[63,53],H4:[90,53],
-           H5:[20,62],H6:[80,62],
-           H7:[14,69],H8:[50,69],H9:[84,69],
-           H10:[28,77],H11:[72,77],
+      text:'최전방 4명이 중앙선 바로 앞으로 전진. 짧은 거리에서 강하게 던져 상대를 압박합니다.',
+      pos:{H1:[22,53],H2:[38,53],H3:[62,53],H4:[78,53],
+           H5:[26,61],H6:[74,61],
+           H7:[18,68],H8:[50,68],H9:[82,68],
+           H10:[32,76],H11:[68,76],
            H12:[50,6],
-           A1:[10,42],A2:[37,42],A3:[63,42],A4:[90,42],A5:[28,33],A6:[72,33],BALL:[50,50]}
+           A1:[22,43],A2:[38,43],A3:[62,43],A4:[78,43],A5:[32,34],A6:[68,34],BALL:[50,50]}
     },
     defense:{
-      title:'수비 대형',
-      text:'최전방이 뒤로 물러나 중앙 수비 강화. 좌우 끝을 넓게 커버해 피할 공간 확보.',
-      pos:{H1:[15,63],H2:[38,62],H3:[62,62],H4:[85,63],
-           H5:[22,70],H6:[78,70],
-           H7:[10,76],H8:[50,76],H9:[90,76],
-           H10:[28,83],H11:[72,83],
+      title:'기본 수비',
+      text:'수비 라인을 한 칸 뒤로. 피할 공간 확보. 공 위치에 따라 전체 라인이 좌우 슬라이드.',
+      pos:{H1:[22,61],H2:[38,61],H3:[62,61],H4:[78,61],
+           H5:[26,68],H6:[74,68],
+           H7:[18,74],H8:[50,74],H9:[82,74],
+           H10:[32,81],H11:[68,81],
            H12:[50,6],
-           A1:[10,42],A2:[37,42],A3:[63,42],A4:[90,42],A5:[28,33],A6:[72,33],BALL:[50,50]}
+           A1:[22,43],A2:[38,43],A3:[62,43],A4:[78,43],A5:[32,34],A6:[68,34],BALL:[50,50]}
+    },
+    vShape:{
+      title:'V자 공격 대형',
+      text:'1·2번 두 명이 V 꼭짓점(중앙선 바로 앞), 양쪽으로 \·/ 벌어짐. 차단수(11번)는 상대 외야수 맞은편 깊숙이.',
+      pos:{H1:[42,54],H2:[58,54],
+           H3:[30,61],H4:[70,61],
+           H5:[20,67],H6:[80,67],
+           H7:[13,73],H8:[87,73],
+           H9:[25,79],H10:[75,79],
+           H11:[50,84],
+           H12:[50,6],
+           A1:[22,43],A2:[38,43],A3:[62,43],A4:[78,43],A5:[32,34],A6:[68,34],BALL:[50,50]}
     },
     wide:{
       title:'좌우 넓은 대형',
-      text:'전방 4명이 양 끝까지 펼쳐 공격 범위 최대화. 상대의 중앙 집중 공격을 분산시킵니다.',
-      pos:{H1:[4,58],H2:[32,58],H3:[68,58],H4:[96,58],
-           H5:[14,66],H6:[86,66],
-           H7:[8,73],H8:[50,73],H9:[92,73],
-           H10:[24,80],H11:[76,80],
+      text:'4명이 좌우로 조금 더 펼쳐 공격 범위 넓히기. 극단까지는 가지 않고 빠른 이동 가능한 범위 유지.',
+      pos:{H1:[14,57],H2:[36,57],H3:[64,57],H4:[86,57],
+           H5:[20,65],H6:[80,65],
+           H7:[12,72],H8:[50,72],H9:[88,72],
+           H10:[28,79],H11:[72,79],
            H12:[50,6],
-           A1:[8,42],A2:[37,42],A3:[63,42],A4:[92,42],A5:[28,33],A6:[72,33],BALL:[50,50]}
+           A1:[22,43],A2:[38,43],A3:[62,43],A4:[78,43],A5:[32,34],A6:[68,34],BALL:[50,50]}
     },
     pincer:{
-      title:'협공 대형',
-      text:'외야(12번)와 최전방이 앞뒤에서 동시 압박. 좌우도 좁혀 피할 공간을 최소화합니다.',
-      pos:{H1:[8,54],H2:[34,54],H3:[66,54],H4:[92,54],
-           H5:[18,63],H6:[82,63],
-           H7:[12,71],H8:[50,71],H9:[88,71],
-           H10:[26,79],H11:[74,79],
+      title:'외야 협공 대형',
+      text:'12번(외야)이 상대 뒤에서, 1~4번이 앞에서. 동시 공격으로 상대 도망갈 곳이 없어집니다.',
+      pos:{H1:[22,54],H2:[38,54],H3:[62,54],H4:[78,54],
+           H5:[26,62],H6:[74,62],
+           H7:[18,69],H8:[50,69],H9:[82,69],
+           H10:[32,77],H11:[68,77],
            H12:[50,6],
-           A1:[10,42],A2:[37,42],A3:[63,42],A4:[90,42],A5:[28,33],A6:[72,33],BALL:[50,50]}
+           A1:[22,43],A2:[38,43],A3:[62,43],A4:[78,43],A5:[32,34],A6:[68,34],BALL:[50,50]}
     }
   };
 

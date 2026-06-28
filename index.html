@@ -287,125 +287,106 @@
     .toast.show{display:block;}
     .admin-scroll{overflow-x:auto;}
 
-    /* ===== 인터랙티브 전술판 (VB) ===== */
-    .vb-board{padding:0;}
-    /* 좌우 2열 레이아웃 */
-    .vb-layout{display:grid;grid-template-columns:1fr;gap:8px;margin-top:8px;}
-    @media(min-width:540px){
-      .vb-layout{grid-template-columns:200px 1fr;align-items:start;}
-      .vb-controls{display:block!important;position:sticky;top:8px;}
-      .vb-mobile-tabs{display:none;}
-      .vb-court{width:min(58vw,340px);}
+
+    /* ===== 배구 전술판 v2 (pigu 스타일) ===== */
+    .vb2-sim{display:flex;flex-direction:column;gap:8px;padding:10px 8px;background:var(--bg);min-height:0;}
+    .vb2-topbar{display:flex;align-items:center;justify-content:space-between;gap:6px;flex-wrap:wrap;}
+    .vb2-tabs{display:flex;gap:5px;flex-wrap:wrap;}
+    .vb2-tabs button{
+      padding:6px 13px;border-radius:8px;font-weight:800;font-size:12px;cursor:pointer;
+      border:1.5px solid rgba(17,24,39,.10);background:rgba(255,255,255,.82);
+      transition:background .15s,color .15s;
     }
-    @media(min-width:760px){
-      .vb-layout{grid-template-columns:220px 1fr;}
-      .vb-court{width:min(50vw,380px);}
+    .vb2-tabs button.vb2-tab-on{color:#fff;background:var(--blue);border-color:var(--blue);}
+    .vb2-mode-sel{font-size:12px;font-weight:800;color:var(--muted);}
+    .vb2-mode-sel select{
+      font-size:12px;font-weight:800;border-radius:8px;border:1.5px solid var(--line);
+      background:#fff;padding:4px 8px;cursor:pointer;
     }
-    .vb-mobile-tabs{
-      display:grid;grid-template-columns:repeat(4,1fr);gap:6px;
-      padding:7px;margin-bottom:8px;
-      border:1px solid var(--line);border-radius:14px;
-      background:rgba(255,255,255,.96);
-      box-shadow:0 10px 24px rgba(15,23,42,.1);
+    .vb2-main{display:grid;grid-template-columns:1fr;gap:8px;}
+    @media(min-width:540px){.vb2-main{grid-template-columns:200px 1fr;align-items:start;}}
+    @media(min-width:760px){.vb2-main{grid-template-columns:220px 1fr;}}
+    .vb2-stage{display:flex;flex-direction:column;align-items:center;}
+    .vb2-field-wrap{
+      position:relative;
+      width:100%;max-width:340px;
+      aspect-ratio:400/820;
+      overflow:hidden;border-radius:14px;
+      box-shadow:0 8px 28px rgba(10,20,40,.45);
     }
-    .vb-mobile-tabs button{
-      min-height:40px;border-radius:10px;font-weight:800;font-size:13px;
-      border:1px solid rgba(17,24,39,.06);background:rgba(255,255,255,.82);
+    @media(min-width:540px){.vb2-field-wrap{width:min(54vw,300px);}}
+    .vb2-field-svg,.vb2-arrow-svg{
+      position:absolute;inset:0;width:100%;height:100%;
     }
-    .vb-mobile-tabs button.active{color:#fff;background:var(--blue);border-color:var(--blue);}
-    .vb-controls{
-      border:1px solid var(--line);border-radius:var(--one-radius-sm);
-      background:rgba(255,255,255,.92);overflow:hidden;display:none;
-    }
-    .vb-controls.open{display:block;}
-    .vb-section{padding:10px;border-bottom:1px solid #edf2f7;}
-    .vb-section:last-child{border-bottom:0;}
-    .vb-section h2{margin:0 0 8px;color:var(--muted);font-size:12px;font-weight:900;}
-    .vb-button-row{display:flex;flex-wrap:wrap;gap:6px;}
-    .vb-choice{
-      flex:0 0 auto;min-height:36px;padding:7px 11px;border-radius:10px;
-      font-weight:800;font-size:13px;border:1px solid rgba(17,24,39,.06);
-      background:rgba(255,255,255,.82);white-space:nowrap;cursor:pointer;
-    }
-    .vb-choice.active{color:#fff;background:var(--blue);border-color:var(--blue);}
-    .vb-court-wrap{
-      padding:8px 6px 22px;border-radius:var(--one-radius-sm);
-      background:rgba(255,255,255,.92);
-      box-shadow:0 16px 36px rgba(15,23,42,.1);
-    }
-    .vb-court{
-      position:relative;width:min(74vw,310px);aspect-ratio:1/1.5;
-      border:4px solid #bcc7d7;border-radius:12px;margin:0 auto;
-      background:
-        linear-gradient(to bottom,rgba(205,53,75,.12) 0 49.6%,#98a6b8 49.6% 50.8%,rgba(46,125,215,.12) 50.8% 100%),
-        linear-gradient(to right,transparent 0 33.1%,rgba(255,255,255,.78) 33.1% 33.9%,transparent 33.9% 66.1%,rgba(255,255,255,.78) 66.1% 66.9%,transparent 66.9%),
-        linear-gradient(to bottom,transparent 0 16.2%,rgba(255,255,255,.78) 16.2% 17%,transparent 17% 32.9%,rgba(255,255,255,.78) 32.9% 33.7%,transparent 33.7% 66.2%,rgba(255,255,255,.78) 66.2% 67%,transparent 67% 82.9%,rgba(255,255,255,.78) 82.9% 83.7%,transparent 83.7%);
-      overflow:visible;user-select:none;cursor:crosshair;
-    }
-    .vb-court-label{
-      position:absolute;z-index:1;left:8px;color:rgba(15,23,42,.62);
-      font-size:11px;font-weight:900;pointer-events:none;
-    }
-    .vb-court-label.away{top:7px;}
-    .vb-court-label.home{bottom:7px;}
-    .vb-net{
-      position:absolute;z-index:2;left:-4px;right:-4px;top:49.4%;
-      height:7px;background:#79879b;pointer-events:none;
-    }
-    .vb-net span{
-      position:absolute;left:50%;bottom:8px;transform:translateX(-50%);
-      color:#7d8ca2;font-weight:900;font-size:10px;letter-spacing:1px;
-    }
-    .vb-serve-zone{
-      position:absolute;left:-4px;right:-4px;top:100%;height:14%;
-      border:2px dashed rgba(37,99,235,.42);border-top:0;border-radius:0 0 10px 10px;
-      color:rgba(37,99,235,.8);display:flex;align-items:center;justify-content:center;
-      font-size:11px;font-weight:900;pointer-events:none;
-    }
-    .vb-layer{position:absolute;inset:0;z-index:3;overflow:visible;pointer-events:none;}
-    .vb-token{
-      position:absolute;z-index:5;
-      width:clamp(28px,8vw,40px);height:clamp(28px,8vw,40px);
-      display:grid;place-items:center;
-      border:3px solid #fff;border-radius:50%;color:#fff;
-      font-size:clamp(10px,2.8vw,12px);font-weight:900;
+    .vb2-arrow-svg{z-index:4;pointer-events:none;overflow:visible;}
+    .vb2-player-layer{position:absolute;inset:0;z-index:5;}
+    .vb2-ball-layer{position:absolute;inset:0;z-index:8;pointer-events:none;}
+    .vb2-player{
+      position:absolute;
+      width:clamp(22px,7.5vw,34px);height:clamp(22px,7.5vw,34px);
+      border-radius:50%;color:#fff;
+      font-size:clamp(9px,3vw,12px);font-weight:900;text-align:center;line-height:1;
+      display:flex;flex-direction:column;align-items:center;justify-content:center;gap:1px;
       transform:translate(-50%,-50%);
-      box-shadow:0 4px 9px rgba(15,23,42,.22);
-      transition:left 4000ms cubic-bezier(.25,.1,.25,1),top 4000ms cubic-bezier(.25,.1,.3,1);
-      cursor:pointer;
+      border:2.5px solid rgba(255,255,255,.55);
+      box-shadow:0 2px 8px rgba(0,0,0,.4);
+      transition:left .7s cubic-bezier(.25,.8,.25,1),top .7s cubic-bezier(.25,.8,.25,1);
+      cursor:default;user-select:none;
     }
-    .vb-token.home{background:#2e7dd7;}
-    .vb-token.away{background:#c9354b;}
-    .vb-token.ball{
-      z-index:7;width:clamp(18px,5vw,26px);height:clamp(18px,5vw,26px);
-      color:#3a2300;background:#f59e0b;border-width:2px;font-size:11px;
+    .vb2-player.home{background:#2563eb;}
+    .vb2-player.away{background:#dc2626;}
+    .vb2-player .vb2-num{font-size:clamp(10px,3.5vw,13px);font-weight:900;line-height:1;}
+    .vb2-player .vb2-role{font-size:clamp(7px,2vw,9px);opacity:.85;line-height:1;}
+    .vb2-ball{
+      position:absolute;
+      width:clamp(14px,4.5vw,22px);height:clamp(14px,4.5vw,22px);
+      border-radius:50%;background:#f59e0b;
+      border:2px solid #fff;
+      transform:translate(-50%,-50%);
+      box-shadow:0 2px 8px rgba(0,0,0,.45);
+      transition:left .65s cubic-bezier(.25,.8,.25,1),top .65s cubic-bezier(.25,.8,.25,1);
+      z-index:8;
     }
-    .vb-token.selected{outline:4px solid rgba(16,185,129,.4);}
-    .vb-target{
-      position:absolute;z-index:4;width:28px;height:28px;
-      display:grid;place-items:center;
-      border:2px dashed rgba(15,23,42,.6);border-radius:50%;
-      color:#172033;background:rgba(255,255,255,.75);
-      transform:translate(-50%,-50%);font-size:9px;font-weight:900;pointer-events:none;
-    }
-    .vb-actions{
-      display:grid;grid-template-columns:1.25fr 1fr 1fr;gap:6px;
-      padding:8px;margin-top:8px;
+    .vb2-info{
+      display:flex;flex-direction:column;gap:7px;
       border:1px solid var(--line);border-radius:14px;
-      background:rgba(255,255,255,.96);
+      background:rgba(255,255,255,.96);padding:10px;
+      box-shadow:0 4px 16px rgba(15,23,42,.08);
     }
-    .vb-actions button{
-      min-height:42px;border-radius:10px;font-weight:800;font-size:13px;
-      border:1px solid rgba(17,24,39,.06);background:rgba(255,255,255,.82);cursor:pointer;
+    .vb2-section{border-bottom:1px solid #edf2f7;padding-bottom:8px;margin-bottom:2px;}
+    .vb2-section:last-child{border-bottom:0;}
+    .vb2-section h3{margin:0 0 7px;color:var(--muted);font-size:11px;font-weight:900;text-transform:uppercase;letter-spacing:.5px;}
+    .vb2-btn-row{display:flex;flex-wrap:wrap;gap:5px;}
+    .vb2-chip{
+      flex:0 0 auto;padding:5px 10px;border-radius:8px;font-size:12px;font-weight:800;
+      border:1.5px solid rgba(17,24,39,.08);background:rgba(255,255,255,.82);cursor:pointer;
+      transition:background .15s,color .15s;white-space:nowrap;
     }
-    .vb-primary{color:#fff!important;background:var(--blue)!important;border-color:var(--blue)!important;}
-    .vb-detail{margin-top:8px;}
-    .vb-detail h3{font-size:14px;font-weight:900;margin:0 0 4px;color:var(--ink);}
-    .vb-detail p{margin:0;color:var(--muted);line-height:1.45;font-size:13px;}
-    .vb-legend-row{display:flex;flex-wrap:wrap;gap:5px 10px;font-size:12px;color:var(--muted);font-weight:800;}
-    .vb-dot{width:10px;height:10px;display:inline-block;border-radius:50%;margin-right:3px;vertical-align:-1px;}
-    .vb-dot.home{background:#2e7dd7;}.vb-dot.away{background:#c9354b;}
-    .vb-dot.ball{background:#f59e0b;}.vb-dot.move{background:#1fa971;}
+    .vb2-chip.on{color:#fff;background:var(--blue);border-color:var(--blue);}
+    .vb2-step-list{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:4px;}
+    .vb2-step-dot{
+      width:28px;height:28px;border-radius:50%;display:flex;align-items:center;justify-content:center;
+      font-size:11px;font-weight:900;border:2px solid #d1d5db;background:#f9fafb;color:#9ca3af;cursor:pointer;
+    }
+    .vb2-step-dot.done{background:#1fa971;border-color:#1fa971;color:#fff;}
+    .vb2-step-dot.cur{background:var(--blue);border-color:var(--blue);color:#fff;}
+    .vb2-copy{padding:2px 0;}
+    .vb2-copy h3{margin:0 0 3px;font-size:13px;font-weight:900;color:var(--ink);}
+    .vb2-copy p{margin:0;font-size:12px;color:var(--muted);line-height:1.45;}
+    .vb2-actions{display:flex;gap:5px;flex-wrap:wrap;padding-top:6px;}
+    .vb2-actions button{
+      flex:1;min-width:58px;min-height:38px;border-radius:9px;font-size:12px;font-weight:800;
+      border:1.5px solid rgba(17,24,39,.08);background:rgba(255,255,255,.82);cursor:pointer;
+    }
+    .vb2-primary{color:#fff!important;background:var(--blue)!important;border-color:var(--blue)!important;}
+    .vb2-speed{display:flex;gap:3px;margin-top:4px;}
+    .vb2-speed button{
+      flex:1;min-height:28px;border-radius:7px;font-size:11px;font-weight:800;
+      border:1px solid rgba(17,24,39,.08);background:rgba(255,255,255,.8);cursor:pointer;
+    }
+    .vb2-speed button.vb2-spd-on{background:var(--blue);color:#fff;border-color:var(--blue);}
+    .vb2-loop-row{display:flex;align-items:center;gap:6px;font-size:12px;color:var(--muted);font-weight:800;}
+
 
     /* 관련 영상 섹션 */
     .tactic-videos{margin-top:14px;}
@@ -1031,75 +1012,110 @@
     <!-- 전술학습 탭 -->
     <div id="tab-tactics" class="tab-pane">
 
-      <!-- 배구 전술판 (인터랙티브 v2) -->
+      <!-- 배구 전술판 v2 (피구 스타일) -->
       <div id="tacticVolley" hidden>
-        <div class="vb-board">
-          <div class="panel" style="padding:11px 14px 9px;">
-            <div class="section-title"><h2>🏐 배구 전술판</h2><span class="badge" id="vbStatusBadge">배구</span></div>
+        <div class="vb2-sim">
+          <header class="vb2-topbar">
+            <div class="section-title" style="margin:0;"><h2 style="margin:0;">🏐 배구 전술판</h2></div>
+            <div class="vb2-mode-sel">
+              <select id="vb2-modeSelect" onchange="VB.setMode(this.value)">
+                <option value="6">6인제</option>
+                <option value="5">5인제</option>
+              </select>
+            </div>
+          </header>
+
+          <div class="vb2-main">
+            <!-- 왼쪽: 전술 선택 + 컨트롤 -->
+            <div class="vb2-info">
+              <!-- 포메이션 -->
+              <div class="vb2-section">
+                <h3>포메이션</h3>
+                <div id="vb2-formBtns" class="vb2-btn-row"></div>
+              </div>
+              <!-- 전술 시나리오 -->
+              <div class="vb2-section">
+                <h3>전술 시나리오</h3>
+                <div id="vb2-tacBtns" class="vb2-btn-row"></div>
+              </div>
+              <!-- 스텝 인디케이터 -->
+              <div class="vb2-step-list" id="vb2-stepList"></div>
+              <!-- 제목/설명 -->
+              <div class="vb2-copy">
+                <h3 id="vb2-stepTitle">전술 선택</h3>
+                <p id="vb2-stepDesc">왼쪽 전술 시나리오를 선택하면 단계별로 이동을 보여줍니다.</p>
+              </div>
+              <!-- 컨트롤 버튼 -->
+              <div class="vb2-actions">
+                <button class="vb2-primary" id="vb2-nextBtn" onclick="VB.next()">다음 ▶</button>
+                <button id="vb2-playBtn" onclick="VB.play()">재생</button>
+                <button id="vb2-resetBtn" onclick="VB.reset()">처음</button>
+              </div>
+              <!-- 속도 -->
+              <div class="vb2-speed" id="vb2-speedBtns">
+                <button type="button" data-vb2spd="0.5">0.5x</button>
+                <button type="button" class="vb2-spd-on" data-vb2spd="1">1x</button>
+                <button type="button" data-vb2spd="1.5">1.5x</button>
+                <button type="button" data-vb2spd="2">2x</button>
+              </div>
+              <div class="vb2-loop-row">
+                <label><input id="vb2-loopChk" type="checkbox"> 자동반복</label>
+              </div>
+            </div>
+
+            <!-- 오른쪽: SVG 코트 -->
+            <div class="vb2-stage">
+              <div class="vb2-field-wrap" id="vb2-fieldWrap">
+                <!-- 코트 배경 SVG -->
+                <svg class="vb2-field-svg" viewBox="0 0 400 820" xmlns="http://www.w3.org/2000/svg">
+                  <!-- 배경 -->
+                  <rect x="0" y="0" width="400" height="820" fill="#1a2540"/>
+                  <!-- 코트 내부 -->
+                  <rect x="30" y="15" width="340" height="790" rx="10" fill="#2a7a3a"/>
+                  <!-- 엔드라인 -->
+                  <rect x="30" y="15" width="340" height="790" rx="10" fill="none" stroke="#5ccd7e" stroke-width="2.5"/>
+                  <!-- 네트 -->
+                  <rect x="28" y="407" width="344" height="6" rx="3" fill="#e2e8f0"/>
+                  <text x="200" y="403" text-anchor="middle" fill="#c8d6e8" font-size="10" font-weight="900" opacity=".8">NET</text>
+                  <!-- 어택 라인 (점선) -->
+                  <line x1="30" y1="275" x2="370" y2="275" stroke="#5ccd7e" stroke-width="1.5" stroke-dasharray="8,5" opacity=".55"/>
+                  <line x1="30" y1="545" x2="370" y2="545" stroke="#5ccd7e" stroke-width="1.5" stroke-dasharray="8,5" opacity=".55"/>
+                  <!-- 서비스 존 (우리팀 뒤) -->
+                  <rect x="30" y="807" width="340" height="10" rx="3" fill="none" stroke="#5ccd7e" stroke-width="1" stroke-dasharray="5,3" opacity=".3"/>
+                  <!-- 레이블 -->
+                  <text x="200" y="130" text-anchor="middle" fill="#c8d6e8" font-size="15" font-weight="900" opacity=".22">상대 코트</text>
+                  <text x="200" y="690" text-anchor="middle" fill="#c8d6e8" font-size="15" font-weight="900" opacity=".22">우리 코트</text>
+                  <!-- 포지션 번호 가이드 (희미) -->
+                  <text x="80" y="393" text-anchor="middle" fill="#fff" font-size="12" opacity=".12">②</text>
+                  <text x="200" y="393" text-anchor="middle" fill="#fff" font-size="12" opacity=".12">③</text>
+                  <text x="320" y="393" text-anchor="middle" fill="#fff" font-size="12" opacity=".12">④</text>
+                  <text x="320" y="730" text-anchor="middle" fill="#fff" font-size="12" opacity=".12">①</text>
+                  <text x="200" y="730" text-anchor="middle" fill="#fff" font-size="12" opacity=".12">⑥</text>
+                  <text x="80" y="730" text-anchor="middle" fill="#fff" font-size="12" opacity=".12">⑤</text>
+                </svg>
+                <!-- 화살표 레이어 -->
+                <svg class="vb2-arrow-svg" id="vb2-arrowSvg" viewBox="0 0 400 820" preserveAspectRatio="none">
+                  <defs>
+                    <marker id="vb2-ah" markerWidth="10" markerHeight="10" refX="9" refY="5" orient="auto">
+                      <path d="M0 0 L10 5 L0 10z" fill="#ffd84d"/>
+                    </marker>
+                    <marker id="vb2-ahb" markerWidth="10" markerHeight="10" refX="9" refY="5" orient="auto">
+                      <path d="M0 0 L10 5 L0 10z" fill="rgba(255,255,255,.65)"/>
+                    </marker>
+                  </defs>
+                </svg>
+                <!-- 선수 레이어 -->
+                <div class="vb2-player-layer" id="vb2-playerLayer"></div>
+                <!-- 공 레이어 -->
+                <div class="vb2-ball-layer">
+                  <div class="vb2-ball" id="vb2-ball"></div>
+                </div>
+              </div>
+            </div>
           </div>
-          <!-- 모바일용 탭 (넓은 화면에서는 숨김) -->
-          <nav class="vb-mobile-tabs" style="margin-top:8px;">
-            <button type="button" data-vb-panel="formations" onclick="VB.panel('formations')">배치</button>
-            <button type="button" data-vb-panel="tactics" onclick="VB.panel('tactics')">전술</button>
-            <button type="button" onclick="VB.action('execute')" class="active">이동</button>
-            <button type="button" onclick="VB.action('reset')">초기화</button>
-          </nav>
+        </div>
+      </div>
 
-          <!-- 2열 레이아웃: 왼쪽=선택, 오른쪽=코트 -->
-          <div class="vb-layout">
-
-            <!-- 왼쪽: 배치/전술 선택 패널 -->
-            <div id="vb-controls" class="vb-controls">
-              <section class="vb-section" data-vb-panel-body="formations">
-                <h2>배치 선택</h2>
-                <div id="vb-formationButtons" class="vb-button-row"></div>
-              </section>
-              <section class="vb-section" data-vb-panel-body="tactics">
-                <h2>상황별 전술</h2>
-                <div id="vb-tacticButtons" class="vb-button-row"></div>
-              </section>
-            </div>
-
-            <!-- 오른쪽: 코트 + 버튼 -->
-            <div>
-              <!-- 코트 -->
-              <div class="vb-court-wrap">
-                <div id="vb-court" class="vb-court">
-                  <div class="vb-court-label away">상대 코트</div>
-                  <div class="vb-court-label home">우리 코트</div>
-                  <div class="vb-net"><span>NET</span></div>
-                  <svg id="vb-routeLayer" class="vb-layer" viewBox="0 0 100 100" preserveAspectRatio="none"></svg>
-                  <div id="vb-targetLayer"></div>
-                  <div id="vb-tokenLayer"></div>
-                  <div class="vb-serve-zone">서브 출발선</div>
-                </div>
-              </div>
-              <!-- 실행 버튼 -->
-              <div class="vb-actions">
-                <button type="button" class="vb-primary" onclick="VB.action('execute')">▶ 이동 실행</button>
-                <button type="button" onclick="VB.action('preview')">예정 삭제</button>
-                <button type="button" onclick="VB.action('reset')">초기화</button>
-              </div>
-              <!-- 상세 설명 -->
-              <div class="panel vb-detail">
-                <h3 id="vb-detailTitle">3-3-3 기본</h3>
-                <p id="vb-detailText">9인제 기본 3열 배치입니다. 전위는 블록과 짧은 공격, 중위는 연결과 커버, 후위는 리시브와 깊은 수비를 맡습니다.</p>
-              </div>
-              <div class="panel" style="margin-top:8px;">
-                <div class="vb-legend-row">
-                  <span><i class="vb-dot home"></i>우리</span>
-                  <span><i class="vb-dot away"></i>상대</span>
-                  <span><i class="vb-dot ball"></i>공</span>
-                  <span><i class="vb-dot move"></i>이동예정</span>
-                </div>
-              </div>
-            </div>
-
-          </div><!-- /vb-layout -->
-          <!-- 포지션 피드백 -->
-          <div class="position-feedback" id="vb-feedback" hidden></div>
-          <!-- 관련 영상 -->
-          <div class="panel tactic-videos" id="tbRelatedVideos" hidden></div>
         </div>
       </div>
 
@@ -1916,392 +1932,566 @@ function updateTacticTab(club) {
 /* ============================================================
    인터랙티브 전술판 (VB 네임스페이스) - v2
    ============================================================ */
-var VB = (function() { try { return (function() {
+var VB = (function(){ try { return (function(){
   "use strict";
-  /* ---- 선수 명단 ---- */
-  const roster = [
-    ["H1","home","전좌","전위 좌"], ["H2","home","전중","전위 중"], ["H3","home","전우","전위 우"],
-    ["H4","home","중좌","중위 좌"], ["H5","home","중중","중위 중 / 연결"], ["H6","home","중우","중위 우"],
-    ["H7","home","후좌","후위 좌"], ["H8","home","후중","후위 중"], ["H9","home","후우","후위 우"],
-    ["A1","away","전좌","상대 전위 좌"], ["A2","away","전중","상대 전위 중"], ["A3","away","전우","상대 전위 우"],
-    ["A4","away","중좌","상대 중위 좌"], ["A5","away","중중","상대 중위 중"], ["A6","away","중우","상대 중위 우"],
-    ["A7","away","후좌","상대 후위 좌"], ["A8","away","후중","상대 후위 중"], ["A9","away","후우","상대 후위 우"],
-    ["BALL","ball","공","공"]
+
+  // ── 코트 좌표 (SVG viewBox 400×820) ──
+  const W=400,H=820;
+  // 우리팀: 하단 / 상대팀: 상단
+  const POS={
+    // 우리팀 기본 (6인제 rotation1)
+    H1:[320,715], H2:[320,455], H3:[200,445], H4:[80,455], H5:[80,715], H6:[200,715],
+    // 상대팀 (거울)
+    A1:[80,105], A2:[80,365], A3:[200,375], A4:[320,365], A5:[320,105], A6:[200,105],
+    // 5인제 우리팀
+    I1:[320,715],I2:[80,455],I3:[200,445],I4:[320,455],I5:[200,715],
+    // 5인제 상대
+    B1:[80,105],B2:[320,365],B3:[200,375],B4:[80,365],B5:[200,105],
+    BALL:[200,410]
+  };
+
+  // ── 선수 레이블 ──
+  const LABELS6={
+    H1:{n:"①",r:"세터"},H2:{n:"②",r:"OP"},H3:{n:"③",r:"미들"},
+    H4:{n:"④",r:"레프트"},H5:{n:"⑤",r:"OH"},H6:{n:"⑥",r:"리베로"},
+    A1:{n:"①",r:""},A2:{n:"②",r:""},A3:{n:"③",r:""},A4:{n:"④",r:""},A5:{n:"⑤",r:""},A6:{n:"⑥",r:""}
+  };
+  const LABELS5={
+    I1:{n:"①",r:"세터"},I2:{n:"②",r:"레프트"},I3:{n:"③",r:"미들"},
+    I4:{n:"④",r:"라이트"},I5:{n:"⑤",r:"리베로"},
+    B1:{n:"①",r:""},B2:{n:"②",r:""},B3:{n:"③",r:""},B4:{n:"④",r:""},B5:{n:"⑤",r:""}
+  };
+
+  // ── 포메이션 ──
+  const forms6=[
+    {key:'rot1', label:'로테이션 1',
+     pos:{H1:[320,715],H2:[320,455],H3:[200,445],H4:[80,455],H5:[80,715],H6:[200,715],
+          A1:[80,105],A2:[80,365],A3:[200,375],A4:[320,365],A5:[320,105],A6:[200,105],BALL:[200,410]}},
+    {key:'rot2', label:'로테이션 2',
+     pos:{H1:[80,715],H2:[320,455],H3:[200,445],H4:[80,455],H5:[200,715],H6:[320,715],
+          A1:[80,105],A2:[80,365],A3:[200,375],A4:[320,365],A5:[320,105],A6:[200,105],BALL:[200,410]}},
+    {key:'wrecv', label:'W 리시브',
+     pos:{H1:[320,690],H2:[320,620],H3:[200,690],H4:[80,690],H5:[60,640],H6:[160,640],
+          A1:[80,105],A2:[80,365],A3:[200,375],A4:[320,365],A5:[320,105],A6:[200,105],BALL:[200,410]}},
+    {key:'block', label:'블로킹 대형',
+     pos:{H1:[320,715],H2:[80,425],H3:[200,425],H4:[320,425],H5:[80,715],H6:[200,715],
+          A1:[80,105],A2:[80,365],A3:[200,375],A4:[320,365],A5:[320,105],A6:[200,105],BALL:[200,400]}}
   ];
-  /* ---- 배치 데이터 ---- */
-  /* 6인제 숨김좌표: H7-9/A7-9 코트 밖 */
-  const _X6H=[50,115],_X6A=[50,-15];
-  const positions = {
-    /* ── 9인제 ── */
-    base:{title:"[9인제] 3-3-3 기본",text:"9인제 기본 3열 배치. 전위=블록·단거리공격, 중위=연결·커버, 후위=리시브·깊은수비.",pos:{H1:[18,58],H2:[50,58],H3:[82,58],H4:[18,74],H5:[50,74],H6:[82,74],H7:[18,90],H8:[50,90],H9:[82,90],A1:[18,42],A2:[50,42],A3:[82,42],A4:[18,26],A5:[50,26],A6:[82,26],A7:[18,10],A8:[50,10],A9:[82,10],BALL:[50,107]}},
-    serve:{title:"[9인제] 서브 대형",text:"서브 선수(우후)는 라인 뒤에서 출발. 나머지는 상대 리턴 대비 중앙 당김.",pos:{H1:[20,60],H2:[50,58],H3:[80,60],H4:[22,75],H5:[50,72],H6:[78,75],H7:[18,90],H8:[50,88],H9:[82,107],A1:[18,42],A2:[50,42],A3:[82,42],A4:[18,26],A5:[50,26],A6:[82,26],A7:[18,10],A8:[50,10],A9:[82,10],BALL:[82,107]}},
-    receive:{title:"[9인제] W 리시브",text:"후위 3+중위 양측이 W 모양으로 받고, 중위 중앙이 2차 연결 준비.",pos:{H1:[18,58],H2:[50,59],H3:[82,58],H4:[15,73],H5:[50,70],H6:[85,73],H7:[18,88],H8:[50,91],H9:[82,88],A1:[18,42],A2:[50,42],A3:[82,42],A4:[18,26],A5:[50,26],A6:[82,26],A7:[18,10],A8:[50,10],A9:[82,10],BALL:[50,6]}},
-    attack:{title:"[9인제] 공격 전개",text:"중위 중앙 연결 → 전위 3명 공격 선택지. 후위는 빈 공간 커버.",pos:{H1:[16,54],H2:[50,52],H3:[84,54],H4:[22,68],H5:[50,63],H6:[78,68],H7:[20,86],H8:[50,88],H9:[80,86],A1:[16,42],A2:[50,42],A3:[84,42],A4:[18,26],A5:[50,26],A6:[82,26],A7:[18,10],A8:[50,10],A9:[82,10],BALL:[50,63]}},
-    block:{title:"[9인제] 블록 커버",text:"전위는 네트를 닫고 중위는 떨어지는 공, 후위 중앙은 깊은 공 담당.",pos:{H1:[19,53],H2:[50,52],H3:[81,53],H4:[24,66],H5:[50,68],H6:[76,66],H7:[18,86],H8:[50,91],H9:[82,86],A1:[18,42],A2:[50,42],A3:[82,42],A4:[18,26],A5:[50,26],A6:[82,26],A7:[18,10],A8:[50,10],A9:[82,10],BALL:[50,48]}},
-    narrow:{title:"[9인제] 좁은 리시브",text:"초보팀용. 중앙 먼저 막고 좌우는 한 발 늦게라도 커버.",pos:{H1:[24,58],H2:[50,57],H3:[76,58],H4:[28,74],H5:[50,72],H6:[72,74],H7:[25,89],H8:[50,91],H9:[75,89],A1:[18,42],A2:[50,42],A3:[82,42],A4:[18,26],A5:[50,26],A6:[82,26],A7:[18,10],A8:[50,10],A9:[82,10],BALL:[50,7]}},
-    deep:{title:"[9인제] 깊은 수비",text:"상대가 길게 넘기는 팀용. 후위를 뒤로 빼고 중위가 앞 공간 담당.",pos:{H1:[18,59],H2:[50,59],H3:[82,59],H4:[20,71],H5:[50,72],H6:[80,71],H7:[16,95],H8:[50,96],H9:[84,95],A1:[18,42],A2:[50,42],A3:[82,42],A4:[18,26],A5:[50,26],A6:[82,26],A7:[18,10],A8:[50,10],A9:[82,10],BALL:[50,6]}},
-    /* ── 6인제 ── H1=세터 H2=OP H3=MB1 H4=OH(좌전) H5=OH(좌후) H6=Lib */
-    s6_base:{title:"[6인제] 기본 배치",text:"6인제 기본. 세터(S)·반대(OP)·미들×2·레프트OH×2(+리베로). 전위 3명 / 후위 3명.",pos:{H1:[80,85],H2:[80,60],H3:[50,60],H4:[20,60],H5:[20,85],H6:[50,85],H7:_X6H,H8:_X6H,H9:_X6H,A1:[20,15],A2:[50,15],A3:[80,15],A4:[20,35],A5:[50,35],A6:[80,35],A7:_X6A,A8:_X6A,A9:_X6A,BALL:[50,6]}},
-    s6_rot1:{title:"[6인제] 로테이션 1번",text:"세터가 우후(1번 위치). 서브 후 세터가 전위로 이동해 토스 준비.",pos:{H1:[80,85],H2:[80,60],H3:[50,60],H4:[20,60],H5:[20,85],H6:[50,85],H7:_X6H,H8:_X6H,H9:_X6H,A1:[20,15],A2:[50,15],A3:[80,15],A4:[20,35],A5:[50,35],A6:[80,35],A7:_X6A,A8:_X6A,A9:_X6A,BALL:[80,107]}},
-    s6_rot2:{title:"[6인제] 로테이션 2번",text:"세터가 중후(6번 위치). 좌전 OH가 공격 주력.",pos:{H1:[50,85],H2:[20,85],H3:[80,60],H4:[50,60],H5:[20,60],H6:[80,85],H7:_X6H,H8:_X6H,H9:_X6H,A1:[20,15],A2:[50,15],A3:[80,15],A4:[20,35],A5:[50,35],A6:[80,35],A7:_X6A,A8:_X6A,A9:_X6A,BALL:[50,6]}},
-    s6_rot3:{title:"[6인제] 로테이션 3번",text:"세터가 좌후(5번 위치). 전위 OH·MB·OP 공격 선택지.",pos:{H1:[20,85],H2:[80,85],H3:[20,60],H4:[50,60],H5:[80,60],H6:[50,85],H7:_X6H,H8:_X6H,H9:_X6H,A1:[20,15],A2:[50,15],A3:[80,15],A4:[20,35],A5:[50,35],A6:[80,35],A7:_X6A,A8:_X6A,A9:_X6A,BALL:[50,6]}},
-    s6_recv_w:{title:"[6인제] W 리시브",text:"OH 2명+Lib 3각 리시브. 세터는 우전으로 미리 이동해 토스 대기.",pos:{H1:[78,62],H2:[80,85],H3:[50,60],H4:[20,60],H5:[20,85],H6:[50,90],H7:_X6H,H8:_X6H,H9:_X6H,A1:[20,15],A2:[50,15],A3:[80,15],A4:[20,35],A5:[50,35],A6:[80,35],A7:_X6A,A8:_X6A,A9:_X6A,BALL:[50,6]}},
-    s6_recv_u:{title:"[6인제] U 리시브",text:"후위 3명이 U 모양으로 받고 전위가 네트 앞 공격 준비.",pos:{H1:[78,62],H2:[80,60],H3:[50,60],H4:[20,60],H5:[14,87],H6:[50,92],H7:_X6H,H8:_X6H,H9:_X6H,A1:[20,15],A2:[50,15],A3:[80,15],A4:[20,35],A5:[50,35],A6:[80,35],A7:_X6A,A8:_X6A,A9:_X6A,BALL:[50,6]}},
-    s6_block:{title:"[6인제] 블록 대형",text:"전위 3명이 네트에 붙어 블록. Lib는 중앙 수비, OH후위는 사이드 수비.",pos:{H1:[78,58],H2:[80,57],H3:[50,57],H4:[20,57],H5:[15,85],H6:[50,88],H7:_X6H,H8:_X6H,H9:_X6H,A1:[20,15],A2:[50,15],A3:[80,15],A4:[20,35],A5:[50,35],A6:[80,35],A7:_X6A,A8:_X6A,A9:_X6A,BALL:[50,48]}},
-    /* ── 5인제 H1=세터 H2=레프트 H3=라이트 H4=레프트백 H5=라이트백 ── */
-    s5_base:{title:"[5인제] 기본 배치",text:"5인제 기본. 전위 세터·레프트·라이트 / 후위 레프트백·라이트백.",pos:{H1:[50,62],H2:[20,62],H3:[80,62],H4:[22,87],H5:[78,87],H6:_X6H,H7:_X6H,H8:_X6H,H9:_X6H,A1:[50,38],A2:[20,38],A3:[80,38],A4:[22,13],A5:[78,13],A6:_X6A,A7:_X6A,A8:_X6A,A9:_X6A,BALL:[50,6]}},
-    s5_serve:{title:"[5인제] 서브 대형",text:"서브 선수(라이트백)가 코트 밖에서 출발. 나머지 4명 수비 위치 유지.",pos:{H1:[50,62],H2:[20,62],H3:[80,62],H4:[22,87],H5:[80,107],H6:_X6H,H7:_X6H,H8:_X6H,H9:_X6H,A1:[50,38],A2:[20,38],A3:[80,38],A4:[22,13],A5:[78,13],A6:_X6A,A7:_X6A,A8:_X6A,A9:_X6A,BALL:[80,107]}},
-    s5_recv:{title:"[5인제] W 리시브",text:"후위 2명+레프트가 삼각 리시브. 세터는 중앙 앞에서 토스 대기.",pos:{H1:[50,68],H2:[16,74],H3:[80,62],H4:[30,87],H5:[72,87],H6:_X6H,H7:_X6H,H8:_X6H,H9:_X6H,A1:[50,38],A2:[20,38],A3:[80,38],A4:[22,13],A5:[78,13],A6:_X6A,A7:_X6A,A8:_X6A,A9:_X6A,BALL:[50,6]}},
-    s5_attack:{title:"[5인제] 공격 전개",text:"세터 토스 → 레프트 또는 라이트 공격. 백어택(후위)도 선택지.",pos:{H1:[50,65],H2:[18,60],H3:[82,60],H4:[22,85],H5:[78,85],H6:_X6H,H7:_X6H,H8:_X6H,H9:_X6H,A1:[50,38],A2:[20,38],A3:[80,38],A4:[22,13],A5:[78,13],A6:_X6A,A7:_X6A,A8:_X6A,A9:_X6A,BALL:[50,65]}},
-    s5_block:{title:"[5인제] 블록 + 수비",text:"전위 3명 블록 대기. 후위 2명이 블록 뒤 좌우 빈 공간 수비.",pos:{H1:[50,58],H2:[22,58],H3:[78,58],H4:[18,85],H5:[82,85],H6:_X6H,H7:_X6H,H8:_X6H,H9:_X6H,A1:[50,38],A2:[20,38],A3:[80,38],A4:[22,13],A5:[78,13],A6:_X6A,A7:_X6A,A8:_X6A,A9:_X6A,BALL:[50,48]}}
-  };
-  /* ---- 전술 데이터 ---- */
-  const tactics = {
-    /* ── 9인제 서브 ── */
-    serveRight:{title:"[9인] 우측 깊은 서브",text:"후우가 라인 뒤에서 출발해 상대 후좌/후중 사이 깊은 곳으로 보냅니다.",base:"serve",moves:{H9:[82,107],H5:[50,70],H2:[50,55],H6:[76,74],H8:[50,90]},ball:{from:[82,107],to:[22,8],label:"서브"}},
-    serveShort:{title:"[9인] 짧은 서브",text:"상대 전위와 중위 사이로 짧게 떨어뜨려 첫 터치를 흔듭니다.",base:"serve",moves:{H9:[82,107],H1:[18,55],H2:[50,53],H3:[82,55],H5:[50,69]},ball:{from:[82,107],to:[53,31],label:"짧은 서브"}},
-    serveFloat:{title:"[9인] 플로트 서브",text:"공에 힘을 빼고 불규칙하게 흔들리도록 서브. 받는 사람이 예측하기 어렵습니다.",base:"serve",moves:{H9:[82,107],H5:[50,68],H2:[50,54],H1:[24,58],H3:[76,58]},ball:{from:[82,107],to:[50,14],label:"플로트"}},
-    /* ── 9인제 리시브 ── */
-    receiveCenter:{title:"[9인] 중앙 리시브",text:"후중이 받고 중중이 두 번째 공을 전위로 연결합니다.",base:"receive",moves:{H8:[50,86],H5:[50,65],H2:[50,54],H1:[18,56],H3:[82,56]},ball:{from:[50,5],to:[50,86],label:"리시브"}},
-    receiveLeft:{title:"[9인] 좌측 리시브",text:"좌측 서브를 후좌가 받고 중좌·중중이 연결 동선을 나눕니다.",base:"receive",moves:{H7:[18,85],H4:[24,70],H5:[50,66],H1:[18,55],H2:[50,55]},ball:{from:[25,5],to:[18,85],label:"리시브"}},
-    receiveRight:{title:"[9인] 우측 리시브",text:"우측 서브를 후우가 받고 중우·중중이 연결 위치로 들어옵니다.",base:"receive",moves:{H9:[82,85],H6:[76,70],H5:[50,66],H3:[82,55],H2:[50,55]},ball:{from:[75,5],to:[82,85],label:"리시브"}},
-    /* ── 9인제 공격 ── */
-    attackLeft:{title:"[9인] 좌측 공격",text:"중중 연결 → 전좌 공격. 중좌·후좌가 커버.",base:"attack",moves:{H5:[45,64],H1:[14,53],H2:[50,54],H4:[24,68],H7:[20,86]},ball:{from:[50,64],to:[16,34],label:"공격"}},
-    attackRight:{title:"[9인] 우측 공격",text:"오른쪽 전위로 빠르게 밀어 상대 블록을 늦춥니다.",base:"attack",moves:{H5:[55,64],H3:[86,53],H2:[50,54],H6:[76,68],H9:[80,86]},ball:{from:[50,64],to:[84,35],label:"공격"}},
-    centerTip:{title:"[9인] 중앙 페인트",text:"강하게 때리는 척하다가 네트 바로 뒤 빈 공간으로 떨어뜨립니다.",base:"attack",moves:{H2:[50,52],H5:[50,63],H1:[24,55],H3:[76,55],H8:[50,86]},ball:{from:[50,63],to:[50,38],label:"페인트"}},
-    /* ── 9인제 수비/블록 ── */
-    blockMiddle:{title:"[9인] 중앙 블록",text:"상대 중앙 공격에 전중이 기준점, 좌우 전위가 좁혀 들어옵니다.",base:"block",moves:{H1:[28,53],H2:[50,51],H3:[72,53],H4:[30,66],H5:[50,68],H6:[70,66]},ball:{from:[50,37],to:[50,61],label:"상대 공격"}},
-    blockLeft:{title:"[9인] 좌측 블록",text:"상대 좌측 공격 예상 시 전좌·전중이 이동 블록. 후위는 우측 빈 공간 커버.",base:"block",moves:{H1:[22,52],H2:[36,51],H3:[80,55],H4:[28,67],H5:[60,69],H6:[78,66],H7:[18,88],H8:[50,89],H9:[82,87]},ball:{from:[18,37],to:[26,61],label:"좌측 공격"}},
-    coverDrop:{title:"[9인] 짧은 공 커버",text:"상대가 짧게 넘길 때 중위 세 명이 앞으로 당기고 후위는 깊은 공 담당.",base:"base",moves:{H4:[20,66],H5:[50,65],H6:[80,66],H7:[18,89],H8:[50,92],H9:[82,89]},ball:{from:[58,38],to:[44,65],label:"짧은 공"}},
-    deepBall:{title:"[9인] 깊은 공 대응",text:"상대가 후방으로 길게 넘길 때 후위가 먼저 빠지고 중중이 연결 위치로.",base:"deep",moves:{H7:[16,95],H8:[50,96],H9:[84,95],H5:[50,72],H2:[50,57]},ball:{from:[47,36],to:[50,96],label:"긴 공"}},
-    freeBall:{title:"[9인] 찬스볼 전환",text:"쉬운 공이 넘어오면 안정적으로 받고 3가지 공격 방향 중 선택.",base:"base",moves:{H8:[50,86],H5:[50,64],H1:[15,54],H2:[50,53],H3:[85,54]},ball:{from:[50,33],to:[50,86],label:"찬스볼"}},
-    myTactic:{title:"[9인] 좌우 흔들기",text:"초보팀 전술. 첫 공은 중앙, 두 번째 공은 비어 있는 좌우 끝으로.",base:"base",moves:{H5:[50,64],H1:[13,55],H3:[87,55],H4:[28,70],H6:[72,70],H8:[50,88]},ball:{from:[50,88],to:[87,35],label:"좌우 전환"}},
-    /* ── 6인제 전술 ── */
-    s6_serve_jump:{title:"[6인] 점프 서브",text:"세터가 우전으로 이동 준비. OP가 라인 뒤에서 강한 점프 서브.",base:"s6_rot1",moves:{H2:[80,107],H1:[78,62],H3:[50,60],H4:[20,60],H5:[20,85],H6:[50,85]},ball:{from:[80,107],to:[16,8],label:"점프 서브"}},
-    s6_serve_side:{title:"[6인] 사이드 서브",text:"OH(좌후)가 라인 뒤에서 사이드 서브로 상대 리베로 위치를 피해 공격.",base:"s6_rot3",moves:{H5:[20,107],H1:[78,62],H3:[50,60],H4:[20,60],H2:[80,85],H6:[50,85]},ball:{from:[20,107],to:[78,10],label:"사이드 서브"}},
-    s6_recv_setter:{title:"[6인] 리시브 후 세터 토스",text:"OH·Lib가 리시브. 세터가 우전 네트 앞(2번 위치)으로 이동해 토스 준비.",base:"s6_recv_w",moves:{H5:[18,85],H6:[50,90],H1:[78,62],H3:[50,60],H4:[20,60],H2:[80,85]},ball:{from:[30,6],to:[20,85],label:"리시브"}},
-    s6_attack_left:{title:"[6인] 레프트 공격",text:"세터 토스 → 좌전 OH 공격. Lib·OH후위가 공격 후 빈 공간 커버.",base:"s6_recv_w",moves:{H1:[78,62],H4:[18,57],H6:[50,88],H5:[20,85],H2:[80,85]},ball:{from:[78,62],to:[18,35],label:"레프트 공격"}},
-    s6_attack_op:{title:"[6인] OP(반대) 공격",text:"빠른 백세트 → 우전 OP 공격. 상대 블록이 세터를 쫓다가 역습 당함.",base:"s6_recv_w",moves:{H1:[78,62],H2:[82,60],H3:[50,60],H4:[20,60],H6:[50,88]},ball:{from:[78,62],to:[82,35],label:"OP 공격"}},
-    s6_attack_pipe:{title:"[6인] 파이프 공격",text:"후위 OH가 중앙 후방에서 점프 공격(파이프). 전위 블록 타이밍과 어긋남.",base:"s6_base",moves:{H5:[50,75],H1:[78,62],H3:[50,60],H4:[20,60],H6:[50,88]},ball:{from:[78,62],to:[50,55],label:"파이프"}},
-    s6_attack_combo:{title:"[6인] A퀵+레프트 콤비",text:"MB가 A퀵으로 블록 유인 → 세터가 레프트로 연결. 블록 1명 무너뜨리기.",base:"s6_recv_w",moves:{H3:[46,58],H4:[18,57],H1:[78,62],H6:[50,88],H2:[80,85]},ball:{from:[78,62],to:[18,35],label:"콤비 공격"}},
-    s6_block_double:{title:"[6인] 더블 블록",text:"상대 레프트 공격에 MB·OP가 더블 블록. OH후위는 블록 뒤 빈 공간 커버.",base:"s6_block",moves:{H2:[72,57],H3:[56,57],H4:[20,57],H5:[15,75],H6:[50,82],H1:[82,65]},ball:{from:[18,37],to:[60,61],label:"상대 공격"}},
-    s6_libero:{title:"[6인] 리베로 리시브",text:"어려운 서브는 리베로(Lib)가 우선 수비. OH들은 공격 대기 위치 유지.",base:"s6_recv_u",moves:{H6:[50,90],H5:[16,85],H1:[78,62],H4:[22,60],H3:[50,60],H2:[80,60]},ball:{from:[50,6],to:[50,90],label:"리베로 수비"}},
-    s6_rotate_coverage:{title:"[6인] 로테이션 커버",text:"공격 후 착지 선수가 빠질 공간을 중위가 즉시 채운다. 빈 곳이 생기면 역습 허용.",base:"s6_base",moves:{H4:[20,70],H6:[38,78],H5:[14,85],H1:[78,62],H3:[50,60],H2:[80,60]},ball:{from:[20,57],to:[22,72],label:"착지 커버"}},
-    /* ── 5인제 전술 ── */
-    s5_serve_deep:{title:"[5인] 깊은 서브",text:"라이트백이 상대 레프트백 깊숙이 서브. 받기 어려운 위치로 압박.",base:"s5_serve",moves:{H5:[80,107],H1:[50,65],H2:[20,62],H3:[80,62],H4:[28,87]},ball:{from:[80,107],to:[22,8],label:"깊은 서브"}},
-    s5_serve_short:{title:"[5인] 짧은 서브",text:"상대 전위와 후위 사이 경계선으로 짧게 떨어뜨려 혼선 유도.",base:"s5_serve",moves:{H5:[80,107],H1:[50,65],H2:[20,62],H3:[80,62]},ball:{from:[80,107],to:[50,30],label:"짧은 서브"}},
-    s5_recv_left:{title:"[5인] 좌측 리시브",text:"레프트백이 좌측 서브를 받고 세터가 전위로 이동해 연결.",base:"s5_recv",moves:{H4:[18,86],H1:[50,66],H2:[20,60],H3:[80,60]},ball:{from:[22,6],to:[18,86],label:"리시브"}},
-    s5_recv_right:{title:"[5인] 우측 리시브",text:"라이트백이 우측 서브를 받고 세터 연결 → 레프트 공격.",base:"s5_recv",moves:{H5:[78,86],H1:[50,66],H2:[20,60],H3:[80,60]},ball:{from:[78,6],to:[78,86],label:"리시브"}},
-    s5_attack_left:{title:"[5인] 레프트 공격",text:"세터 토스 → 레프트 강공. 후위 2명이 착지 커버 및 수비 위치.",base:"s5_attack",moves:{H1:[50,65],H2:[14,58],H3:[82,62],H4:[28,86],H5:[72,88]},ball:{from:[50,65],to:[16,34],label:"레프트 공격"}},
-    s5_attack_right:{title:"[5인] 라이트 공격",text:"빠른 백세트 → 라이트 공격. 상대 블록이 레프트 쪽으로 이동한 틈을 노린다.",base:"s5_attack",moves:{H1:[50,65],H2:[18,62],H3:[86,58],H4:[28,86],H5:[72,88]},ball:{from:[50,65],to:[84,34],label:"라이트 공격"}},
-    s5_attack_back:{title:"[5인] 후위 공격 (백어택)",text:"레프트백이 3m 라인 뒤에서 점프 공격. 상대 전위 블록을 피할 수 있음.",base:"s5_attack",moves:{H4:[22,78],H1:[50,65],H2:[18,62],H3:[82,62]},ball:{from:[50,65],to:[22,50],label:"백어택"}},
-    s5_tip:{title:"[5인] 페인트 (팁)",text:"강공인 척 팁샷. 상대 블록이 점프한 뒤 빈 공간으로 가볍게 넘김.",base:"s5_attack",moves:{H2:[18,60],H1:[50,65],H3:[82,60],H4:[28,85],H5:[72,85]},ball:{from:[50,65],to:[50,38],label:"팁"}},
-    s5_block_double:{title:"[5인] 더블 블록",text:"레프트 또는 라이트 공격에 두 명이 붙어 블록. 나머지 후위가 빈 공간 수비.",base:"s5_block",moves:{H2:[30,57],H3:[80,57],H1:[50,62],H4:[16,86],H5:[76,86]},ball:{from:[18,37],to:[28,62],label:"상대 공격"}},
-    s5_cover:{title:"[5인] 블록 커버",text:"블록 팅겨 나온 공을 후위가 받고 다시 연결. 공격 후 반드시 커버 위치로.",base:"s5_block",moves:{H4:[22,78],H5:[70,80],H1:[50,68],H2:[18,62],H3:[78,62]},ball:{from:[50,57],to:[30,75],label:"블록 커버"}}
-  };
+  const forms5=[
+    {key:'f5base', label:'5인제 기본',
+     pos:{I1:[320,715],I2:[80,455],I3:[200,445],I4:[320,455],I5:[200,715],
+          B1:[80,105],B2:[320,365],B3:[200,375],B4:[80,365],B5:[200,105],BALL:[200,410]}},
+    {key:'f5recv', label:'5인제 리시브',
+     pos:{I1:[320,680],I2:[60,660],I3:[200,690],I4:[340,660],I5:[200,720],
+          B1:[80,105],B2:[320,365],B3:[200,375],B4:[80,365],B5:[200,105],BALL:[320,180]}}
+  ];
 
-  /* ---- 상태 ---- */
-  const st = {selected:null,selectedFormation:"base",selectedTactic:null,openPanel:null,moving:false,players:{},planned:{},completed:[]};
-  let initialized = false;
+  // ── 전술 (다단계 스텝) ──
+  const TAC6=[
+    {key:'t6_1',label:'W리시브→레프트',
+     form:'rot1',
+     title:'W 리시브 → 레프트 공격',
+     steps:[
+       {desc:'① 상대 서브 시작 (우측 대각)',
+        ball:{from:[320,180],to:[80,680]},moves:{}},
+       {desc:'② W 대형으로 리시브 이동',
+        ball:{from:[80,680],to:[200,640]},
+        moves:{H1:[320,690],H2:[290,640],H3:[200,690],H4:[60,670],H5:[130,635],H6:[200,710]}},
+       {desc:'③ 세터 위치로 2단 처리',
+        ball:{from:[200,640],to:[200,510]},
+        moves:{H1:[280,500]}},
+       {desc:'④ 레프트 스파이크 공격!',
+        ball:{from:[200,510],to:[80,430]},
+        moves:{H4:[75,475],H2:[80,420]}},
+       {desc:'⑤ 레프트 스파이크 → 상대 코트로',
+        ball:{from:[80,430],to:[100,200]},moves:{}}
+     ]},
+    {key:'t6_2',label:'W리시브→미들속공',
+     form:'rot1',
+     title:'W 리시브 → 미들 속공',
+     steps:[
+       {desc:'① 상대 서브 (중앙 방향)',
+        ball:{from:[200,180],to:[200,700]},moves:{}},
+       {desc:'② W 대형 리시브',
+        ball:{from:[200,700],to:[200,640]},
+        moves:{H1:[320,690],H2:[280,640],H3:[200,690],H4:[60,670],H5:[120,635],H6:[200,710]}},
+       {desc:'③ 세터 빠른 토스 → 미들 속공',
+        ball:{from:[200,640],to:[200,460]},
+        moves:{H1:[200,500],H3:[200,450]}},
+       {desc:'④ 미들 점프 스파이크!',
+        ball:{from:[200,460],to:[260,200]},
+        moves:{H3:[200,425]}}
+     ]},
+    {key:'t6_3',label:'W리시브→라이트',
+     form:'rot1',
+     title:'W 리시브 → 라이트 공격',
+     steps:[
+       {desc:'① 상대 서브 (좌측 대각)',
+        ball:{from:[80,180],to:[320,680]},moves:{}},
+       {desc:'② W 대형 리시브',
+        ball:{from:[320,680],to:[200,640]},
+        moves:{H1:[320,690],H2:[290,640],H3:[200,690],H4:[60,670],H5:[130,635],H6:[200,710]}},
+       {desc:'③ 세터 라이트 방향 토스',
+        ball:{from:[200,640],to:[320,500]},
+        moves:{H1:[280,500]}},
+       {desc:'④ OP(라이트) 백어택 공격!',
+        ball:{from:[320,500],to:[300,200]},
+        moves:{H2:[320,450]}}
+     ]},
+    {key:'t6_4',label:'더블 블로킹',
+     form:'block',
+     title:'더블 블로킹 수비',
+     steps:[
+       {desc:'① 상대팀 세터 토스 (레프트)',
+        ball:{from:[200,360],to:[80,340]},
+        moves:{A2:[200,375],A3:[80,375]}},
+       {desc:'② 우리팀 2·3번 블로킹 점프',
+        ball:{from:[80,340],to:[80,360]},
+        moves:{H3:[80,425],H2:[160,430]}},
+       {desc:'③ 스파이크 막기 + 뒤 수비 준비',
+        ball:{from:[80,360],to:[80,470]},
+        moves:{H5:[80,660],H6:[200,620],H1:[320,680]}},
+       {desc:'④ 수비 성공 → 역공 세팅',
+        ball:{from:[80,470],to:[200,600]},
+        moves:{H1:[200,550]}}
+     ]},
+    {key:'t6_5',label:'로테이션 이동',
+     form:'rot1',
+     title:'서브 득점 후 로테이션',
+     steps:[
+       {desc:'① 현재 로테이션 1 대형',
+        ball:{from:[320,750],to:[200,410]},moves:{}},
+       {desc:'② 시계방향으로 1칸 이동',
+        ball:{from:[200,410],to:[200,410]},
+        moves:{H1:[80,715],H2:[320,455],H3:[200,455],H4:[80,455],H5:[200,715],H6:[320,715]}},
+       {desc:'③ 로테이션 2 완료 → 서브 준비',
+        ball:{from:[200,410],to:[80,750]},
+        moves:{}}
+     ]},
+    {key:'t6_6',label:'서브 에이스',
+     form:'rot1',
+     title:'점프 서브 에이스 노림',
+     steps:[
+       {desc:'① 서버 서브 지점 이동',
+        ball:{from:[200,410],to:[200,790]},
+        moves:{H1:[200,780]}},
+       {desc:'② 점프 서브 → 상대 약점 공략',
+        ball:{from:[200,790],to:[80,120]},
+        moves:{A6:[80,160],A1:[60,130]}},
+       {desc:'③ 서브 에이스 성공 / 리시브 실패',
+        ball:{from:[80,120],to:[80,50]},moves:{}}
+     ]},
+    {key:'t6_7',label:'수비 커버',
+     form:'wrecv',
+     title:'스파이크 수비 커버 시스템',
+     steps:[
+       {desc:'① 상대 레프트 스파이크 예고',
+        ball:{from:[200,375],to:[80,350]},
+        moves:{A4:[80,380]}},
+       {desc:'② 블로커 점프 + 수비 대형',
+        ball:{from:[80,350],to:[80,365]},
+        moves:{H3:[80,420],H2:[160,430],H5:[130,680],H6:[200,650],H1:[320,690]}},
+       {desc:'③ 스파이크 수비 성공',
+        ball:{from:[80,365],to:[200,620]},
+        moves:{}},
+       {desc:'④ 수비 → 역공 전환',
+        ball:{from:[200,620],to:[320,460]},
+        moves:{H1:[280,530],H4:[75,475]}}
+     ]},
+    {key:'t6_8',label:'빠른 역습',
+     form:'rot1',
+     title:'빠른 역습 공격 (카운터)',
+     steps:[
+       {desc:'① 상대 스파이크 리시브 성공',
+        ball:{from:[80,340],to:[200,650]},
+        moves:{H5:[60,670],H6:[200,680]}},
+       {desc:'② 세터 빠른 연결',
+        ball:{from:[200,650],to:[200,520]},
+        moves:{H1:[200,530]}},
+       {desc:'③ 레프트·라이트 동시 진입',
+        ball:{from:[200,520],to:[200,460]},
+        moves:{H4:[80,445],H2:[320,445]}},
+       {desc:'④ 레프트 속공으로 역습 성공!',
+        ball:{from:[200,460],to:[70,200]},
+        moves:{H4:[75,430]}}
+     ]}
+  ];
 
-  /* ---- 헬퍼 ---- */
-  const $v = id => document.getElementById(id);
-  function scaleY(y){ return y<=100?y:100+((y-100)*0.72); }
-  function tokenStyle(x,y){ return `left:${x}%;top:${scaleY(y)}%;`; }
-  function playerById(id){ return st.players[id]; }
+  const TAC5=[
+    {key:'t5_1',label:'서브리시브→공격',
+     form:'f5base',
+     title:'5인제 서브 리시브 → 공격',
+     steps:[
+       {desc:'① 상대 서브',
+        ball:{from:[200,180],to:[180,680]},moves:{}},
+       {desc:'② 후위 2인 리시브 → 세터',
+        ball:{from:[180,680],to:[200,600]},
+        moves:{I1:[320,680],I5:[160,680]}},
+       {desc:'③ 세터 토스 (레프트)',
+        ball:{from:[200,600],to:[80,480]},
+        moves:{I1:[250,520]}},
+       {desc:'④ 레프트 스파이크 공격',
+        ball:{from:[80,480],to:[80,200]},
+        moves:{I2:[80,445]}}
+     ]},
+    {key:'t5_2',label:'미들 속공',
+     form:'f5base',
+     title:'5인제 미들 속공',
+     steps:[
+       {desc:'① 상대 서브 → 리시브',
+        ball:{from:[200,160],to:[200,680]},moves:{}},
+       {desc:'② 세터 속공 토스',
+        ball:{from:[200,680],to:[200,470]},
+        moves:{I1:[200,530]}},
+       {desc:'③ 미들 점프 스파이크',
+        ball:{from:[200,470],to:[240,210]},
+        moves:{I3:[200,440]}}
+     ]},
+    {key:'t5_3',label:'백어택',
+     form:'f5base',
+     title:'5인제 백어택 (후위 공격)',
+     steps:[
+       {desc:'① 리시브 → 세터',
+        ball:{from:[80,150],to:[320,700]},moves:{}},
+       {desc:'② 세터 백어택 세팅',
+        ball:{from:[320,700],to:[320,570]},
+        moves:{I1:[310,570]}},
+       {desc:'③ 라이트 백어택 점프',
+        ball:{from:[320,570],to:[320,420]},
+        moves:{I4:[320,555]}},
+       {desc:'④ 백어택 스파이크 공격!',
+        ball:{from:[320,420],to:[280,180]},moves:{}}
+     ]},
+    {key:'t5_4',label:'더블 공격 옵션',
+     form:'f5base',
+     title:'5인제 레프트·라이트 더블 공격',
+     steps:[
+       {desc:'① 리시브 성공 → 세터 전달',
+        ball:{from:[200,180],to:[200,680]},moves:{}},
+       {desc:'② 세터 포지션 이동',
+        ball:{from:[200,680],to:[200,560]},
+        moves:{I1:[200,550]}},
+       {desc:'③ 레프트·라이트 동시 진입',
+        ball:{from:[200,560],to:[200,470]},
+        moves:{I2:[80,450],I4:[320,450]}},
+       {desc:'④ 레프트 선택 → 공격!',
+        ball:{from:[200,470],to:[80,200]},
+        moves:{I2:[75,430]}}
+     ]}
+  ];
 
-  /* ---- 선수 초기화 ---- */
-  const _six_labels={H1:"세터(S)",H2:"OP",H3:"미들",H4:"레프트",H5:"OH후위",H6:"리베로",BALL:"공",
-    A1:"상대S",A2:"상대OP",A3:"상대MB",A4:"상대OH",A5:"상대Lib",A6:"상대OH2"};
-  const _five_labels={H1:"세터",H2:"레프트",H3:"라이트",H4:"레프트백",H5:"라이트백",BALL:"공",
-    A1:"상대S",A2:"상대L",A3:"상대R",A4:"상대LB",A5:"상대RB"};
-  function seedPlayers(key="base"){
-    st.players={};
-    var isSix=key.startsWith('s6_'); var isFive=key.startsWith('s5_');
-    roster.forEach(([id,team,label,role])=>{
-      const pos_entry=positions[key]||positions.base;
-      const p=pos_entry.pos[id]||positions.base.pos[id]||[50,50];
-      var lbl=isFive&&_five_labels[id]?_five_labels[id]:isSix&&_six_labels[id]?_six_labels[id]:label;
-      var rl=isFive&&_five_labels[id]?_five_labels[id]:isSix&&_six_labels[id]?_six_labels[id]:role;
-      st.players[id]={id,team,label:lbl,role:rl,x:p[0],y:p[1]};
-    });
-    st.planned={}; st.completed=[]; st.selected=null; st.selectedFormation=key; st.selectedTactic=null;
+  // ── 상태 ──
+  let _mode='6';          // '6' or '5'
+  let _tacs=TAC6,_forms=forms6,_lbls=LABELS6;
+  let _curTac=null;
+  let _curForm=forms6[0];
+  let _step=-1;           // -1=기본배치, 0~n=스텝
+  let _playing=false;
+  let _playTimer=null;
+  let _speed=1;
+  let _loop=false;
+  // 현재 선수 위치 {id:[x,y]}
+  let _cur={};
+  let _ballPos=[200,410];
+
+  // ── DOM 헬퍼 ──
+  function $v(id){return document.getElementById(id);}
+  function pct(px,dim){return (px/dim*100)+'%';}
+  function pctXY(x,y){return {left:pct(x,W),top:pct(y,H)};}
+
+  // ── 초기 위치 로드 ──
+  function loadBase(formKey){
+    const f=_forms.find(f=>f.key===formKey)||_forms[0];
+    _curForm=f;
+    const p=f.pos;
+    _cur={};
+    Object.keys(p).forEach(id=>{ if(id!=='BALL') _cur[id]=[p[id][0],p[id][1]]; });
+    _ballPos=[...(p.BALL||[200,410])];
+    _step=-1;
+    _curTac=null;
   }
 
-  /* ---- 렌더링 ---- */
-  function renderButtons(){
-    $v('vb-formationButtons').innerHTML=Object.entries(positions).map(([k,item])=>
-      `<button type="button" class="vb-choice${st.selectedFormation===k?' active':''}" onclick="VB.formation('${k}')">${item.title}</button>`
-    ).join('');
-    $v('vb-tacticButtons').innerHTML=Object.entries(tactics).map(([k,item])=>
-      `<button type="button" class="vb-choice${st.selectedTactic===k?' active':''}" onclick="VB.tactic('${k}')">${item.title}</button>`
-    ).join('');
+  // ── 스텝 적용 ──
+  function applyStep(s){
+    if(!s)return;
+    // 선수 이동
+    Object.keys(s.moves||{}).forEach(id=>{
+      _cur[id]=[s.moves[id][0],s.moves[id][1]];
+    });
+    // 공 이동
+    if(s.ball){
+      _ballPos=[s.ball.to[0],s.ball.to[1]];
+    }
+    renderPlayers();
+    renderBall();
+    renderArrows(s);
   }
 
-  function renderTokens(){
-    const layer=$v('vb-tokenLayer');
-    const existing={};
-    Array.prototype.forEach.call(layer.querySelectorAll('[data-vb-player]'),function(el){
-      existing[el.dataset.vbPlayer]=el;
-    });
-    Object.values(st.players).forEach(function(p){
-      var el=existing[p.id];
+  // ── 렌더 ──
+  function renderPlayers(){
+    const layer=$v('vb2-playerLayer'); if(!layer)return;
+    // 현재 모드에서 사용하는 ID 목록
+    const ids=Object.keys(_cur);
+    // 기존 토큰 재사용
+    ids.forEach(id=>{
+      let el=layer.querySelector('[data-vb2id="'+id+'"]');
       if(!el){
-        el=document.createElement('button');
-        el.type='button';
-        el.setAttribute('data-vb-player',p.id);
-        el.title=p.role; el.textContent=p.label;
-        if(p.team==='home') makeDraggable(el,p,'vb-court',analyzeVBPositions);
+        el=document.createElement('div');
+        el.className='vb2-player '+(id.startsWith('H')||id.startsWith('I')?'home':'away');
+        el.setAttribute('data-vb2id',id);
+        const lbl=(_lbls||LABELS6)[id]||{n:id,r:''};
+        el.innerHTML='<span class="vb2-num">'+lbl.n+'</span>'+(lbl.r?'<span class="vb2-role">'+lbl.r+'</span>':'');
         layer.appendChild(el);
       }
-      el.className='vb-token '+p.team+(p.id===st.selected?' selected':'');
-      el.style.left=p.x+'%';
-      el.style.top=scaleY(p.y)+'%';
+      const [x,y]=_cur[id];
+      el.style.left=pct(x,W);
+      el.style.top=pct(y,H);
     });
-    Object.keys(existing).forEach(function(id){
-      if(!st.players[id]&&!Object.values(st.players).find(function(p){return p.id===id;}))
-        layer.removeChild(existing[id]);
+    // 없어진 ID 제거
+    layer.querySelectorAll('[data-vb2id]').forEach(el=>{
+      if(!ids.includes(el.getAttribute('data-vb2id'))) el.remove();
     });
   }
 
-  /* ---- 드래그 공통 ---- */
-  function makeDraggable(el,player,courtId,onDrop){
-    var isDrag=false,sx,sy,spx,spy;
-    function coords(e){ return e.touches?[e.touches[0].clientX,e.touches[0].clientY]:[e.clientX,e.clientY]; }
-    function onStart(e){
-      if(e.type==='mousedown'&&e.button!==0)return;
-      isDrag=true; var c=coords(e); sx=c[0];sy=c[1]; spx=player.x;spy=player.y;
-      el.style.transition='none'; e.stopPropagation();
-      document.addEventListener('mousemove',onMove);
-      document.addEventListener('mouseup',onEnd);
-      document.addEventListener('touchmove',onMove,{passive:false});
-      document.addEventListener('touchend',onEnd);
-    }
-    function onMove(e){
-      if(!isDrag)return; if(e.cancelable)e.preventDefault();
-      var c=coords(e); var rect=document.getElementById(courtId).getBoundingClientRect();
-      var nx=Math.max(4,Math.min(96,spx+(c[0]-sx)/rect.width*100));
-      var ny=Math.max(2,Math.min(110,spy+(c[1]-sy)/rect.height*100));
-      player.x=nx; player.y=ny;
-      el.style.left=nx+'%'; el.style.top=scaleY(ny)+'%';
-    }
-    function onEnd(){
-      if(!isDrag)return; isDrag=false;
-      document.removeEventListener('mousemove',onMove); document.removeEventListener('mouseup',onEnd);
-      document.removeEventListener('touchmove',onMove); document.removeEventListener('touchend',onEnd);
-      el.style.transition=''; onDrop();
-    }
-    el.addEventListener('mousedown',onStart);
-    el.addEventListener('touchstart',onStart,{passive:false});
+  function renderBall(){
+    const ball=$v('vb2-ball'); if(!ball)return;
+    ball.style.left=pct(_ballPos[0],W);
+    ball.style.top=pct(_ballPos[1],H);
   }
 
-  /* ---- VB 포지션 분석 ---- */
-  function analyzeVBPositions(){
-    var home=Object.values(st.players).filter(function(p){return p.team==='home';});
-    var issues=[], tips=[];
-    var front=home.filter(function(p){return p.y<66;});
-    var mid=home.filter(function(p){return p.y>=66&&p.y<83;});
-    var back=home.filter(function(p){return p.y>=83;});
-    var left=home.filter(function(p){return p.x<33;});
-    var right=home.filter(function(p){return p.x>67;});
-    if(front.length===0) issues.push('⚠️ 전위가 없어요! 네트 앞이 비어 블로킹·공격이 불가능합니다.');
-    if(back.length===0)  issues.push('⚠️ 후위가 없어요! 깊게 오는 공을 아무도 받을 수 없습니다.');
-    if(mid.length===0)   issues.push('⚠️ 중위가 없어요! 연결(세컨드 터치) 역할이 비어 있습니다.');
-    if(left.length===0)  issues.push('⚠️ 왼쪽이 완전히 비어있어요! 상대가 왼쪽을 집중 공략하면 막을 수 없습니다.');
-    if(right.length===0) issues.push('⚠️ 오른쪽이 완전히 비어있어요! 오른쪽 공격에 취약합니다.');
-    for(var i=0;i<home.length;i++){
-      for(var j=i+1;j<home.length;j++){
-        var dx=home[i].x-home[j].x, dy=home[i].y-home[j].y;
-        if(Math.sqrt(dx*dx+dy*dy)<9) issues.push('⚠️ '+home[i].label+'·'+home[j].label+' 충돌 위험! 같은 공을 둘이 쫓게 됩니다.');
-      }
-    }
-    var avgX=home.reduce(function(s,p){return s+p.x;},0)/home.length;
-    var avgY=home.reduce(function(s,p){return s+p.y;},0)/home.length;
-    var spread=home.reduce(function(s,p){return s+Math.sqrt((p.x-avgX)*(p.x-avgX)+(p.y-avgY)*(p.y-avgY));},0)/home.length;
-    if(spread<12) issues.push('⚠️ 선수들이 너무 몰려있어요! 더 넓게 퍼져야 코트를 커버할 수 있습니다.');
-    if(issues.length===0){
-      tips.push('✅ 좋은 포지션이에요! 전·중·후위가 고르게 퍼져 있습니다.');
-      if(front.length>=3) tips.push('💡 전위 3명이 네트를 잘 지키고 있어요.');
-      if(back.length>=3)  tips.push('💡 후위 3명이 깊은 공을 안전하게 커버합니다.');
-    }
-    var fb=document.getElementById('vb-feedback');
-    if(!fb)return;
-    var all=issues.concat(tips);
-    if(!all.length){fb.hidden=true;return;}
-    fb.hidden=false;
-    fb.innerHTML='<div class="feedback-title">📍 포지션 분석 (드래그해서 바꿔보세요)</div>'+
-      all.map(function(m){return '<div class="feedback-item'+(m.startsWith('⚠️')?' warn':' good')+'">'+m+'</div>';}).join('')+
-      '<div class="feedback-hint">선수를 드래그해서 더 나은 위치를 찾아보세요!</div>';
-  }
-
-  function routeLine(from,to,color,dashed=false){
-    const dash=dashed?" stroke-dasharray='3 3'":'';
-    return `<line x1="${from[0]}" y1="${scaleY(from[1])}" x2="${to[0]}" y2="${scaleY(to[1])}" stroke="${color}" stroke-width="1.5" stroke-linecap="round"${dash}></line>`;
-  }
-
-  function renderRoutes(){
-    const items=[];
-    st.completed.slice(-14).forEach(m=>items.push(routeLine(m.from,m.to,'rgba(31,169,113,.34)',true)));
-    Object.values(st.planned).forEach(m=>{
-      const color=m.id==='BALL'?'rgba(245,158,11,.95)':'rgba(31,169,113,.88)';
-      items.push(routeLine(m.from,m.to,color,m.id!=='BALL'));
+  function renderArrows(s){
+    const svg=$v('vb2-arrowSvg'); if(!svg)return;
+    const lines=[];
+    // 선수 이동 화살표
+    Object.keys(s&&s.moves||{}).forEach(id=>{
+      const from=_cur[id]||[200,410]; // already updated, so use prev
+      // Note: _cur already updated to new pos. We use the ball.from or tac step from info
+      // We'll draw from the formation-base or previous position
     });
-    $v('vb-routeLayer').innerHTML=items.join('');
+    // 공 화살표 (노란색)
+    if(s&&s.ball){
+      const f=s.ball.from, t=s.ball.to;
+      lines.push('<line x1="'+f[0]+'" y1="'+f[1]+'" x2="'+t[0]+'" y2="'+t[1]+'"'+
+        ' stroke="#ffd84d" stroke-width="2.2" stroke-linecap="round" marker-end="url(#vb2-ah)"/>');
+    }
+    svg.innerHTML=svg.querySelector('defs').outerHTML+lines.join('');
   }
 
-  function renderTargets(){
-    $v('vb-targetLayer').innerHTML=Object.values(st.planned).map(m=>{
-      const lbl=m.label||(m.id==='BALL'?'공':playerById(m.id).label);
-      return `<div class="vb-target" style="${tokenStyle(m.to[0],m.to[1])}">${lbl}</div>`;
+  function renderArrowsFull(prevPos, s){
+    const svg=$v('vb2-arrowSvg'); if(!svg)return;
+    const defsEl=svg.querySelector('defs');
+    const lines=[];
+    // 선수 이동 화살표 (흰색 점선)
+    Object.keys(s&&s.moves||{}).forEach(id=>{
+      const from=prevPos[id]||[200,410];
+      const to=s.moves[id];
+      if(!to)return;
+      lines.push('<line x1="'+from[0]+'" y1="'+from[1]+'" x2="'+to[0]+'" y2="'+to[1]+'"'+
+        ' stroke="rgba(255,255,255,.7)" stroke-width="1.8" stroke-dasharray="6,4" stroke-linecap="round" marker-end="url(#vb2-ahb)"/>');
+    });
+    // 공 화살표
+    if(s&&s.ball){
+      const f=s.ball.from, t=s.ball.to;
+      lines.push('<line x1="'+f[0]+'" y1="'+f[1]+'" x2="'+t[0]+'" y2="'+t[1]+'"'+
+        ' stroke="#ffd84d" stroke-width="2.5" stroke-linecap="round" marker-end="url(#vb2-ah)"/>');
+    }
+    svg.innerHTML=(defsEl?defsEl.outerHTML:'')+lines.join('');
+  }
+
+  function renderStepList(){
+    const el=$v('vb2-stepList'); if(!el)return;
+    if(!_curTac){el.innerHTML='';return;}
+    const steps=_curTac.steps;
+    el.innerHTML=steps.map((s,i)=>{
+      const cls=i<_step?'done':i===_step?'cur':'';
+      return '<div class="vb2-step-dot '+cls+'" onclick="VB.goStep('+i+')">'+(i+1)+'</div>';
     }).join('');
   }
 
-  function renderDetail(title,text){
-    $v('vb-detailTitle').textContent=title;
-    $v('vb-detailText').textContent=text;
+  function renderButtons(){
+    // 포메이션 버튼
+    const fb=$v('vb2-formBtns'); if(!fb)return;
+    fb.innerHTML=_forms.map(f=>`<button class="vb2-chip${_curForm.key===f.key?' on':''}" onclick="VB.form('${f.key}')">${f.label}</button>`).join('');
+    // 전술 버튼
+    const tb=$v('vb2-tacBtns'); if(!tb)return;
+    tb.innerHTML=_tacs.map(t=>`<button class="vb2-chip${_curTac&&_curTac.key===t.key?' on':''}" onclick="VB.tac('${t.key}')">${t.label}</button>`).join('');
   }
 
-  function render(){ renderButtons(); renderTokens(); renderRoutes(); renderTargets(); }
-
-  /* ---- 패널 ---- */
-  function closeMobilePanel(){
-    st.openPanel=null;
-    $v('vb-controls').classList.remove('open');
-    document.querySelectorAll('[data-vb-panel]').forEach(b=>b.classList.remove('active'));
-  }
-
-  function openPanel(name){
-    st.openPanel=name;
-    $v('vb-controls').classList.add('open');
-    document.querySelectorAll('[data-vb-panel]').forEach(b=>b.classList.toggle('active',b.dataset.vbPanel===name));
-    document.querySelectorAll('[data-vb-panel-body]').forEach(s=>{
-      s.style.display=(s.dataset.vbPanelBody===name)?'':'none';
-    });
-  }
-
-  /* ---- 배치/전술 적용 ---- */
-  function applyFormation(key){
-    if(!positions[key])return;
-    var pos=positions[key].pos;
-    if(!pos){ seedPlayers(key); renderDetail(positions[key].title,positions[key].text); render(); closeMobilePanel(); return; }
-    st.planned={};
-    Object.values(st.players).forEach(function(p){
-      var to=pos[p.id];
-      if(to && (Math.abs(p.x-to[0])>0.5||Math.abs(p.y-to[1])>0.5))
-        st.planned[p.id]={id:p.id,from:[p.x,p.y],to:to,label:p.label};
-    });
-    renderDetail(positions[key].title,positions[key].text);
-    render(); closeMobilePanel();
-    showToast('이동 예약 완료 — ▶ 이동 실행 누르세요');
-  }
-
-  function applyTactic(key){
-    const tac=tactics[key]; if(!tac)return;
-    seedPlayers(tac.base||st.selectedFormation);
-    st.selectedTactic=key; st.planned={};
-    Object.entries(tac.moves||{}).forEach(([id,pos])=>{
-      const p=playerById(id); if(!p)return;
-      st.planned[id]={id,from:[p.x,p.y],to:pos,label:p.label};
-    });
-    if(tac.ball){
-      const ball=playerById('BALL');
-      ball.x=tac.ball.from[0]; ball.y=tac.ball.from[1];
-      st.planned.BALL={id:'BALL',from:tac.ball.from,to:tac.ball.to,label:tac.ball.label||'공'};
-    }
-    renderDetail(tac.title,tac.text);
-    render(); closeMobilePanel();
-    showToast('전술 선택: '+tac.title);
-  }
-
-  /* ---- 이동 실행 ---- */
-  function executeMoves(){
-    if(st.moving)return;
-    const moves=Object.values(st.planned);
-    if(!moves.length){showToast('예약된 이동이 없어요');return;}
-    st.moving=true;
-    moves.forEach(m=>{const p=playerById(m.id);if(!p)return;p.x=m.to[0];p.y=m.to[1];});
-    renderTokens();
-    setTimeout(()=>{
-      st.completed.push(...moves); st.planned={}; st.moving=false; render(); showToast('이동 완료');
-    },4200);
-  }
-
-  /* ---- 코트 클릭 ---- */
-  function courtClick(ev){
-    const token=ev.target.closest('[data-vb-player]');
-    if(token){st.selected=token.dataset.vbPlayer;renderTokens();showToast(playerById(st.selected).role);return;}
-    if(!st.selected||ev.target.closest('button'))return;
-    const rect=$v('vb-court').getBoundingClientRect();
-    const x=((ev.clientX-rect.left)/rect.width)*100;
-    const y=((ev.clientY-rect.top)/rect.height)*100;
-    const p=playerById(st.selected);
-    st.planned[p.id]={id:p.id,from:[p.x,p.y],to:[Math.max(4,Math.min(96,x)),Math.max(2,Math.min(114,y))],label:p.label};
-    render(); showToast('이동 예약됨');
-  }
-
-  /* ---- 초기화 ---- */
-  function init(){
-    initialized=true;
-    seedPlayers('base');
-    renderDetail(positions.base.title,positions.base.text);
-    render();
-    $v('vb-court').addEventListener('click',courtClick);
-    showToast('전술판 준비됨');
-  }
-
-  /* ---- 영상 ---- */
-  function renderVideos(videos){
-    const wrap=$v('tbRelatedVideos'); if(!wrap)return;
-    if(!videos||!videos.length){wrap.hidden=true;return;}
-    wrap.hidden=false;
-    wrap.innerHTML='<h3>📹 현재 단계 훈련 영상</h3><div class="video-pill-row">'+
-      videos.map(v=>
-        `<div class="video-pill"><div class="video-pill-info"><b>${safe(v.title)}</b><span>${safe(v.focus)}</span></div><a href="${safe(v.url)}" target="_blank" rel="noopener">▶ 보기</a></div>`
-      ).join('')+'</div>';
-  }
-
-  /* ---- 공개 API ---- */
-  function action(name){
-    if(name==='execute')executeMoves();
-    else if(name==='preview'){st.planned={};render();showToast('예정 삭제됨');}
-    else if(name==='reset'){applyFormation('base');}
-  }
-  function formation(key){applyFormation(key);}
-  function tactic(key){applyTactic(key);}
-  /* ── init ── */
-  function init(){
-    if(VB.initialized) return;
-    VB.initialized = true;
-    seedPlayers('base');
-    render();
-  }
-
-  /* ── action (모든 버튼) ── */
-  function action(name){
-    if(name==='execute'){
-      if(Object.keys(st.planned).length===0){ showToast('이동 예정이 없습니다'); return; }
-      st.moving=true;
-      Object.keys(st.planned).forEach(function(id){
-        var p=playerById(id), m=st.planned[id];
-        if(p && m){ p.x=m.to[0]; p.y=m.to[1]; }
-      });
-      st.completed = Object.keys(st.planned);
-      st.planned={};
-      render();
-      setTimeout(function(){ st.completed=[]; render(); }, 4500);
+  function setStepInfo(){
+    const titleEl=$v('vb2-stepTitle'), descEl=$v('vb2-stepDesc');
+    if(!titleEl||!descEl)return;
+    if(!_curTac){
+      titleEl.textContent='전술 선택';
+      descEl.textContent='왼쪽 전술 시나리오를 선택하면 단계별로 이동을 보여줍니다.';
       return;
     }
-    if(name==='reset'){ applyFormation('base'); return; }
-    if(name==='preview'){ st.planned={}; render(); return; }
+    if(_step<0){
+      titleEl.textContent=_curTac.title;
+      descEl.textContent='▶ 다음 버튼을 눌러 시작하세요 (총 '+_curTac.steps.length+'단계)';
+    } else {
+      titleEl.textContent=_curTac.title;
+      descEl.textContent=_curTac.steps[_step].desc;
+    }
   }
 
-  function panel(name){
-    if(st.openPanel===name&&$v('vb-controls').classList.contains('open'))closeMobilePanel();
-    else openPanel(name);
+  // ── 공개 API ──
+  function setMode(m){
+    _mode=m;
+    if(m==='5'){_tacs=TAC5;_forms=forms5;_lbls=LABELS5;}
+    else{_tacs=TAC6;_forms=forms6;_lbls=LABELS6;}
+    _curTac=null;
+    loadBase(_forms[0].key);
+    renderButtons();
+    renderPlayers();
+    renderBall();
+    setStepInfo();
   }
 
-  return { init: init, renderVideos: renderVideos, action: action, formation: formation, tactic: tactic, panel: panel, initialized: false };
-})(); } catch(e) { showError('VB 초기화 오류: '+(e.message||String(e))); return {init:function(){},renderVideos:function(){},action:function(){},formation:function(){},tactic:function(){},panel:function(){},initialized:false}; } })();
+  function form(key){
+    loadBase(key);
+    const svg=$v('vb2-arrowSvg');
+    if(svg){const d=svg.querySelector('defs');svg.innerHTML=d?d.outerHTML:'';}
+    renderButtons();
+    renderPlayers();
+    renderBall();
+    setStepInfo();
+    renderStepList();
+  }
+
+  function tac(key){
+    stopPlay();
+    const t=_tacs.find(t=>t.key===key); if(!t)return;
+    _curTac=t;
+    loadBase(t.form);
+    renderButtons();
+    renderPlayers();
+    renderBall();
+    const svg=$v('vb2-arrowSvg');
+    if(svg){const d=svg.querySelector('defs');svg.innerHTML=d?d.outerHTML:'';}
+    setStepInfo();
+    renderStepList();
+  }
+
+  function next(){
+    if(!_curTac)return;
+    const maxStep=_curTac.steps.length-1;
+    if(_step>=maxStep){
+      if(_loop){ reset(); setTimeout(()=>next(),300); }
+      return;
+    }
+    _step++;
+    const s=_curTac.steps[_step];
+    // 이전 위치 스냅샷 (화살표용)
+    const prevPos=Object.assign({},_cur); Object.keys(_cur).forEach(id=>{prevPos[id]=[..._cur[id]];});
+    applyStep(s);
+    renderArrowsFull(prevPos,s);
+    setStepInfo();
+    renderStepList();
+    updateNextBtn();
+  }
+
+  function goStep(idx){
+    if(!_curTac)return;
+    stopPlay();
+    _step=idx;
+    // idx-1까지 누적 → prevPos (화살표 시작점)
+    const baseF=_forms.find(f=>f.key===_curTac.form)||_forms[0];
+    const prevPos={};
+    Object.keys(baseF.pos).forEach(id=>{if(id!=='BALL')prevPos[id]=[...baseF.pos[id]];});
+    for(let i=0;i<idx;i++){
+      const ss=_curTac.steps[i];
+      Object.keys(ss.moves||{}).forEach(id=>{prevPos[id]=[ss.moves[id][0],ss.moves[id][1]];});
+    }
+    // 0~idx 누적 → 현재 위치
+    loadBase(_curTac.form);
+    for(let i=0;i<=idx;i++){
+      const ss=_curTac.steps[i];
+      Object.keys(ss.moves||{}).forEach(id=>{_cur[id]=[ss.moves[id][0],ss.moves[id][1]];});
+      if(ss.ball)_ballPos=[ss.ball.to[0],ss.ball.to[1]];
+    }
+    renderPlayers(); renderBall();
+    renderArrowsFull(prevPos,_curTac.steps[idx]);
+    setStepInfo(); renderStepList(); updateNextBtn();
+  }
+
+  function play(){
+    if(_playing){stopPlay();return;}
+    if(_curTac&&_step>=_curTac.steps.length-1){ reset(); }
+    _playing=true;
+    $v('vb2-playBtn').textContent='⏹ 정지';
+    function tick(){
+      if(!_curTac||_step>=_curTac.steps.length-1){
+        stopPlay();
+        if(_loop){ reset(); setTimeout(play,400); }
+        return;
+      }
+      next();
+      const delay=(800/_speed)+100;
+      _playTimer=setTimeout(tick,delay);
+    }
+    const delay=(_step<0)?200:100;
+    _playTimer=setTimeout(tick,delay);
+  }
+
+  function stopPlay(){
+    _playing=false;
+    clearTimeout(_playTimer);
+    const pb=$v('vb2-playBtn'); if(pb)pb.textContent='재생';
+  }
+
+  function reset(){
+    stopPlay();
+    if(!_curTac){loadBase(_curForm.key);}
+    else{loadBase(_curTac.form);}
+    const svg=$v('vb2-arrowSvg');
+    if(svg){const d=svg.querySelector('defs');svg.innerHTML=d?d.outerHTML:'';}
+    renderPlayers(); renderBall();
+    setStepInfo(); renderStepList(); updateNextBtn();
+  }
+
+  function updateNextBtn(){
+    const btn=$v('vb2-nextBtn'); if(!btn)return;
+    if(_curTac&&_step>=_curTac.steps.length-1){
+      btn.textContent='완료 ✓';
+    } else {
+      btn.textContent='다음 ▶';
+    }
+  }
+
+  let initialized=false;
+  function init(){
+    if(initialized)return;
+    initialized=true;
+    loadBase(forms6[0].key);
+    renderButtons();
+    renderPlayers();
+    renderBall();
+    setStepInfo();
+    // 속도 버튼
+    document.querySelectorAll('[data-vb2spd]').forEach(btn=>{
+      btn.addEventListener('click',function(){
+        _speed=parseFloat(this.dataset.vb2spd);
+        document.querySelectorAll('[data-vb2spd]').forEach(b=>b.classList.remove('vb2-spd-on'));
+        this.classList.add('vb2-spd-on');
+      });
+    });
+    // 반복 체크박스
+    var lp=$v('vb2-loopChk');
+    if(lp)lp.addEventListener('change',function(){_loop=this.checked;});
+  }
+
+  return {init,setMode,form,tac,next,play,reset,goStep,
+    renderVideos:function(){},
+    action:function(n){if(n==='reset')reset();if(n==='execute')next();},
+    formation:function(k){form(k);},
+    tactic:function(k){tac(k);},
+    panel:function(){},
+    initialized:false};
+})(); } catch(e){ console.error('VB 오류:',e);
+  return {init:function(){},renderVideos:function(){},action:function(){},
+    formation:function(){},tactic:function(){},panel:function(){},initialized:false}; }
+})();
+
 
 
 /* ============================================================

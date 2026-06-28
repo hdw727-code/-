@@ -347,6 +347,22 @@
       transition:left .65s cubic-bezier(.25,.8,.25,1),top .65s cubic-bezier(.25,.8,.25,1);
       z-index:8;
     }
+    .vb2-trail{
+      position:absolute;
+      border-radius:50%;
+      background:rgba(245,158,11,0.55);
+      border:1.5px solid rgba(255,220,80,0.7);
+      transform:translate(-50%,-50%);
+      pointer-events:none;
+      animation:vb2-trail-fade 1.2s ease-out forwards;
+    }
+    @keyframes vb2-trail-fade{0%{opacity:.8;transform:translate(-50%,-50%) scale(1);}100%{opacity:0;transform:translate(-50%,-50%) scale(.3);}}
+    .vb2-ball.vb2-ball-selected{
+      outline:3px solid #fff;
+      box-shadow:0 0 0 5px rgba(245,158,11,0.5),0 0 12px 4px #ffd84d;
+      cursor:crosshair;
+    }
+
     .vb2-info{
       display:flex;flex-direction:column;gap:7px;
       border:1px solid var(--line);border-radius:14px;
@@ -2662,6 +2678,16 @@ var VB = (function(){ try { return (function(){
     }
   }
 
+  function _addBallTrail(x,y){
+    var wrap=$v('vb2-fieldWrap'); if(!wrap)return;
+    var w=wrap.offsetWidth, h=wrap.offsetHeight;
+    var sz=Math.max(8,Math.min(18,w*0.04));
+    var dot=document.createElement('div');
+    dot.className='vb2-trail';
+    dot.style.cssText='left:'+((x/W*100))+'%;top:'+((y/H*100))+'%;width:'+sz+'px;height:'+sz+'px;z-index:7;';
+    wrap.appendChild(dot);
+    setTimeout(function(){if(dot.parentNode)dot.parentNode.removeChild(dot);},1300);
+  }
   function simState(state, bx, by){
     const isAtk=(state==='atk');
     // 볼 이동
@@ -2671,6 +2697,7 @@ var VB = (function(){ try { return (function(){
     } else {
       _ballPos=isAtk?[200,200]:[200,625];
     }
+    _addBallTrail(prevBall[0],prevBall[1]);
     renderBall();
     // 선수 자동 대형 전환
     const posMap=_getSimPos(isAtk);
@@ -2729,17 +2756,65 @@ var VB = (function(){ try { return (function(){
     // 코트 클릭 → 볼 이동 + 자동 대형
     var fw=$v('vb2-fieldWrap');
     if(fw){
+      // ── 공 클릭 → 선택, 코트 클릭 → 이동 또는 자동 대형 ──
+      var _ballSelected=false;
+      function _setBallSelected(on){
+        _ballSelected=on;
+        var b=$v('vb2-ball');
+        if(b) b.classList.toggle('vb2-ball-selected',on);
+        var h=$v('vb2-simHint');
+        if(h) h.textContent=on?'이동할 위치를 클릭하세요':'코트 클릭: 공 이동 / 공 클릭: 선수 이동 모드';
+        if(h) h.style.display='block';
+      }
+      // 공 클릭
+      var ballEl=$v('vb2-ball');
+      if(ballEl){
+        ballEl.style.pointerEvents='auto';
+        ballEl.addEventListener('click',function(e){
+          e.stopPropagation();
+          _setBallSelected(!_ballSelected);
+        });
+      }
       fw.addEventListener('click',function(e){
-        if(e.target.closest('.vb2-player'))return; // 선수 클릭 무시
+        if(e.target.closest('.vb2-player'))return;
+        if(e.target===ballEl&&!_ballSelected)return;
         var rect=fw.getBoundingClientRect();
         var rx=(e.clientX-rect.left)/rect.width;
         var ry=(e.clientY-rect.top)/rect.height;
         var bx=Math.round(rx*W);
         var by=Math.round(ry*H);
-        var isAtk=(ry<0.5); // 상단(상대코트) 클릭 = 우리 공격
-        simState(isAtk?'atk':'def',bx,by);
-        // 힌트 표시
-        var hint=$v('vb2-simHint'); if(hint)hint.style.display='block';
+        if(_ballSelected){
+          // 공 선택 모드: 공이 클릭 위치로 이동, 가장 가까운 선수가 따라옴
+          _addBallTrail(_ballPos[0],_ballPos[1]);
+          var prevPos=[..._ballPos];
+          _ballPos=[bx,by];
+          renderBall();
+          // 가장 가까운 우리팀 선수를 공 위치로 이동
+          var keys=Object.keys(_cur).filter(function(id){return id.startsWith('H')||id.startsWith('I');});
+          var minDist=Infinity,bestId=null;
+          keys.forEach(function(id){
+            var p=_cur[id];if(!p)return;
+            var d=Math.sqrt(Math.pow(p[0]-bx,2)+Math.pow(p[1]-by,2));
+            if(d<minDist){minDist=d;bestId=id;}
+          });
+          if(bestId&&_cur[bestId]){
+            _cur[bestId]=[bx,by];
+            renderPlayers();
+            // 선수 강조
+            var isAtk=(by<410);
+            setTimeout(function(){
+              var el=document.querySelector('[data-vb2id="'+bestId+'"]');
+              if(el){el.classList.add(isAtk?'vb2-spike':'vb2-recv');setTimeout(function(){el.classList.remove('vb2-recv','vb2-spike');},1200);}
+            },200);
+          }
+          _setBallSelected(false);
+        } else {
+          // 일반 클릭: 대형 자동 전환
+          _addBallTrail(_ballPos[0],_ballPos[1]);
+          var isAtk=(ry<0.5);
+          simState(isAtk?'atk':'def',bx,by);
+        }
+        var hint=$v('vb2-simHint'); if(hint){hint.style.display='block';}
       });
     }
   }

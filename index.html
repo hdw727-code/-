@@ -2806,17 +2806,41 @@ var DB = (function(){ try { return (function(){
   }
 
   function _setDefaultEdit(){
-    var oa=_oursAttack(),ta=_theirsAttack();
-    function place(map){
+    /* ── 탭별 초기 대형 ──
+       공격전술 : 우리(공 소유) → 공격대형 / 상대 → 수비대형
+       수비전술 : 우리 → 수비대형 / 상대(공 소유) → 공격대형
+       외야활용 : 양팀 수비대형 (중립)
+       경기흐름 : 우리 공격 / 상대 수비 (기본)
+    ─────────────────────────────────── */
+    var ourMap, theirMap, ballX='50%', ballY;
+    if(_activeTab==='attack'){
+      ourMap  = _oursAttack();   theirMap = _theirsFlat();
+      ballY = '55%'; /* 우리 내야 쪽 */
+    } else if(_activeTab==='defense'){
+      ourMap  = _oursFlat();     theirMap = _theirsAttack();
+      ballY = '32%'; /* 상대 내야 쪽 */
+    } else if(_activeTab==='outfield'){
+      ourMap  = _oursFlat();     theirMap = _theirsFlat();
+      ballY = '50%';
+    } else { /* flow 등 */
+      ourMap  = _oursAttack();   theirMap = _theirsFlat();
+      ballY = '55%';
+    }
+
+    function place(rawMap, pfx){
+      /* 인원 모드 필터링 적용 */
+      var map = _applyMode(rawMap, pfx);
       Object.keys(map).forEach(function(id){
-        var el=_$('pg-'+id),pt=map[id];if(!el)return;
-        var p=_pct(pt);el.style.left=p.left;el.style.top=p.top;
-        el.classList.remove('pg-hidden','pg-elim','pg-elim-flash','pg-in-outfield','pg-hit1','pg-hit2');
+        var el=_$('pg-'+id), pt=map[id]; if(!el)return;
+        var pos=_pct(pt);
+        el.style.left=pos.left; el.style.top=pos.top;
+        el.classList.toggle('pg-hidden', !!pt.hidden);
+        el.classList.remove('pg-elim','pg-elim-flash','pg-in-outfield','pg-hit1','pg-hit2');
       });
     }
-    place(oa);place(ta);
+    place(ourMap,'o'); place(theirMap,'t');
     var ball=_$('pg-ball');
-    if(ball){ball.style.left='50%';ball.style.top='15%';ball.style.opacity='1';}
+    if(ball){ball.style.left=ballX;ball.style.top=ballY;ball.style.opacity='1';}
   }
 
   /* 렌더 */

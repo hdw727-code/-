@@ -3522,4 +3522,49 @@ var DB = (function(){ try { return (function(){
     var er=_$('pg-elimResetBtn');if(er)er.addEventListener('click',_resetAll);
     /* 저장/불러오기 */
     var sv=_$('pg-saveBtn'),ld=_$('pg-loadBtn'),rst=_$('pg-editResetBtn');
-    if(sv)sv
+    if(sv)sv.addEventListener('click',function(){_savePos(_activeTab);});
+    if(ld)ld.addEventListener('click',function(){if(!_loadPos(_activeTab))showToast('저장된 배치가 없습니다.');else _render();});
+    if(rst)rst.addEventListener('click',function(){_setDefaultEdit();});
+    /* 탭 클릭 */
+    var tabBar=_$('pg-tabBar');
+    if(tabBar){
+      tabBar.addEventListener('click',function(e){
+        var btn=e.target.closest('[data-pgtab]');if(!btn)return;
+        _stopAuto();
+        _stepIndex=0;
+        _activeTab=btn.dataset.pgtab;
+        _renderTabs();
+        _render();
+        _updateSaveLabel(_activeTab);
+      });
+    }
+  }
+
+  function init(){
+    if(_initialized)return;
+    _initialized=true;
+    _renderTabs();
+    _createPlayers();
+    _bindEvents();
+    _render();
+    _updateSaveLabel(_activeTab);
+  }
+
+  function renderVideos(training){
+    // 비디오/미션 영역 업데이트 (필요 시 확장)
+  }
+
+  return {
+    init:init,
+    renderVideos:renderVideos,
+    panel:function(){},
+    initialized:false
+  };
+})(); } catch(e){
+  console.error('DB 오류:',e);
+  return {init:function(){},renderVideos:function(){},panel:function(){},initialized:false};
+}
+})();
+</script>
+</body>
+</html>

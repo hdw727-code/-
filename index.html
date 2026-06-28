@@ -2268,66 +2268,16 @@ var VB = (function() { try { return (function() {
   }
   function formation(key){applyFormation(key);}
   function tactic(key){applyTactic(key);}
-  /* ── 상태: 공격권 / 패스 / 타이머 ── */
-  var ruleState = { attackTeam:'home', passCount:0, timerInterval:null };
-
-  function updateStatusBar(){
-    var atk = $d('db-attack-ind');
-    var pc  = $d('db-pass-cnt');
-    if(atk) atk.textContent = ruleState.attackTeam==='home' ? '🔴 우리팀 공격' : '🔵 상대팀 공격';
-    if(pc)  pc.textContent  = '패스 ' + ruleState.passCount + '/3';
-  }
-
-  function clearTimer5(){
-    if(ruleState.timerInterval){ clearInterval(ruleState.timerInterval); ruleState.timerInterval=null; }
-    var t=$d('db-timer5'); if(t) t.textContent='⏱ -';
-  }
-
-  function startTimer5(){
-    clearTimer5();
-    var sec=5;
-    var t=$d('db-timer5');
-    if(t) t.textContent='⏱ '+sec+'s';
-    ruleState.timerInterval = setInterval(function(){
-      sec--;
-      if(t) t.textContent = sec>0 ? '⏱ '+sec+'s' : '⏱ 5초!';
-      if(sec<=0){ clearTimer5(); showFaultAlert('5초룰','5초 안에 던지지 않았습니다. 공격권이 넘어갑니다.'); changeAttackTeam(); }
-    }, 1000);
-  }
-
-  function changeAttackTeam(){
-    clearTimer5();
-    ruleState.passCount = 0;
-    ruleState.attackTeam = ruleState.attackTeam==='home' ? 'away' : 'home';
-    updateStatusBar();
-    showToast('공격권 전환: ' + (ruleState.attackTeam==='home'?'우리팀':'상대팀') + ' 공격');
-  }
-
-  function showFaultAlert(title, msg){
-    var el=$d('db-fault-alert');
-    if(!el) return;
-    el.hidden=false;
-    el.innerHTML='<strong>⚠️ '+title+'</strong> '+msg;
-    setTimeout(function(){ el.hidden=true; }, 4000);
-  }
-
   /* ── init ── */
   function init(){
-    if(DB.initialized) return;
-    DB.initialized = true;
+    if(VB.initialized) return;
+    VB.initialized = true;
     seedPlayers('base');
     render();
-    updateStatusBar();
   }
 
-  /* ── formation (버튼 클릭) ── */
-  function formation(key){ applyFormation(key); }
-
-  /* ── tactic (버튼 클릭) ── */
-  function tactic(key){ applyTactic(key); }
-
   /* ── action (모든 버튼) ── */
-  function action(name, arg){
+  function action(name){
     if(name==='execute'){
       if(Object.keys(st.planned).length===0){ showToast('이동 예정이 없습니다'); return; }
       st.moving=true;
@@ -2343,35 +2293,6 @@ var VB = (function() { try { return (function() {
     }
     if(name==='reset'){ applyFormation('base'); return; }
     if(name==='preview'){ st.planned={}; render(); return; }
-    if(name==='jumpball'){
-      ruleState.passCount=0; ruleState.attackTeam='home';
-      updateStatusBar(); clearTimer5();
-      showToast('점프볼! 우리팀 공격권으로 시작');
-      return;
-    }
-    if(name==='pass'){
-      ruleState.passCount++;
-      if(ruleState.passCount>=4){
-        showFaultAlert('포패스','4번 패스 — 공격권이 상대팀으로 넘어갑니다.');
-        ruleState.passCount=0; changeAttackTeam(); return;
-      }
-      updateStatusBar(); startTimer5(); return;
-    }
-    if(name==='changeAttack'){ changeAttackTeam(); return; }
-    if(name==='fault'){
-      var msgs={
-        headattack:['헤드어택','머리를 맞혔습니다. 상대팀이 공격권을 가집니다.'],
-        doublepass:['더블패스','내야끼리 또는 외야끼리 패스했습니다. 공격권 전환.'],
-        '4pass':['포패스','4번째 패스 — 공격권 전환.'],
-        '5sec':['5초룰','5초 초과 — 공격권 전환.'],
-        overline:['오버라인','선을 밟았습니다. 아웃.'],
-        holding:['홀딩','공을 5초 이상 잡고 있었습니다.']
-      };
-      var m=msgs[arg]||[arg,'파울 선언'];
-      showFaultAlert(m[0], m[1]);
-      if(['headattack','doublepass','4pass','5sec'].indexOf(arg)>=0) changeAttackTeam();
-      return;
-    }
   }
 
   function panel(name){

@@ -1019,8 +1019,9 @@
             <div class="section-title" style="margin:0;"><h2 style="margin:0;">🏐 배구 전술판</h2></div>
             <div class="vb2-mode-sel">
               <select id="vb2-modeSelect" onchange="VB.setMode(this.value)">
-                <option value="6">6인제</option>
-                <option value="5">5인제</option>
+                <option value="9">9인제 (기본)</option>
+                <option value="6">6인제 (미니)</option>
+                <option value="5">5인제 (미니)</option>
               </select>
             </div>
           </header>
@@ -1060,6 +1061,20 @@
               </div>
               <div class="vb2-loop-row">
                 <label><input id="vb2-loopChk" type="checkbox"> 자동반복</label>
+              </div>
+              <!-- 자유 시뮬레이션 패널 -->
+              <div class="vb2-section" style="margin-top:8px;">
+                <h3>⚡ 자유 시뮬레이션</h3>
+                <div style="font-size:11px;color:var(--muted);margin-bottom:7px;line-height:1.4;">
+                  코트 클릭 또는 버튼으로 공을 이동하면<br>선수 대형이 자동으로 변경됩니다
+                </div>
+                <div class="vb2-btn-row">
+                  <button class="vb2-chip" id="vb2-simAtk" onclick="VB.simState('atk')">🏐 우리 공격</button>
+                  <button class="vb2-chip" id="vb2-simDef" onclick="VB.simState('def')">🛡 우리 수비</button>
+                </div>
+                <div id="vb2-simHint" style="font-size:11px;color:#aebbd0;margin-top:5px;display:none;">
+                  코트를 클릭하면 공이 이동합니다
+                </div>
               </div>
             </div>
 
@@ -1935,207 +1950,288 @@ function updateTacticTab(club) {
 var VB = (function(){ try { return (function(){
   "use strict";
 
-  // ── 코트 좌표 (SVG viewBox 400×820) ──
+  // ── 코트 SVG 좌표 (viewBox 400×820) ──
+  // 우리팀: 하단(y 415~800), 상대팀: 상단(y 20~405), 네트: y=410
   const W=400,H=820;
-  // 우리팀: 하단 / 상대팀: 상단
-  const POS={
-    // 우리팀 기본 (6인제 rotation1)
-    H1:[320,715], H2:[320,455], H3:[200,445], H4:[80,455], H5:[80,715], H6:[200,715],
+  function pct(v,d){return (v/d*100)+'%';}
+
+  // ── 9인제 선수 좌표 (3×3 그리드) ──
+  const POS9_BASE={
+    // 우리팀
+    H1:[80,458],H2:[200,450],H3:[320,458],   // 전위
+    H4:[80,578],H5:[200,570],H6:[320,578],   // 중위
+    H7:[80,698],H8:[200,692],H9:[320,698],   // 후위
     // 상대팀 (거울)
-    A1:[80,105], A2:[80,365], A3:[200,375], A4:[320,365], A5:[320,105], A6:[200,105],
-    // 5인제 우리팀
+    A1:[320,362],A2:[200,370],A3:[80,362],   // 상대 전위
+    A4:[320,242],A5:[200,250],A6:[80,242],   // 상대 중위
+    A7:[320,122],A8:[200,128],A9:[80,122],   // 상대 후위
+    BALL:[200,410]
+  };
+  // 9인제 W리시브 대형
+  const POS9_RECV={
+    H1:[80,458],H2:[200,450],H3:[320,458],
+    H4:[60,640],H5:[160,660],H6:[340,640],
+    H7:[80,710],H8:[200,710],H9:[320,710],
+    A1:[320,362],A2:[200,370],A3:[80,362],
+    A4:[320,242],A5:[200,250],A6:[80,242],
+    A7:[320,122],A8:[200,128],A9:[80,122],
+    BALL:[200,130]
+  };
+  // 9인제 공격 대형
+  const POS9_ATK={
+    H1:[80,430],H2:[200,422],H3:[320,430],
+    H4:[80,578],H5:[200,570],H6:[320,578],
+    H7:[80,698],H8:[200,692],H9:[320,698],
+    A1:[320,380],A2:[200,385],A3:[80,380],
+    A4:[320,250],A5:[200,255],A6:[80,250],
+    A7:[320,130],A8:[200,135],A9:[80,130],
+    BALL:[80,415]
+  };
+
+  // ── 6인제 좌표 ──
+  const POS6_R1={
+    H1:[320,715],H2:[320,455],H3:[200,445],H4:[80,455],H5:[80,715],H6:[200,715],
+    A1:[80,105],A2:[80,365],A3:[200,375],A4:[320,365],A5:[320,105],A6:[200,105],
+    BALL:[200,410]
+  };
+  const POS6_RECV={
+    H1:[320,690],H2:[290,640],H3:[200,690],H4:[60,670],H5:[130,635],H6:[200,710],
+    A1:[80,105],A2:[80,365],A3:[200,375],A4:[320,365],A5:[320,105],A6:[200,105],
+    BALL:[200,410]
+  };
+
+  // ── 5인제 좌표 ──
+  const POS5_BASE={
     I1:[320,715],I2:[80,455],I3:[200,445],I4:[320,455],I5:[200,715],
-    // 5인제 상대
     B1:[80,105],B2:[320,365],B3:[200,375],B4:[80,365],B5:[200,105],
     BALL:[200,410]
   };
 
-  // ── 선수 레이블 ──
-  const LABELS6={
+  // ── 레이블 ──
+  const LBL9={
+    H1:{n:"좌",r:"전위"},H2:{n:"중",r:"전위"},H3:{n:"우",r:"전위"},
+    H4:{n:"좌",r:"중위"},H5:{n:"중",r:"중위"},H6:{n:"우",r:"중위"},
+    H7:{n:"좌",r:"후위"},H8:{n:"중",r:"후위"},H9:{n:"우",r:"후위"},
+    A1:{n:"좌",r:""},A2:{n:"중",r:""},A3:{n:"우",r:""},
+    A4:{n:"좌",r:""},A5:{n:"중",r:""},A6:{n:"우",r:""},
+    A7:{n:"좌",r:""},A8:{n:"중",r:""},A9:{n:"우",r:""}
+  };
+  const LBL6={
     H1:{n:"①",r:"세터"},H2:{n:"②",r:"OP"},H3:{n:"③",r:"미들"},
     H4:{n:"④",r:"레프트"},H5:{n:"⑤",r:"OH"},H6:{n:"⑥",r:"리베로"},
     A1:{n:"①",r:""},A2:{n:"②",r:""},A3:{n:"③",r:""},A4:{n:"④",r:""},A5:{n:"⑤",r:""},A6:{n:"⑥",r:""}
   };
-  const LABELS5={
+  const LBL5={
     I1:{n:"①",r:"세터"},I2:{n:"②",r:"레프트"},I3:{n:"③",r:"미들"},
-    I4:{n:"④",r:"라이트"},I5:{n:"⑤",r:"리베로"},
+    I4:{n:"④",r:"라이트"},I5:{n:"⑤",r:"리베"},
     B1:{n:"①",r:""},B2:{n:"②",r:""},B3:{n:"③",r:""},B4:{n:"④",r:""},B5:{n:"⑤",r:""}
   };
 
   // ── 포메이션 ──
-  const forms6=[
-    {key:'rot1', label:'로테이션 1',
-     pos:{H1:[320,715],H2:[320,455],H3:[200,445],H4:[80,455],H5:[80,715],H6:[200,715],
-          A1:[80,105],A2:[80,365],A3:[200,375],A4:[320,365],A5:[320,105],A6:[200,105],BALL:[200,410]}},
-    {key:'rot2', label:'로테이션 2',
-     pos:{H1:[80,715],H2:[320,455],H3:[200,445],H4:[80,455],H5:[200,715],H6:[320,715],
-          A1:[80,105],A2:[80,365],A3:[200,375],A4:[320,365],A5:[320,105],A6:[200,105],BALL:[200,410]}},
-    {key:'wrecv', label:'W 리시브',
-     pos:{H1:[320,690],H2:[320,620],H3:[200,690],H4:[80,690],H5:[60,640],H6:[160,640],
-          A1:[80,105],A2:[80,365],A3:[200,375],A4:[320,365],A5:[320,105],A6:[200,105],BALL:[200,410]}},
-    {key:'block', label:'블로킹 대형',
-     pos:{H1:[320,715],H2:[80,425],H3:[200,425],H4:[320,425],H5:[80,715],H6:[200,715],
-          A1:[80,105],A2:[80,365],A3:[200,375],A4:[320,365],A5:[320,105],A6:[200,105],BALL:[200,400]}}
+  const FORMS9=[
+    {key:'f9_base', label:'기본 3-3-3', pos:POS9_BASE},
+    {key:'f9_recv', label:'W 리시브',   pos:POS9_RECV},
+    {key:'f9_atk',  label:'공격 대형',  pos:POS9_ATK}
   ];
-  const forms5=[
-    {key:'f5base', label:'5인제 기본',
-     pos:{I1:[320,715],I2:[80,455],I3:[200,445],I4:[320,455],I5:[200,715],
-          B1:[80,105],B2:[320,365],B3:[200,375],B4:[80,365],B5:[200,105],BALL:[200,410]}},
-    {key:'f5recv', label:'5인제 리시브',
-     pos:{I1:[320,680],I2:[60,660],I3:[200,690],I4:[340,660],I5:[200,720],
-          B1:[80,105],B2:[320,365],B3:[200,375],B4:[80,365],B5:[200,105],BALL:[320,180]}}
+  const FORMS6=[
+    {key:'f6_r1',   label:'로테이션 1', pos:POS6_R1},
+    {key:'f6_recv', label:'W 리시브',   pos:POS6_RECV}
+  ];
+  const FORMS5=[
+    {key:'f5_base', label:'5인제 기본', pos:POS5_BASE}
   ];
 
-  // ── 전술 (다단계 스텝) ──
+  // ── 9인제 전술 시나리오 ──
+  const TAC9=[
+    {key:'t9_1',label:'3단 기본 공격',form:'f9_base',
+     title:'9인제 3단 공격 기본',
+     steps:[
+       {desc:'① 상대 서브 날아옴',
+        ball:{from:[200,130],to:[160,690]},moves:{}},
+       {desc:'② 후위가 리시브 (1단)',
+        ball:{from:[160,690],to:[200,580]},
+        moves:{H7:[130,690],H8:[200,695],H9:[300,685]}},
+       {desc:'③ 중위가 2단으로 전위 연결',
+        ball:{from:[200,580],to:[200,470]},
+        moves:{H5:[200,540]}},
+       {desc:'④ 전위 중앙에서 스파이크!',
+        ball:{from:[200,470],to:[220,210]},
+        moves:{H2:[200,430]}}
+     ]},
+    {key:'t9_2',label:'W리시브→좌측공격',form:'f9_recv',
+     title:'W 리시브 → 좌측 전위 공격',
+     steps:[
+       {desc:'① 상대 강서브 좌측으로',
+        ball:{from:[320,130],to:[80,680]},moves:{}},
+       {desc:'② W 대형으로 리시브',
+        ball:{from:[80,680],to:[200,610]},
+        moves:{H4:[60,645],H5:[160,665],H6:[340,645],H7:[80,710],H9:[320,710]}},
+       {desc:'③ 중위가 2단 → 전위 좌측',
+        ball:{from:[200,610],to:[80,460]},
+        moves:{H5:[180,550]}},
+       {desc:'④ 전위 좌측 스파이크!',
+        ball:{from:[80,460],to:[80,210]},
+        moves:{H1:[75,428]}}
+     ]},
+    {key:'t9_3',label:'W리시브→우측공격',form:'f9_recv',
+     title:'W 리시브 → 우측 전위 공격',
+     steps:[
+       {desc:'① 상대 강서브 우측으로',
+        ball:{from:[80,130],to:[320,680]},moves:{}},
+       {desc:'② W 대형 리시브',
+        ball:{from:[320,680],to:[200,610]},
+        moves:{H4:[60,645],H5:[160,665],H6:[340,645]}},
+       {desc:'③ 2단 → 전위 우측',
+        ball:{from:[200,610],to:[320,460]},
+        moves:{H5:[210,545]}},
+       {desc:'④ 전위 우측 스파이크!',
+        ball:{from:[320,460],to:[300,200]},
+        moves:{H3:[325,428]}}
+     ]},
+    {key:'t9_4',label:'중앙 돌파',form:'f9_base',
+     title:'중앙 집중 돌파',
+     steps:[
+       {desc:'① 상대 서브 리시브',
+        ball:{from:[200,130],to:[200,680]},moves:{}},
+       {desc:'② 후위 리시브 → 중앙 연결',
+        ball:{from:[200,680],to:[200,560]},
+        moves:{H8:[200,670]}},
+       {desc:'③ 전위 중앙으로 집중',
+        ball:{from:[200,560],to:[200,455]},
+        moves:{H1:[140,445],H3:[260,445],H5:[200,530]}},
+       {desc:'④ 중앙 3명 동시 점프 → 타이밍 혼란 유발',
+        ball:{from:[200,455],to:[200,200]},
+        moves:{H1:[140,420],H2:[200,422],H3:[260,420]}}
+     ]},
+    {key:'t9_5',label:'좌우 분산 공격',form:'f9_base',
+     title:'좌우 분산 공격 (수비 혼란)',
+     steps:[
+       {desc:'① 리시브 성공 → 중앙 집결',
+        ball:{from:[320,130],to:[200,670]},moves:{}},
+       {desc:'② 전위 좌우 벌리기',
+        ball:{from:[200,670],to:[200,555]},
+        moves:{H1:[60,440],H3:[340,440],H2:[200,445],H5:[200,535]}},
+       {desc:'③ 좌측 또는 우측 선택적 공격',
+        ball:{from:[200,555],to:[200,460]},
+        moves:{}},
+       {desc:'④ 우측 공격 선택!',
+        ball:{from:[200,460],to:[330,190]},
+        moves:{H3:[335,425]}}
+     ]},
+    {key:'t9_6',label:'후위 백어택',form:'f9_base',
+     title:'후위에서 백어택',
+     steps:[
+       {desc:'① 리시브 후 후위 공격수 진입',
+        ball:{from:[80,130],to:[200,660]},moves:{}},
+       {desc:'② 전위 오른쪽 두 명 어택 라인 앞으로',
+        ball:{from:[200,660],to:[200,550]},
+        moves:{H2:[200,445],H3:[270,445]}},
+       {desc:'③ 후위 우측 어택 라인 뒤에서 점프',
+        ball:{from:[200,550],to:[320,560]},
+        moves:{H9:[320,565]}},
+       {desc:'④ 후위 백어택 스파이크!',
+        ball:{from:[320,560],to:[290,195]},
+        moves:{H9:[320,535]}}
+     ]},
+    {key:'t9_7',label:'서브 에이스 노림',form:'f9_base',
+     title:'점프 서브로 에이스 노리기',
+     steps:[
+       {desc:'① 서버가 서비스 라인으로 이동',
+        ball:{from:[200,410],to:[200,790]},
+        moves:{H9:[200,775]}},
+       {desc:'② 강서브 → 상대 후위 빈틈 공략',
+        ball:{from:[200,790],to:[80,140]},
+        moves:{}},
+       {desc:'③ 에이스 성공 (리시브 실패)',
+        ball:{from:[80,140],to:[80,60]},
+        moves:{A9:[60,120],A7:[100,130]}}
+     ]},
+    {key:'t9_8',label:'더블 블로킹',form:'f9_atk',
+     title:'전위 더블 블로킹 + 수비',
+     steps:[
+       {desc:'① 상대 좌측 전위가 토스 받아 공격',
+        ball:{from:[200,370],to:[80,345]},
+        moves:{A1:[80,375]}},
+       {desc:'② 우리 전위 좌측 두 명 블로킹 점프',
+        ball:{from:[80,345],to:[80,358]},
+        moves:{H1:[80,420],H2:[150,422]}},
+       {desc:'③ 뒤 중위·후위 수비 대형',
+        ball:{from:[80,358],to:[80,475]},
+        moves:{H4:[60,560],H5:[200,590],H6:[340,560],H8:[200,680]}},
+       {desc:'④ 수비 성공 → 역습 시작',
+        ball:{from:[80,475],to:[200,590]},
+        moves:{H5:[200,540]}}
+     ]}
+  ];
+
+  // ── 6인제 전술 ──
   const TAC6=[
-    {key:'t6_1',label:'W리시브→레프트',
-     form:'rot1',
+    {key:'t6_1',label:'W리시브→레프트',form:'f6_r1',
      title:'W 리시브 → 레프트 공격',
      steps:[
-       {desc:'① 상대 서브 시작 (우측 대각)',
+       {desc:'① 상대 서브 (우측 대각)',
         ball:{from:[320,180],to:[80,680]},moves:{}},
-       {desc:'② W 대형으로 리시브 이동',
+       {desc:'② W 대형 리시브',
         ball:{from:[80,680],to:[200,640]},
         moves:{H1:[320,690],H2:[290,640],H3:[200,690],H4:[60,670],H5:[130,635],H6:[200,710]}},
-       {desc:'③ 세터 위치로 2단 처리',
-        ball:{from:[200,640],to:[200,510]},
+       {desc:'③ 세터 연결 (레프트)',
+        ball:{from:[200,640],to:[80,480]},
         moves:{H1:[280,500]}},
-       {desc:'④ 레프트 스파이크 공격!',
-        ball:{from:[200,510],to:[80,430]},
-        moves:{H4:[75,475],H2:[80,420]}},
-       {desc:'⑤ 레프트 스파이크 → 상대 코트로',
-        ball:{from:[80,430],to:[100,200]},moves:{}}
+       {desc:'④ 레프트 스파이크!',
+        ball:{from:[80,480],to:[80,200]},
+        moves:{H4:[75,428]}}
      ]},
-    {key:'t6_2',label:'W리시브→미들속공',
-     form:'rot1',
+    {key:'t6_2',label:'W리시브→미들속공',form:'f6_r1',
      title:'W 리시브 → 미들 속공',
      steps:[
-       {desc:'① 상대 서브 (중앙 방향)',
+       {desc:'① 상대 서브 (중앙)',
         ball:{from:[200,180],to:[200,700]},moves:{}},
        {desc:'② W 대형 리시브',
         ball:{from:[200,700],to:[200,640]},
         moves:{H1:[320,690],H2:[280,640],H3:[200,690],H4:[60,670],H5:[120,635],H6:[200,710]}},
-       {desc:'③ 세터 빠른 토스 → 미들 속공',
-        ball:{from:[200,640],to:[200,460]},
-        moves:{H1:[200,500],H3:[200,450]}},
+       {desc:'③ 세터 미들 속공 토스',
+        ball:{from:[200,640],to:[200,455]},
+        moves:{H1:[200,500]}},
        {desc:'④ 미들 점프 스파이크!',
-        ball:{from:[200,460],to:[260,200]},
+        ball:{from:[200,455],to:[260,200]},
         moves:{H3:[200,425]}}
      ]},
-    {key:'t6_3',label:'W리시브→라이트',
-     form:'rot1',
-     title:'W 리시브 → 라이트 공격',
-     steps:[
-       {desc:'① 상대 서브 (좌측 대각)',
-        ball:{from:[80,180],to:[320,680]},moves:{}},
-       {desc:'② W 대형 리시브',
-        ball:{from:[320,680],to:[200,640]},
-        moves:{H1:[320,690],H2:[290,640],H3:[200,690],H4:[60,670],H5:[130,635],H6:[200,710]}},
-       {desc:'③ 세터 라이트 방향 토스',
-        ball:{from:[200,640],to:[320,500]},
-        moves:{H1:[280,500]}},
-       {desc:'④ OP(라이트) 백어택 공격!',
-        ball:{from:[320,500],to:[300,200]},
-        moves:{H2:[320,450]}}
-     ]},
-    {key:'t6_4',label:'더블 블로킹',
-     form:'block',
+    {key:'t6_3',label:'더블 블로킹',form:'f6_r1',
      title:'더블 블로킹 수비',
      steps:[
-       {desc:'① 상대팀 세터 토스 (레프트)',
+       {desc:'① 상대 세터 레프트 토스',
         ball:{from:[200,360],to:[80,340]},
         moves:{A2:[200,375],A3:[80,375]}},
-       {desc:'② 우리팀 2·3번 블로킹 점프',
-        ball:{from:[80,340],to:[80,360]},
-        moves:{H3:[80,425],H2:[160,430]}},
-       {desc:'③ 스파이크 막기 + 뒤 수비 준비',
-        ball:{from:[80,360],to:[80,470]},
-        moves:{H5:[80,660],H6:[200,620],H1:[320,680]}},
-       {desc:'④ 수비 성공 → 역공 세팅',
-        ball:{from:[80,470],to:[200,600]},
+       {desc:'② 우리 2·3번 블로킹 점프',
+        ball:{from:[80,340],to:[80,355]},
+        moves:{H3:[80,420],H2:[160,425]}},
+       {desc:'③ 스파이크 막기 + 수비 준비',
+        ball:{from:[80,355],to:[80,475]},
+        moves:{H5:[80,660],H6:[200,620]}},
+       {desc:'④ 수비 성공 → 역습',
+        ball:{from:[80,475],to:[200,600]},
         moves:{H1:[200,550]}}
-     ]},
-    {key:'t6_5',label:'로테이션 이동',
-     form:'rot1',
-     title:'서브 득점 후 로테이션',
-     steps:[
-       {desc:'① 현재 로테이션 1 대형',
-        ball:{from:[320,750],to:[200,410]},moves:{}},
-       {desc:'② 시계방향으로 1칸 이동',
-        ball:{from:[200,410],to:[200,410]},
-        moves:{H1:[80,715],H2:[320,455],H3:[200,455],H4:[80,455],H5:[200,715],H6:[320,715]}},
-       {desc:'③ 로테이션 2 완료 → 서브 준비',
-        ball:{from:[200,410],to:[80,750]},
-        moves:{}}
-     ]},
-    {key:'t6_6',label:'서브 에이스',
-     form:'rot1',
-     title:'점프 서브 에이스 노림',
-     steps:[
-       {desc:'① 서버 서브 지점 이동',
-        ball:{from:[200,410],to:[200,790]},
-        moves:{H1:[200,780]}},
-       {desc:'② 점프 서브 → 상대 약점 공략',
-        ball:{from:[200,790],to:[80,120]},
-        moves:{A6:[80,160],A1:[60,130]}},
-       {desc:'③ 서브 에이스 성공 / 리시브 실패',
-        ball:{from:[80,120],to:[80,50]},moves:{}}
-     ]},
-    {key:'t6_7',label:'수비 커버',
-     form:'wrecv',
-     title:'스파이크 수비 커버 시스템',
-     steps:[
-       {desc:'① 상대 레프트 스파이크 예고',
-        ball:{from:[200,375],to:[80,350]},
-        moves:{A4:[80,380]}},
-       {desc:'② 블로커 점프 + 수비 대형',
-        ball:{from:[80,350],to:[80,365]},
-        moves:{H3:[80,420],H2:[160,430],H5:[130,680],H6:[200,650],H1:[320,690]}},
-       {desc:'③ 스파이크 수비 성공',
-        ball:{from:[80,365],to:[200,620]},
-        moves:{}},
-       {desc:'④ 수비 → 역공 전환',
-        ball:{from:[200,620],to:[320,460]},
-        moves:{H1:[280,530],H4:[75,475]}}
-     ]},
-    {key:'t6_8',label:'빠른 역습',
-     form:'rot1',
-     title:'빠른 역습 공격 (카운터)',
-     steps:[
-       {desc:'① 상대 스파이크 리시브 성공',
-        ball:{from:[80,340],to:[200,650]},
-        moves:{H5:[60,670],H6:[200,680]}},
-       {desc:'② 세터 빠른 연결',
-        ball:{from:[200,650],to:[200,520]},
-        moves:{H1:[200,530]}},
-       {desc:'③ 레프트·라이트 동시 진입',
-        ball:{from:[200,520],to:[200,460]},
-        moves:{H4:[80,445],H2:[320,445]}},
-       {desc:'④ 레프트 속공으로 역습 성공!',
-        ball:{from:[200,460],to:[70,200]},
-        moves:{H4:[75,430]}}
      ]}
   ];
 
+  // ── 5인제 전술 ──
   const TAC5=[
-    {key:'t5_1',label:'서브리시브→공격',
-     form:'f5base',
+    {key:'t5_1',label:'서브리시브→공격',form:'f5_base',
      title:'5인제 서브 리시브 → 공격',
      steps:[
        {desc:'① 상대 서브',
         ball:{from:[200,180],to:[180,680]},moves:{}},
-       {desc:'② 후위 2인 리시브 → 세터',
+       {desc:'② 후위 리시브 → 세터',
         ball:{from:[180,680],to:[200,600]},
         moves:{I1:[320,680],I5:[160,680]}},
        {desc:'③ 세터 토스 (레프트)',
         ball:{from:[200,600],to:[80,480]},
         moves:{I1:[250,520]}},
-       {desc:'④ 레프트 스파이크 공격',
+       {desc:'④ 레프트 스파이크!',
         ball:{from:[80,480],to:[80,200]},
         moves:{I2:[80,445]}}
      ]},
-    {key:'t5_2',label:'미들 속공',
-     form:'f5base',
+    {key:'t5_2',label:'미들 속공',form:'f5_base',
      title:'5인제 미들 속공',
      steps:[
        {desc:'① 상대 서브 → 리시브',
@@ -2146,100 +2242,57 @@ var VB = (function(){ try { return (function(){
        {desc:'③ 미들 점프 스파이크',
         ball:{from:[200,470],to:[240,210]},
         moves:{I3:[200,440]}}
-     ]},
-    {key:'t5_3',label:'백어택',
-     form:'f5base',
-     title:'5인제 백어택 (후위 공격)',
-     steps:[
-       {desc:'① 리시브 → 세터',
-        ball:{from:[80,150],to:[320,700]},moves:{}},
-       {desc:'② 세터 백어택 세팅',
-        ball:{from:[320,700],to:[320,570]},
-        moves:{I1:[310,570]}},
-       {desc:'③ 라이트 백어택 점프',
-        ball:{from:[320,570],to:[320,420]},
-        moves:{I4:[320,555]}},
-       {desc:'④ 백어택 스파이크 공격!',
-        ball:{from:[320,420],to:[280,180]},moves:{}}
-     ]},
-    {key:'t5_4',label:'더블 공격 옵션',
-     form:'f5base',
-     title:'5인제 레프트·라이트 더블 공격',
-     steps:[
-       {desc:'① 리시브 성공 → 세터 전달',
-        ball:{from:[200,180],to:[200,680]},moves:{}},
-       {desc:'② 세터 포지션 이동',
-        ball:{from:[200,680],to:[200,560]},
-        moves:{I1:[200,550]}},
-       {desc:'③ 레프트·라이트 동시 진입',
-        ball:{from:[200,560],to:[200,470]},
-        moves:{I2:[80,450],I4:[320,450]}},
-       {desc:'④ 레프트 선택 → 공격!',
-        ball:{from:[200,470],to:[80,200]},
-        moves:{I2:[75,430]}}
      ]}
   ];
 
   // ── 상태 ──
-  let _mode='6';          // '6' or '5'
-  let _tacs=TAC6,_forms=forms6,_lbls=LABELS6;
-  let _curTac=null;
-  let _curForm=forms6[0];
-  let _step=-1;           // -1=기본배치, 0~n=스텝
-  let _playing=false;
-  let _playTimer=null;
-  let _speed=1;
-  let _loop=false;
-  // 현재 선수 위치 {id:[x,y]}
-  let _cur={};
-  let _ballPos=[200,410];
+  let _mode='9';
+  let _tacs=TAC9,_forms=FORMS9,_lbls=LBL9;
+  let _curTac=null, _curForm=FORMS9[0];
+  let _step=-1;
+  let _playing=false, _playTimer=null;
+  let _speed=1, _loop=false;
+  let _cur={}, _ballPos=[200,410];
 
   // ── DOM 헬퍼 ──
   function $v(id){return document.getElementById(id);}
-  function pct(px,dim){return (px/dim*100)+'%';}
-  function pctXY(x,y){return {left:pct(x,W),top:pct(y,H)};}
 
-  // ── 초기 위치 로드 ──
+  // ── 기본 배치 로드 (★ _curTac은 여기서 건드리지 않음) ──
   function loadBase(formKey){
     const f=_forms.find(f=>f.key===formKey)||_forms[0];
     _curForm=f;
     const p=f.pos;
     _cur={};
-    Object.keys(p).forEach(id=>{ if(id!=='BALL') _cur[id]=[p[id][0],p[id][1]]; });
+    Object.keys(p).forEach(id=>{if(id!=='BALL')_cur[id]=[p[id][0],p[id][1]];});
     _ballPos=[...(p.BALL||[200,410])];
     _step=-1;
-    _curTac=null;
+    // ★ _curTac은 여기서 초기화하지 않음 (form 버튼과 tac 버튼 분리)
   }
 
   // ── 스텝 적용 ──
   function applyStep(s){
     if(!s)return;
-    // 선수 이동
     Object.keys(s.moves||{}).forEach(id=>{
-      _cur[id]=[s.moves[id][0],s.moves[id][1]];
+      if(_cur[id])_cur[id]=[s.moves[id][0],s.moves[id][1]];
+      else _cur[id]=[s.moves[id][0],s.moves[id][1]];
     });
-    // 공 이동
-    if(s.ball){
-      _ballPos=[s.ball.to[0],s.ball.to[1]];
-    }
+    if(s.ball)_ballPos=[s.ball.to[0],s.ball.to[1]];
     renderPlayers();
     renderBall();
-    renderArrows(s);
   }
 
   // ── 렌더 ──
   function renderPlayers(){
     const layer=$v('vb2-playerLayer'); if(!layer)return;
-    // 현재 모드에서 사용하는 ID 목록
     const ids=Object.keys(_cur);
-    // 기존 토큰 재사용
     ids.forEach(id=>{
       let el=layer.querySelector('[data-vb2id="'+id+'"]');
       if(!el){
         el=document.createElement('div');
-        el.className='vb2-player '+(id.startsWith('H')||id.startsWith('I')?'home':'away');
+        const isHome=id.startsWith('H')||id.startsWith('I');
+        el.className='vb2-player '+(isHome?'home':'away');
         el.setAttribute('data-vb2id',id);
-        const lbl=(_lbls||LABELS6)[id]||{n:id,r:''};
+        const lbl=(_lbls||LBL9)[id]||{n:id,r:''};
         el.innerHTML='<span class="vb2-num">'+lbl.n+'</span>'+(lbl.r?'<span class="vb2-role">'+lbl.r+'</span>':'');
         layer.appendChild(el);
       }
@@ -2247,9 +2300,8 @@ var VB = (function(){ try { return (function(){
       el.style.left=pct(x,W);
       el.style.top=pct(y,H);
     });
-    // 없어진 ID 제거
     layer.querySelectorAll('[data-vb2id]').forEach(el=>{
-      if(!ids.includes(el.getAttribute('data-vb2id'))) el.remove();
+      if(!ids.includes(el.getAttribute('data-vb2id')))el.remove();
     });
   }
 
@@ -2259,73 +2311,57 @@ var VB = (function(){ try { return (function(){
     ball.style.top=pct(_ballPos[1],H);
   }
 
-  function renderArrows(s){
-    const svg=$v('vb2-arrowSvg'); if(!svg)return;
-    const lines=[];
-    // 선수 이동 화살표
-    Object.keys(s&&s.moves||{}).forEach(id=>{
-      const from=_cur[id]||[200,410]; // already updated, so use prev
-      // Note: _cur already updated to new pos. We use the ball.from or tac step from info
-      // We'll draw from the formation-base or previous position
-    });
-    // 공 화살표 (노란색)
-    if(s&&s.ball){
-      const f=s.ball.from, t=s.ball.to;
-      lines.push('<line x1="'+f[0]+'" y1="'+f[1]+'" x2="'+t[0]+'" y2="'+t[1]+'"'+
-        ' stroke="#ffd84d" stroke-width="2.2" stroke-linecap="round" marker-end="url(#vb2-ah)"/>');
-    }
-    svg.innerHTML=svg.querySelector('defs').outerHTML+lines.join('');
-  }
-
-  function renderArrowsFull(prevPos, s){
+  function renderArrows(prevPos,s){
     const svg=$v('vb2-arrowSvg'); if(!svg)return;
     const defsEl=svg.querySelector('defs');
     const lines=[];
-    // 선수 이동 화살표 (흰색 점선)
+    // 선수 이동 화살표 (흰 점선)
     Object.keys(s&&s.moves||{}).forEach(id=>{
-      const from=prevPos[id]||[200,410];
-      const to=s.moves[id];
-      if(!to)return;
+      const from=prevPos[id]; const to=s.moves[id];
+      if(!from||!to)return;
       lines.push('<line x1="'+from[0]+'" y1="'+from[1]+'" x2="'+to[0]+'" y2="'+to[1]+'"'+
-        ' stroke="rgba(255,255,255,.7)" stroke-width="1.8" stroke-dasharray="6,4" stroke-linecap="round" marker-end="url(#vb2-ahb)"/>');
+        ' stroke="rgba(255,255,255,.75)" stroke-width="2" stroke-dasharray="6,4"'+
+        ' stroke-linecap="round" marker-end="url(#vb2-ahb)"/>');
     });
-    // 공 화살표
+    // 공 화살표 (노란색)
     if(s&&s.ball){
-      const f=s.ball.from, t=s.ball.to;
+      const f=s.ball.from,t=s.ball.to;
       lines.push('<line x1="'+f[0]+'" y1="'+f[1]+'" x2="'+t[0]+'" y2="'+t[1]+'"'+
         ' stroke="#ffd84d" stroke-width="2.5" stroke-linecap="round" marker-end="url(#vb2-ah)"/>');
     }
     svg.innerHTML=(defsEl?defsEl.outerHTML:'')+lines.join('');
   }
 
+  function clearArrows(){
+    const svg=$v('vb2-arrowSvg'); if(!svg)return;
+    const d=svg.querySelector('defs'); svg.innerHTML=d?d.outerHTML:'';
+  }
+
   function renderStepList(){
     const el=$v('vb2-stepList'); if(!el)return;
     if(!_curTac){el.innerHTML='';return;}
-    const steps=_curTac.steps;
-    el.innerHTML=steps.map((s,i)=>{
+    el.innerHTML=_curTac.steps.map((s,i)=>{
       const cls=i<_step?'done':i===_step?'cur':'';
       return '<div class="vb2-step-dot '+cls+'" onclick="VB.goStep('+i+')">'+(i+1)+'</div>';
     }).join('');
   }
 
   function renderButtons(){
-    // 포메이션 버튼
     const fb=$v('vb2-formBtns'); if(!fb)return;
-    fb.innerHTML=_forms.map(f=>`<button class="vb2-chip${_curForm.key===f.key?' on':''}" onclick="VB.form('${f.key}')">${f.label}</button>`).join('');
-    // 전술 버튼
+    fb.innerHTML=_forms.map(f=>'<button class="vb2-chip'+(_curForm.key===f.key?' on':'')+
+      '" onclick="VB.form(\''+f.key+'\')">'+f.label+'</button>').join('');
     const tb=$v('vb2-tacBtns'); if(!tb)return;
-    tb.innerHTML=_tacs.map(t=>`<button class="vb2-chip${_curTac&&_curTac.key===t.key?' on':''}" onclick="VB.tac('${t.key}')">${t.label}</button>`).join('');
+    tb.innerHTML=_tacs.map(t=>'<button class="vb2-chip'+(_curTac&&_curTac.key===t.key?' on':'')+
+      '" onclick="VB.tac(\''+t.key+'\')">'+t.label+'</button>').join('');
   }
 
   function setStepInfo(){
-    const titleEl=$v('vb2-stepTitle'), descEl=$v('vb2-stepDesc');
+    const titleEl=$v('vb2-stepTitle'),descEl=$v('vb2-stepDesc');
     if(!titleEl||!descEl)return;
     if(!_curTac){
       titleEl.textContent='전술 선택';
-      descEl.textContent='왼쪽 전술 시나리오를 선택하면 단계별로 이동을 보여줍니다.';
-      return;
-    }
-    if(_step<0){
+      descEl.textContent='왼쪽 전술 시나리오를 선택하면 단계별 이동을 보여줍니다.';
+    } else if(_step<0){
       titleEl.textContent=_curTac.title;
       descEl.textContent='▶ 다음 버튼을 눌러 시작하세요 (총 '+_curTac.steps.length+'단계)';
     } else {
@@ -2334,67 +2370,64 @@ var VB = (function(){ try { return (function(){
     }
   }
 
+  function updateNextBtn(){
+    const btn=$v('vb2-nextBtn'); if(!btn)return;
+    btn.textContent=(_curTac&&_step>=_curTac.steps.length-1)?'완료 ✓':'다음 ▶';
+  }
+
   // ── 공개 API ──
   function setMode(m){
     _mode=m;
-    if(m==='5'){_tacs=TAC5;_forms=forms5;_lbls=LABELS5;}
-    else{_tacs=TAC6;_forms=forms6;_lbls=LABELS6;}
+    stopPlay();
+    if(m==='6'){_tacs=TAC6;_forms=FORMS6;_lbls=LBL6;}
+    else if(m==='5'){_tacs=TAC5;_forms=FORMS5;_lbls=LBL5;}
+    else{_tacs=TAC9;_forms=FORMS9;_lbls=LBL9;}
     _curTac=null;
     loadBase(_forms[0].key);
-    renderButtons();
-    renderPlayers();
-    renderBall();
-    setStepInfo();
+    clearArrows();
+    renderButtons(); renderPlayers(); renderBall();
+    setStepInfo(); renderStepList(); updateNextBtn();
   }
 
   function form(key){
+    stopPlay();
+    _curTac=null; // 포메이션 선택시에만 전술 초기화
     loadBase(key);
-    const svg=$v('vb2-arrowSvg');
-    if(svg){const d=svg.querySelector('defs');svg.innerHTML=d?d.outerHTML:'';}
-    renderButtons();
-    renderPlayers();
-    renderBall();
-    setStepInfo();
-    renderStepList();
+    clearArrows();
+    renderButtons(); renderPlayers(); renderBall();
+    setStepInfo(); renderStepList(); updateNextBtn();
   }
 
   function tac(key){
     stopPlay();
     const t=_tacs.find(t=>t.key===key); if(!t)return;
-    _curTac=t;
+    // ★ loadBase 먼저, 그 다음 _curTac 설정 (순서 중요!)
     loadBase(t.form);
-    renderButtons();
-    renderPlayers();
-    renderBall();
-    const svg=$v('vb2-arrowSvg');
-    if(svg){const d=svg.querySelector('defs');svg.innerHTML=d?d.outerHTML:'';}
-    setStepInfo();
-    renderStepList();
+    _curTac=t;        // loadBase 후에 설정해야 null로 덮어씌워지지 않음
+    clearArrows();
+    renderButtons(); renderPlayers(); renderBall();
+    setStepInfo(); renderStepList(); updateNextBtn();
   }
 
   function next(){
     if(!_curTac)return;
-    const maxStep=_curTac.steps.length-1;
-    if(_step>=maxStep){
-      if(_loop){ reset(); setTimeout(()=>next(),300); }
+    if(_step>=_curTac.steps.length-1){
+      if(_loop){reset();setTimeout(()=>next(),400);}
       return;
     }
-    _step++;
-    const s=_curTac.steps[_step];
     // 이전 위치 스냅샷 (화살표용)
-    const prevPos=Object.assign({},_cur); Object.keys(_cur).forEach(id=>{prevPos[id]=[..._cur[id]];});
-    applyStep(s);
-    renderArrowsFull(prevPos,s);
-    setStepInfo();
-    renderStepList();
-    updateNextBtn();
+    const prevPos={};
+    Object.keys(_cur).forEach(id=>{prevPos[id]=[..._cur[id]];});
+    _step++;
+    applyStep(_curTac.steps[_step]);
+    renderArrows(prevPos,_curTac.steps[_step]);
+    setStepInfo(); renderStepList(); updateNextBtn();
   }
 
   function goStep(idx){
     if(!_curTac)return;
     stopPlay();
-    _step=idx;
-    // idx-1까지 누적 → prevPos (화살표 시작점)
+    // idx-1까지 누적 → prevPos
     const baseF=_forms.find(f=>f.key===_curTac.form)||_forms[0];
     const prevPos={};
     Object.keys(baseF.pos).forEach(id=>{if(id!=='BALL')prevPos[id]=[...baseF.pos[id]];});
@@ -2404,33 +2437,34 @@ var VB = (function(){ try { return (function(){
     }
     // 0~idx 누적 → 현재 위치
     loadBase(_curTac.form);
+    const savedTac=_curTac;
+    _curTac=savedTac; // loadBase가 영향 없으므로 그대로 유지
     for(let i=0;i<=idx;i++){
       const ss=_curTac.steps[i];
       Object.keys(ss.moves||{}).forEach(id=>{_cur[id]=[ss.moves[id][0],ss.moves[id][1]];});
       if(ss.ball)_ballPos=[ss.ball.to[0],ss.ball.to[1]];
     }
+    _step=idx;
     renderPlayers(); renderBall();
-    renderArrowsFull(prevPos,_curTac.steps[idx]);
+    renderArrows(prevPos,_curTac.steps[idx]);
     setStepInfo(); renderStepList(); updateNextBtn();
   }
 
   function play(){
     if(_playing){stopPlay();return;}
-    if(_curTac&&_step>=_curTac.steps.length-1){ reset(); }
+    if(_curTac&&_step>=_curTac.steps.length-1)reset();
     _playing=true;
-    $v('vb2-playBtn').textContent='⏹ 정지';
+    const pb=$v('vb2-playBtn'); if(pb)pb.textContent='⏹ 정지';
     function tick(){
       if(!_curTac||_step>=_curTac.steps.length-1){
         stopPlay();
-        if(_loop){ reset(); setTimeout(play,400); }
+        if(_loop){reset();setTimeout(play,500);}
         return;
       }
       next();
-      const delay=(800/_speed)+100;
-      _playTimer=setTimeout(tick,delay);
+      _playTimer=setTimeout(tick,Math.round(900/_speed));
     }
-    const delay=(_step<0)?200:100;
-    _playTimer=setTimeout(tick,delay);
+    _playTimer=setTimeout(tick,300);
   }
 
   function stopPlay(){
@@ -2441,33 +2475,77 @@ var VB = (function(){ try { return (function(){
 
   function reset(){
     stopPlay();
-    if(!_curTac){loadBase(_curForm.key);}
-    else{loadBase(_curTac.form);}
-    const svg=$v('vb2-arrowSvg');
-    if(svg){const d=svg.querySelector('defs');svg.innerHTML=d?d.outerHTML:'';}
+    const key=_curTac?_curTac.form:_curForm.key;
+    loadBase(key);
+    clearArrows();
     renderPlayers(); renderBall();
     setStepInfo(); renderStepList(); updateNextBtn();
   }
 
-  function updateNextBtn(){
-    const btn=$v('vb2-nextBtn'); if(!btn)return;
-    if(_curTac&&_step>=_curTac.steps.length-1){
-      btn.textContent='완료 ✓';
+  // ── 자유 시뮬레이션 자동 대형 ──
+  // 9인제 공격 대형 (볼이 상대 코트)
+  const SIM9_ATK={
+    H1:[80,428],H2:[200,420],H3:[320,428],
+    H4:[80,575],H5:[200,567],H6:[320,575],
+    H7:[80,692],H8:[200,688],H9:[320,692]
+  };
+  // 9인제 수비/리시브 대형 (볼이 우리 코트)
+  const SIM9_DEF={
+    H1:[80,450],H2:[200,443],H3:[320,450],
+    H4:[60,635],H5:[160,655],H6:[340,635],
+    H7:[80,708],H8:[200,712],H9:[320,708]
+  };
+  // 6인제 공격 대형
+  const SIM6_ATK={
+    H1:[280,498],H2:[320,422],H3:[200,418],H4:[80,422],H5:[80,712],H6:[200,712]
+  };
+  // 6인제 수비/리시브 대형
+  const SIM6_DEF={
+    H1:[320,688],H2:[285,635],H3:[200,688],H4:[60,668],H5:[130,632],H6:[200,712]
+  };
+  // 5인제 공격
+  const SIM5_ATK={I1:[260,520],I2:[80,430],I3:[200,420],I4:[320,430],I5:[200,715]};
+  // 5인제 수비
+  const SIM5_DEF={I1:[320,695],I2:[65,660],I3:[200,688],I4:[335,660],I5:[200,718]};
+
+  function _getSimPos(isAtk){
+    if(_mode==='9')return isAtk?SIM9_ATK:SIM9_DEF;
+    if(_mode==='6')return isAtk?SIM6_ATK:SIM6_DEF;
+    if(_mode==='5')return isAtk?SIM5_ATK:SIM5_DEF;
+    return null;
+  }
+
+  function simState(state, bx, by){
+    const isAtk=(state==='atk');
+    // 볼 이동
+    if(bx!==undefined&&by!==undefined){
+      _ballPos=[bx,by];
     } else {
-      btn.textContent='다음 ▶';
+      _ballPos=isAtk?[200,200]:[200,625];
     }
+    renderBall();
+    // 선수 자동 대형 전환
+    const posMap=_getSimPos(isAtk);
+    if(posMap){
+      Object.keys(posMap).forEach(id=>{
+        if(_cur[id])_cur[id]=[posMap[id][0],posMap[id][1]];
+      });
+      renderPlayers();
+    }
+    clearArrows();
+    // 버튼 표시
+    const ab=$v('vb2-simAtk'),db=$v('vb2-simDef');
+    if(ab)ab.classList.toggle('on',isAtk);
+    if(db)db.classList.toggle('on',!isAtk);
   }
 
   let initialized=false;
   function init(){
     if(initialized)return;
     initialized=true;
-    loadBase(forms6[0].key);
-    renderButtons();
-    renderPlayers();
-    renderBall();
+    loadBase(FORMS9[0].key);
+    renderButtons(); renderPlayers(); renderBall();
     setStepInfo();
-    // 속도 버튼
     document.querySelectorAll('[data-vb2spd]').forEach(btn=>{
       btn.addEventListener('click',function(){
         _speed=parseFloat(this.dataset.vb2spd);
@@ -2475,22 +2553,36 @@ var VB = (function(){ try { return (function(){
         this.classList.add('vb2-spd-on');
       });
     });
-    // 반복 체크박스
     var lp=$v('vb2-loopChk');
     if(lp)lp.addEventListener('change',function(){_loop=this.checked;});
+    // 코트 클릭 → 볼 이동 + 자동 대형
+    var fw=$v('vb2-fieldWrap');
+    if(fw){
+      fw.addEventListener('click',function(e){
+        if(e.target.closest('.vb2-player'))return; // 선수 클릭 무시
+        var rect=fw.getBoundingClientRect();
+        var rx=(e.clientX-rect.left)/rect.width;
+        var ry=(e.clientY-rect.top)/rect.height;
+        var bx=Math.round(rx*W);
+        var by=Math.round(ry*H);
+        var isAtk=(ry<0.5); // 상단(상대코트) 클릭 = 우리 공격
+        simState(isAtk?'atk':'def',bx,by);
+        // 힌트 표시
+        var hint=$v('vb2-simHint'); if(hint)hint.style.display='block';
+      });
+    }
   }
 
   return {init,setMode,form,tac,next,play,reset,goStep,
     renderVideos:function(){},
     action:function(n){if(n==='reset')reset();if(n==='execute')next();},
-    formation:function(k){form(k);},
-    tactic:function(k){tac(k);},
-    panel:function(){},
-    initialized:false};
+    formation:function(k){form(k);},tactic:function(k){tac(k);},
+    panel:function(){},initialized:false};
 })(); } catch(e){ console.error('VB 오류:',e);
   return {init:function(){},renderVideos:function(){},action:function(){},
     formation:function(){},tactic:function(){},panel:function(){},initialized:false}; }
 })();
+
 
 
 

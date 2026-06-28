@@ -538,7 +538,7 @@
       display: grid;
       grid-template-rows: auto 1fr;
       height: 100%;
-      min-height: 560px;
+      min-height: 520px;
       gap: 8px;
       padding: 10px;
       background: #121722;
@@ -605,12 +605,16 @@
       border-radius: 8px;
       padding: 8px;
       min-height: 0;
+      overflow: hidden;
     }
     .pg-field-wrap {
       position: relative;
+      /* 데스크탑: 높이 기준 */
       height: 100%;
       max-height: 100%;
       aspect-ratio: 520 / 820;
+      /* 최소 너비 보장 */
+      min-width: 120px;
     }
     .pg-field-svg, .pg-arrow-svg, .pg-player-layer, .pg-ball-layer {
       position: absolute;
@@ -763,9 +767,46 @@
       font-weight: 800;
       cursor: pointer;
     }
+    /* ── 피구 모바일 레이아웃 ── */
     @media (max-width: 760px) {
-      .pg-main { grid-template-columns: 1fr; }
-      .pg-info { max-height: 260px; }
+      /* sim 최소높이 해제 - 모바일은 콘텐츠 높이로 */
+      .pg-sim { min-height: auto; padding: 8px 6px; gap: 6px; }
+
+      /* 탭 버튼 작게 */
+      .pg-tab { padding: 6px 10px; font-size: 12px; }
+
+      /* 메인: 1열로 스택 */
+      .pg-main {
+        grid-template-columns: 1fr;
+        grid-template-rows: auto auto;
+        overflow: visible;
+      }
+
+      /* 스테이지: 자연 높이로 */
+      .pg-stage { padding: 4px; min-height: 0; }
+
+      /* 핵심 수정: 경기장을 너비 기준으로 비율 유지 */
+      .pg-field-wrap {
+        width: 100% !important;
+        height: auto !important;
+        max-height: none !important;
+        aspect-ratio: 520 / 820;
+      }
+
+      /* 선수 크기 모바일 최적화 */
+      .pg-player {
+        width: clamp(20px, 7vw, 28px);
+        height: clamp(20px, 7vw, 28px);
+        font-size: clamp(10px, 3.5vw, 15px);
+        border-width: 1.5px;
+      }
+      .pg-ball {
+        width: clamp(16px, 5.5vw, 24px);
+        height: clamp(16px, 5.5vw, 24px);
+      }
+
+      /* 사이드 패널: 최대 높이 + 스크롤 */
+      .pg-info { max-height: 240px; overflow-y: auto; }
     }
 
   
@@ -798,6 +839,20 @@
   
     /* 공 게임모드 */
     .pg-ball { cursor: pointer; }
+    /* 공 던지기 비행 애니메이션 */
+    .pg-ball.pg-throwing {
+      transition: left .28s cubic-bezier(.5,0,.3,1), top .28s cubic-bezier(.5,0,.3,1) !important;
+      transform: translate(-50%,-50%) scale(.55) !important;
+      opacity: .85 !important;
+    }
+    /* 홀드 중 선수 하이라이트 */
+    .pg-player.pg-hold-target {
+      animation: pgHoldPulse .18s ease-in-out infinite alternate;
+    }
+    @keyframes pgHoldPulse {
+      from { box-shadow: 0 0 0 3px #ff4444, 0 0 8px #ff4444; }
+      to   { box-shadow: 0 0 0 6px #ff2222, 0 0 20px rgba(255,50,50,.6); }
+    }
     .pg-ball.pg-ball-active {
       box-shadow: 0 0 0 5px #fff456, 0 0 24px rgba(255,220,0,.9), 0 5px 12px rgba(0,0,0,.4);
       animation: pgBallPulse .7s ease-in-out infinite;
@@ -2311,10 +2366,11 @@ var DB = (function(){ try { return (function(){
 
   /* 외야 슬롯 (SVG 좌표) */
   var _outSlots={
-    o:[{x:130,y:138},{x:158,y:138},{x:186,y:138},{x:214,y:138},{x:242,y:138},
-       {x:270,y:138},{x:298,y:138},{x:326,y:138},{x:354,y:138},{x:382,y:138}],
-    t:[{x:382,y:682},{x:354,y:682},{x:326,y:682},{x:298,y:682},{x:270,y:682},
-       {x:242,y:682},{x:214,y:682},{x:186,y:682},{x:158,y:682},{x:130,y:682}]
+    /* 외야 전체 활용: 앞줄(내야쪽) 6자리 + 뒷줄(보드쪽) 5자리 */
+    o:[ {x:115,y:190},{x:171,y:190},{x:227,y:190},{x:283,y:190},{x:339,y:190},{x:395,y:190},
+        {x:115,y:122},{x:199,y:122},{x:267,y:122},{x:335,y:122},{x:407,y:122} ],
+    t:[ {x:405,y:630},{x:349,y:630},{x:293,y:630},{x:237,y:630},{x:181,y:630},{x:115,y:630},
+        {x:407,y:698},{x:323,y:698},{x:255,y:698},{x:187,y:698},{x:115,y:698} ]
   };
 
   function _oursAttack(){
@@ -2431,10 +2487,18 @@ var DB = (function(){ try { return (function(){
     });
   }
 
-  /* ── 드래그 + 클릭 이벤트 ── */
+  /* ── 드래그 + 클릭 + 꾹누르기(공 던지기) 이벤트 ── */
   function _attachPlayer(el, pfx, n){
     var dragging=false, moved=false, sx,sy,sl,st;
+    var holdTimer=null;
     function getWrap(){return _$('pg-fieldWrap');}
+
+    function _isOpponent(){
+      /* 게임 모드 + 공 선택 + 상대팀 선수 */
+      if(_editMode!=='game'||!_gs.ballSelected) return false;
+      var ownerPfx=_gs.ballOwner?_gs.ballOwner[0]:null;
+      return ownerPfx && ownerPfx!==pfx;
+    }
 
     function onStart(e){
       e.preventDefault();
@@ -2444,12 +2508,27 @@ var DB = (function(){ try { return (function(){
       sx=tc.clientX; sy=tc.clientY;
       sl=parseFloat(el.style.left)||50;
       st=parseFloat(el.style.top)||50;
+
+      /* 게임 모드 + 상대팀 → 꾹 누르기 던지기 감지 */
+      if(_isOpponent()&&!_gs.elim.has(pfx+n)){
+        el.classList.add('pg-hold-target');
+        holdTimer=setTimeout(function(){
+          holdTimer=null;
+          el.classList.remove('pg-hold-target','pg-dragging');
+          dragging=false;
+          _throwBall(el,pfx+n,pfx,n);
+        },320);
+      }
     }
     function onMove(e){
       if(!dragging)return;
       var tc=e.touches?e.touches[0]:e;
       var dx=tc.clientX-sx, dy=tc.clientY-sy;
-      if(Math.abs(dx)>4||Math.abs(dy)>4) moved=true;
+      if(Math.abs(dx)>6||Math.abs(dy)>6){
+        moved=true;
+        /* 드래그 시작 → 홀드 타이머 취소 */
+        if(holdTimer){clearTimeout(holdTimer);holdTimer=null;el.classList.remove('pg-hold-target');}
+      }
       if(!moved)return;
       var wrap=getWrap();if(!wrap)return;
       var r=wrap.getBoundingClientRect();
@@ -2457,10 +2536,12 @@ var DB = (function(){ try { return (function(){
       el.style.top =Math.max(1,Math.min(99,st+dy/r.height*100))+'%';
     }
     function onEnd(e){
+      el.classList.remove('pg-hold-target');
+      if(holdTimer){clearTimeout(holdTimer);holdTimer=null;}
       if(!dragging)return; dragging=false;
       el.classList.remove('pg-dragging');
       if(!moved){
-        /* 클릭 */
+        /* 클릭: 패스(아군) 또는 일반 */
         _onPlayerClick(el,pfx,n);
       } else {
         /* 드래그 종료: 외야 스냅 */
@@ -2474,13 +2555,33 @@ var DB = (function(){ try { return (function(){
     document.addEventListener('mouseup',onEnd);
     document.addEventListener('touchend',onEnd);
 
-    /* 더블클릭 → 아웃 */
+    /* 더블클릭 → 아웃 (편집 모드) */
     var lastTap=0;
     el.addEventListener('click',function(){
       var now=Date.now();
       if(now-lastTap<400){ _eliminatePlayer(pfx+n); }
       lastTap=now;
     });
+  }
+
+  /* 공 던지기: 비행 애니메이션 → 피격 */
+  function _throwBall(targetEl, id, pfx, n){
+    var ball=_$('pg-ball');if(!ball)return;
+    /* 던지기 비행 - 공이 상대쪽으로 날아감 */
+    ball.classList.add('pg-throwing');
+    ball.style.left=targetEl.style.left;
+    ball.style.top =targetEl.style.top;
+    /* 공 소유권은 던진 팀 유지 (아직 공격 중) */
+    var throwerPfx = _gs.ballOwner ? _gs.ballOwner[0] : (pfx==='o'?'t':'o');
+    _setBallSelected(false);
+    /* 0.3초 후 피격 처리 */
+    setTimeout(function(){
+      ball.classList.remove('pg-throwing');
+      ball.style.transform='';
+      _registerHit(targetEl,id,pfx,n);
+      /* 공격팀(던진 팀) 공격 대형 유지, 수비팀 재정렬 */
+      setTimeout(function(){ _autoFormation(throwerPfx); }, 150);
+    },300);
   }
 
   /* 플레이어 클릭 (게임 모드) */
@@ -2494,13 +2595,14 @@ var DB = (function(){ try { return (function(){
       /* 공 이동 */
       _moveBall(el);
       var ownerPfx=_gs.ballOwner?_gs.ballOwner[0]:null;
-      /* 상대팀 → 공격 */
+      /* 상대팀 → 피격 */
       if(ownerPfx && ownerPfx!==pfx){
         _registerHit(el,id,pfx,n);
       }
       _gs.ballOwner=id;
-      /* 공 선택 유지 (연속 패스 허용) - 공 이동 후 자동 해제 */
       _setBallSelected(false);
+      /* 공 받은 팀 → 공격 대형, 상대팀 → 수비 대형 */
+      setTimeout(function(){ _autoFormation(pfx); }, 80);
     }
   }
 
@@ -2508,6 +2610,29 @@ var DB = (function(){ try { return (function(){
     var ball=_$('pg-ball');if(!ball)return;
     ball.style.left=playerEl.style.left;
     ball.style.top =playerEl.style.top;
+  }
+
+  /* 공 소유팀 → 공격 대형, 상대팀 → 수비 대형 (게임 모드에서만) */
+  function _autoFormation(ownerPfx){
+    if(_editMode!=='game') return;
+    /* 활성 내야 선수에게만 적용 (외야 선수 제외) */
+    var atkRaw = ownerPfx==='o' ? _oursAttack()   : _theirsAttack();
+    var defRaw = ownerPfx==='o' ? _theirsFlat()   : _oursFlat();
+    function applyMap(map){
+      Object.keys(map).forEach(function(id){
+        if(_gs.elim.has(id)) return;        /* 아웃 선수 제외 */
+        if(id.endsWith('12')) return;       /* 외야 고정 선수 제외 */
+        var el=_$('pg-'+id); if(!el) return;
+        var pt=map[id]; if(!pt||pt.hidden) return;
+        var p=_pct(pt);
+        el.style.transition='left .55s cubic-bezier(.25,.8,.25,1), top .55s cubic-bezier(.25,.8,.25,1)';
+        el.style.left=p.left; el.style.top=p.top;
+        /* 트랜지션 후 리셋 (드래그 방해 방지) */
+        setTimeout(function(){el.style.transition='';},600);
+      });
+    }
+    applyMap(_applyMode(atkRaw, ownerPfx));
+    applyMap(_applyMode(defRaw, ownerPfx==='o'?'t':'o'));
   }
 
   function _setBallSelected(on){

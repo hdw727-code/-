@@ -1174,8 +1174,8 @@
               <!-- 자유 편집/시뮬 패널 -->
               <div id="pg-edit-panel" style="display:none;">
                 <div class="pg-mode-toggle">
-                  <button id="pg-modeDrag" class="pg-mode-on" type="button">✏️ 편집</button>
-                  <button id="pg-modeGame" type="button">⚽ 시뮬</button>
+                  <button id="pg-modeDrag" type="button">✏️ 편집</button>
+                  <button id="pg-modeGame" class="pg-mode-on" type="button">⚽ 시뮬</button>
                 </div>
                 <div class="pg-score-bar" id="pg-scoreBar">
                   <span class="pg-s-us" id="pg-scoreUs">우리팀 12명</span>
@@ -2339,7 +2339,7 @@ var DB = (function(){ try { return (function(){
   var _W=520, _H=820;
   var _activeTab='field', _stepIndex=0, _speed=1, _timer=null, _mode='12';
   var _initialized=false;
-  var _editMode='drag'; // 'drag' | 'game'
+  var _editMode='game'; // 'drag' | 'game'
 
   /* 게임 상태 */
   var _gs = {

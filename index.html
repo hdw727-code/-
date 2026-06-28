@@ -1316,7 +1316,7 @@
   <section id="adminLoginScreen" class="screen">
     <div class="panel grid">
       <div class="section-title"><h2>관리자 로그인</h2></div>
-      <label>비밀번호<input id="adminPassword" type="password" placeholder="초기 비밀번호: 1234"></label>
+      <label>비밀번호<input id="adminPassword" type="password" placeholder="비밀번호 입력"></label>
       <button class="btn" onclick="adminLogin()">관리자 화면 열기</button>
       <button class="btn secondary" onclick="showScreen(currentStudent ? 'student' : 'login')">돌아가기</button>
     </div>
@@ -1904,9 +1904,36 @@ function saveRecord() {
   });
 }
 
+const ADMIN_PW = '091200';
 function adminLogin() {
   adminPasswordCache = val('adminPassword');
-  runServer('adminLogin', [adminPasswordCache], data => { renderAdmin(data); showScreen('admin'); });
+  if (adminPasswordCache === ADMIN_PW) {
+    // 로컬 검증 성공 → 서버 데이터 시도, 실패 시 빈 화면
+    renderAdmin(_makeLocalAdminData());
+    showScreen('admin');
+    // 서버도 병행 조회 (성공하면 실제 데이터로 갱신)
+    if (GAS_API_URL) {
+      runServer('adminLogin', [adminPasswordCache], data => { renderAdmin(data); }, function(){});
+    }
+  } else {
+    showToast('비밀번호가 틀렸습니다.');
+  }
+}
+function changeAdminPassword() {
+  var cur = document.getElementById('currentPassword') ? document.getElementById('currentPassword').value : '';
+  var next = document.getElementById('nextPassword') ? document.getElementById('nextPassword').value : '';
+  if (cur !== ADMIN_PW) { showToast('현재 비밀번호가 틀렸습니다.'); return; }
+  if (!next) { showToast('새 비밀번호를 입력하세요.'); return; }
+  showToast('비밀번호 변경은 서버 연결 후 가능합니다.');
+}
+function _makeLocalAdminData() {
+  return {
+    today: new Date().toISOString().slice(0,10),
+    totalStudents: 0,
+    attendanceCounts: {'출석':0,'미확인':0},
+    excellent: [],
+    students: []
+  };
 }
 function refreshAdmin() {
   runServer('adminLogin', [adminPasswordCache], renderAdmin);
@@ -1999,9 +2026,10 @@ var VB = (function(){ try { return (function(){
   };
   // 9인제 W리시브 대형
   const POS9_RECV={
-    H1:[80,458],H2:[200,450],H3:[320,458],
-    H4:[60,640],H5:[160,660],H6:[340,640],
-    H7:[80,710],H8:[200,710],H9:[320,710],
+    // W리시브: H5(세터) 전위중앙, H2 중중위로 내려옴
+    H1:[80,455],H2:[200,570],H3:[320,455],   // H2→중중위
+    H4:[60,638],H5:[200,435],H6:[340,638],   // H5 세터→전위중앙
+    H7:[80,710],H8:[200,715],H9:[320,710],
     A1:[320,362],A2:[200,370],A3:[80,362],
     A4:[320,242],A5:[200,250],A6:[80,242],
     A7:[320,122],A8:[200,128],A9:[80,122],
@@ -2149,52 +2177,51 @@ var VB = (function(){ try { return (function(){
         moves:{A9:[58,122],A7:[108,132]}}
      ]},
     /* ── f9_recv 포메이션 전술 ── */
-    {key:'t9_6',label:'W리시브→중위좌(H4)',form:'f9_recv',
-     title:'W 리시브 → 세터(H5) → 중위 좌날개(H4)',
+    {key:'t9_6',label:'W리시브→날개좌(H4)',form:'f9_recv',
+     title:'W 리시브 → 세터(H5) → 좌날개(H4) 속공',
      steps:[
-       {desc:'① 상대 서브 (W 리시브 대형 준비)',
+       {desc:'① 상대 서브 (H5 세터 전위중앙 대기, H2 중중위 커버)',
         ball:{from:[320,130],to:[80,678]},moves:{}},
-       {desc:'② 1단: W 대형 리시브 → 세터 방향',
-        ball:{from:[80,678],to:[200,572]},
-        moves:{H4:[62,645],H6:[338,645],H7:[80,712],H8:[200,716],H9:[320,712]}},
-       {desc:'③ 2단: 세터(H5) 전위중앙 이동 + 속공 토스 → 중위 좌(H4)',
-        ball:{from:[200,572],to:[72,512]},
-        moves:{H5:[200,435],H4:[72,512]}},
-       {desc:'④ 3단: 중위 좌(H4) 스파이크!',
-        ball:{from:[72,512],to:[68,215]},
-        moves:{H4:[68,492]}}
+       {desc:'② 1단: 좌측 H4가 리시브 → 세터(H5) 방향',
+        ball:{from:[80,678],to:[200,435]},
+        moves:{H4:[62,645],H7:[80,712],H8:[200,716],H9:[320,712]}},
+       {desc:'③ 2단: 세터(H5) 좌날개(H4)로 속공 토스',
+        ball:{from:[200,435],to:[75,530]},
+        moves:{H4:[75,530],H1:[55,440],H3:[330,440]}},
+       {desc:'④ 3단: 좌날개(H4) 스파이크!',
+        ball:{from:[75,530],to:[68,215]},
+        moves:{H4:[68,508]}}
      ]},
-    {key:'t9_7',label:'W리시브→중위우(H6)',form:'f9_recv',
-     title:'W 리시브 → 세터(H5) → 중위 우날개(H6)',
+    {key:'t9_7',label:'W리시브→날개우(H6)',form:'f9_recv',
+     title:'W 리시브 → 세터(H5) → 우날개(H6) 속공',
      steps:[
-       {desc:'① 상대 서브 (W 리시브 대형 준비)',
+       {desc:'① 상대 서브 (H5 세터 전위중앙 대기, H2 중중위 커버)',
         ball:{from:[80,130],to:[320,678]},moves:{}},
-       {desc:'② 1단: W 대형 리시브 → 세터 방향',
-        ball:{from:[320,678],to:[200,572]},
-        moves:{H4:[62,645],H6:[338,645],H7:[80,712],H8:[200,716],H9:[320,712]}},
-       {desc:'③ 2단: 세터(H5) 전위중앙 이동 + 속공 토스 → 중위 우(H6)',
-        ball:{from:[200,572],to:[330,512]},
-        moves:{H5:[200,435],H6:[330,512]}},
-       {desc:'④ 3단: 중위 우(H6) 스파이크!',
-        ball:{from:[330,512],to:[332,215]},
-        moves:{H6:[332,492]}}
+       {desc:'② 1단: 우측 H6가 리시브 → 세터(H5) 방향',
+        ball:{from:[320,678],to:[200,435]},
+        moves:{H6:[338,645],H7:[80,712],H8:[200,716],H9:[320,712]}},
+       {desc:'③ 2단: 세터(H5) 우날개(H6)로 속공 토스',
+        ball:{from:[200,435],to:[325,530]},
+        moves:{H6:[325,530],H1:[55,440],H3:[330,440]}},
+       {desc:'④ 3단: 우날개(H6) 스파이크!',
+        ball:{from:[325,530],to:[332,215]},
+        moves:{H6:[332,508]}}
      ]},
     {key:'t9_8',label:'W리시브→전위좌(H1)',form:'f9_recv',
-     title:'W 리시브 → 세터(H5) → 전위 좌(H1)',
+     title:'W 리시브 → 세터(H5) → 전위 좌(H1) 오픈 공격',
      steps:[
-       {desc:'① 상대 서브 (W 리시브 대형)',
-        ball:{from:[200,130],to:[155,688]},moves:{}},
-       {desc:'② 1단: W 리시브 → 세터 방향',
-        ball:{from:[155,688],to:[200,572]},
-        moves:{H4:[62,645],H6:[338,645],H7:[80,712],H8:[200,716],H9:[320,712]}},
-       {desc:'③ 2단: 세터(H5) 전위중앙 이동 + 높은 토스 → 전위 좌(H1)',
-        ball:{from:[200,572],to:[78,442]},
-        moves:{H5:[200,435],H2:[148,445],H1:[75,435]}},
+       {desc:'① 상대 서브 (H5 전위중앙 대기, H2 중중위 커버)',
+        ball:{from:[200,130],to:[200,695]},moves:{}},
+       {desc:'② 1단: 후위(H8) 리시브 → 세터(H5) 방향',
+        ball:{from:[200,695],to:[200,435]},
+        moves:{H7:[80,712],H8:[200,716],H9:[320,712]}},
+       {desc:'③ 2단: 세터(H5) 전위 좌(H1)로 오픈 토스',
+        ball:{from:[200,435],to:[78,445]},
+        moves:{H1:[78,435],H3:[330,445]}},
        {desc:'④ 3단: 전위 좌(H1) 스파이크!',
-        ball:{from:[78,442],to:[72,195]},
+        ball:{from:[78,445],to:[72,195]},
         moves:{H1:[72,418]}}
      ]},
-    /* ── f9_atk 포메이션 전술 ── */
     {key:'t9_9',label:'더블블로킹+역습',form:'f9_atk',
      title:'더블 블로킹 후 세터(H5) → 전위 우(H3) 역습',
      steps:[
@@ -2555,15 +2582,15 @@ var VB = (function(){ try { return (function(){
 
   // ── 자유 시뮬레이션 자동 대형 ──
   // 9인제 공격 대형 (볼이 상대 코트)
-  const SIM9_ATK={  // 공격: H5(세터) 전위 중앙, H1·H3 공격준비
-    H1:[78,430],H2:[150,438],H3:[322,430],
-    H4:[78,572],H5:[200,432],H6:[322,572],  // H5 전위 중앙 세트 위치
+  const SIM9_ATK={  // 공격: H5 세터 토스 완료, 전위 공격준비
+    H1:[78,430],H2:[148,448],H3:[322,430],
+    H4:[78,572],H5:[200,435],H6:[322,572],  // H5 전위중앙 세트 위치
     H7:[78,692],H8:[200,688],H9:[322,692]
   };
   // 9인제 수비/리시브 대형
-  const SIM9_DEF={  // W수비: H4·H6 날개, H5 전위 중앙 세트 준비
-    H1:[78,450],H2:[148,445],H3:[322,450],
-    H4:[60,638],H5:[200,435],H6:[340,638],  // H5 항상 전위 중앙
+  const SIM9_DEF={  // W수비: H5 전위중앙 세터, H2 중중위, H4·H6 날개
+    H1:[78,455],H2:[200,570],H3:[322,455],  // H2→중중위
+    H4:[60,638],H5:[200,435],H6:[340,638],  // H5 세터 전위중앙
     H7:[78,710],H8:[200,715],H9:[322,710]
   };
   // 6인제 공격 대형
@@ -2638,6 +2665,7 @@ var VB = (function(){ try { return (function(){
   function simState(state, bx, by){
     const isAtk=(state==='atk');
     // 볼 이동
+    const prevBall=[..._ballPos];
     if(bx!==undefined&&by!==undefined){
       _ballPos=[bx,by];
     } else {
@@ -2657,6 +2685,29 @@ var VB = (function(){ try { return (function(){
     const ab=$v('vb2-simAtk'),db=$v('vb2-simDef');
     if(ab)ab.classList.toggle('on',isAtk);
     if(db)db.classList.toggle('on',!isAtk);
+    // 공 도착 위치에서 가장 가까운 선수 하이라이트 (시뮬레이션)
+    _simHighlight(_ballPos, isAtk);
+  }
+  function _simHighlight(bPos, isAtk){
+    document.querySelectorAll('[data-vb2id]').forEach(function(el){
+      el.classList.remove('vb2-recv','vb2-spike');
+    });
+    // 우리 수비(공이 우리코트로): 가장 가까운 우리팀 선수 강조
+    // 우리 공격(공이 상대코트로): 가장 가까운 우리팀 전위 선수 강조
+    var keys=Object.keys(_cur).filter(function(id){return id.startsWith('H')||id.startsWith('I');});
+    var minDist=Infinity, bestId=null;
+    keys.forEach(function(id){
+      var p=_cur[id]; if(!p)return;
+      var d=Math.sqrt(Math.pow(p[0]-bPos[0],2)+Math.pow(p[1]-bPos[1],2));
+      if(d<minDist){minDist=d;bestId=id;}
+    });
+    if(bestId&&minDist<110){
+      var el=document.querySelector('[data-vb2id="'+bestId+'"]');
+      if(el){
+        el.classList.add(isAtk?'vb2-spike':'vb2-recv');
+        setTimeout(function(){el.classList.remove('vb2-recv','vb2-spike');},1400);
+      }
+    }
   }
 
   let initialized=false;
@@ -2693,7 +2744,7 @@ var VB = (function(){ try { return (function(){
     }
   }
 
-  return {init,setMode,form,tac,next,play,reset,goStep,
+  return {init,setMode,form,tac,next,play,reset,goStep,simState,
     renderVideos:function(){},
     action:function(n){if(n==='reset')reset();if(n==='execute')next();},
     formation:function(k){form(k);},tactic:function(k){tac(k);},
@@ -3471,32 +3522,4 @@ var DB = (function(){ try { return (function(){
     var er=_$('pg-elimResetBtn');if(er)er.addEventListener('click',_resetAll);
     /* 저장/불러오기 */
     var sv=_$('pg-saveBtn'),ld=_$('pg-loadBtn'),rst=_$('pg-editResetBtn');
-    if(sv)sv.addEventListener('click',function(){_savePos(_activeTab);});
-    if(ld)ld.addEventListener('click',function(){
-      if(_hasSave(_activeTab))_loadPos(_activeTab);
-      else if(typeof showToast==='function') showToast('저장된 배치가 없습니다');
-    });
-    if(rst)rst.addEventListener('click',function(){
-      _resetAll();try{localStorage.removeItem(_storageKey(_activeTab));}catch(e){}
-      _updateSaveLabel(_activeTab);
-    });
-  }
-
-  function init(){
-    if(_initialized)return;_initialized=true;
-    _createPlayers();_bindEvents();_render();
-  }
-  function renderVideos(){}
-  function action(){}
-  function formation(){}
-  function tactic(){}
-  function panel(){}
-
-  return{init:init,action:action,formation:formation,tactic:tactic,panel:panel,renderVideos:renderVideos,initialized:false};
-})(); } catch(e){
-  showError('DB 초기화 오류: '+(e.message||String(e)));
-  return{init:function(){},action:function(){},formation:function(){},tactic:function(){},panel:function(){},renderVideos:function(){},initialized:false};}
-})();
-</script>
-</body>
-</html>
+    if(sv)sv

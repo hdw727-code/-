@@ -14,6 +14,7 @@
   --foreign:#0369a1;  --foreign-l:#e0f2fe;
   --saja:   #6b21a8;  --saja-l:  #f3e8ff;
   --nonp:   #be5504;  --nonp-l:  #fff4ec;
+  --gong:   #0f6d8a;  --gong-l:  #e0f5fa;
   --red:    #dc2626;
   --orange: #ea580c;
   --gray:   #64748b;
@@ -339,6 +340,48 @@ body {
         <div class="sc-sub">시흥·광주·이천·안성 등<br>추첨 아닌 성적으로 지원</div>
         <span class="sc-tag" style="background:var(--nonp-l);color:var(--nonp);">후기학교</span>
       </div>
+      <div class="school-card" onclick="selectSchool('gongnip')" style="border-color:#67c2d8;">
+        <span class="sc-icon">🏛️</span>
+        <div class="sc-name" style="color:var(--gong);">자율형 공립고</div>
+        <div class="sc-sub">지역 실정에 맞는 자율적<br>교육과정 운영 공립학교</div>
+        <span class="sc-tag" style="background:var(--gong-l);color:var(--gong);">후기학교</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- ───────────── STEP 1b: 자율형 공립고 지역 유형 선택 ───────────── -->
+  <div class="screen" id="screen1b">
+    <div class="step-indicator">
+      <div class="step-dot done">✓</div>
+      <div class="step-line done"></div>
+      <div class="step-dot active">2</div>
+      <div class="step-line"></div>
+      <div class="step-dot">3</div>
+    </div>
+    <div class="screen-title">
+      <h2>🏛️ 자율형 공립고</h2>
+      <p>거주 지역이 평준화인지 비평준화인지 선택해요<br>전형 방법과 일정이 완전히 달라요</p>
+    </div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-top:8px;">
+      <div class="school-card" onclick="selectGongType('gongp')" style="border-color:#6ee7b7;padding:24px 16px;">
+        <span class="sc-icon">🗺️</span>
+        <div class="sc-name" style="color:var(--gen);font-size:16px;">평준화 지역</div>
+        <div class="sc-sub" style="margin-top:6px;">수원·성남·안양권·부천·고양<br>광명·안산·의정부·용인</div>
+        <div style="margin-top:10px;font-size:12px;background:var(--gen-l);color:var(--gen);padding:6px 10px;border-radius:6px;font-weight:600;">
+          학군 추첨 배정 방식
+        </div>
+      </div>
+      <div class="school-card" onclick="selectGongType('gonnp')" style="border-color:#fdba74;padding:24px 16px;">
+        <span class="sc-icon">📍</span>
+        <div class="sc-name" style="color:var(--nonp);font-size:16px;">비평준화 지역</div>
+        <div class="sc-sub" style="margin-top:6px;">시흥·광주·이천·안성·평택<br>파주·남양주·구리 등</div>
+        <div style="margin-top:10px;font-size:12px;background:var(--nonp-l);color:var(--nonp);padding:6px 10px;border-radius:6px;font-weight:600;">
+          내신성적순 학교별 선발
+        </div>
+      </div>
+    </div>
+    <div style="margin-top:14px;padding:12px 14px;background:#f8fafc;border:1px solid var(--border);border-radius:10px;font-size:12px;color:var(--gray);line-height:1.6;">
+      💡 평준화 9개 학군(수원·성남·안양권·부천·고양·광명·안산·의정부·용인) 소재 학교면 <strong>평준화</strong>,<br>그 외 지역이면 <strong>비평준화</strong>를 선택하세요.
     </div>
   </div>
 
@@ -558,7 +601,7 @@ const SCHOOLS = {
     openDate:  new Date('2026-12-04'),
     closeDate: new Date('2026-12-10'),
     timeline: [
-      { phase:'원서접수', date:'2026.12.04(금) ~ 12.10(목)', note:'학교별로 직접 지원 — 여러 학교 동시 지원 가능', highlight:true },
+      { phase:'원서접수', date:'2026.12.04(금) ~ 12.10(목)', note:'학교별로 직접 지원 — 후기학교는 1개교만 지원 가능 (이중지원 금지)', highlight:true },
       { phase:'전형', date:'내신성적(200점) 기준 선발', note:'추첨 없음 — 성적순으로 정원 내 선발 (학교별)' },
       { phase:'합격자 발표', date:'2026.12.14(월)', note:'지원한 학교에서 개별 통보', highlight:true },
       { phase:'등록', date:'합격 후 학교별 안내', note:'기한 내 등록 필수 — 미등록 시 불합격 처리' },
@@ -569,7 +612,58 @@ const SCHOOLS = {
       '내신성적 200점이 합격의 핵심 — 교과 성취도(A/B/C) 집중 관리',
       '봉사활동 3개년 15시간 이상 채우기 (20점 만점)',
       '출결 관리 철저히 — 결석 0일이 20점 만점 (지각·조퇴·결과 3회=결석 1일)',
-      '여러 학교에 동시 지원 가능 — 가고 싶은 학교 + 안정권 학교 함께 지원 전략',
+      '후기학교는 1개교만 지원 가능 — 이중지원 절대 금지 (위반 시 합격 무효)',
+    ],
+    notice: null,
+    nonpInfo: true,
+  },
+  gongp: {
+    name:'자율형 공립고 (평준화)',
+    icon:'🏛️',
+    color:'#0f6d8a',
+    colorL:'#e0f5fa',
+    type:'후기학교 · 평준화',
+    isEarly: false,
+    openDate:  new Date('2026-12-04'),
+    closeDate: new Date('2026-12-10'),
+    timeline: [
+      { phase:'원서접수', date:'2026.12.04(금) ~ 12.10(목)', note:'학군 내 지망 학교 작성 — 후기학교 1개교 지원 원칙', highlight:true },
+      { phase:'배정대상자\n발표', date:'2027.01.06(수)', note:'교육청 또는 중학교 통해 확인' },
+      { phase:'배정학교\n발표', date:'2027.01.22(금)', note:'추첨 결과 발표' },
+      { phase:'등록', date:'2027.01.25(월) ~ 01.27(수)', note:'기한 내 등록 필수' },
+      { phase:'추가배정', date:'2027.02.04(목)', note:'미배정 학생 추가 배정 / 등록 02.04~02.05' },
+    ],
+    prep: [
+      '지망 학교 순서 신중하게 결정 (순서가 배정에 영향)',
+      '거주지 학군 소재 학교만 지망 가능',
+      '내신성적 200점 구조 최종 점검 (출결·봉사 확인)',
+      '전입 예정이라면 원서접수 전에 주민등록 이전 완료',
+      '배정 결과 발표일(1.22) 확인 후 등록(1.25~1.27) 기한 준수',
+    ],
+    isGongp: true,
+  },
+  gonnp: {
+    name:'자율형 공립고 (비평준화)',
+    icon:'🏛️',
+    color:'#0f6d8a',
+    colorL:'#e0f5fa',
+    type:'후기학교 · 비평준화',
+    isEarly: false,
+    openDate:  new Date('2026-12-04'),
+    closeDate: new Date('2026-12-10'),
+    timeline: [
+      { phase:'원서접수', date:'2026.12.04(금) ~ 12.10(목)', note:'학교별 직접 지원 — 후기학교는 1개교만 지원 가능 (이중지원 금지)', highlight:true },
+      { phase:'전형', date:'내신성적(200점) 기준 선발', note:'추첨 없음 — 성적순으로 정원 내 선발 (학교별)' },
+      { phase:'합격자 발표', date:'2026.12.14(월)', note:'지원한 학교에서 개별 통보', highlight:true },
+      { phase:'등록', date:'합격 후 학교별 안내', note:'기한 내 등록 필수 — 미등록 시 불합격 처리' },
+      { phase:'추가모집', date:'2027.01.07(목) ~ 01.12(화)', note:'정원 미달 학교에 한해 실시 / 발표 2027.01.14(목)' },
+    ],
+    prep: [
+      '지원 학교 모집 인원·합격선(전년도 커트라인) 사전 확인',
+      '내신성적 200점이 합격의 핵심 — 교과 성취도(A/B/C) 집중 관리',
+      '봉사활동 3개년 15시간 이상 채우기 (20점 만점)',
+      '출결 관리 철저히 — 결석 0일이 20점 만점',
+      '후기학교는 1개교만 지원 가능 — 이중지원 절대 금지 (위반 시 합격 무효)',
     ],
     notice: null,
     nonpInfo: true,
@@ -619,18 +713,30 @@ function showScreen(id) {
   document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
   document.getElementById('screen'+id).classList.add('active');
   const backBtn = document.getElementById('backBtn');
-  backBtn.style.display = (id > 1) ? 'flex' : 'none';
+  backBtn.style.display = (id !== 1 && id !== '1') ? 'flex' : 'none';
   window.scrollTo({top:0, behavior:'smooth'});
 }
 
 function goBack() {
   const active = document.querySelector('.screen.active').id;
-  if (active === 'screen3' && selectedSchool === 'gen') {
-    showScreen(2);
+  if (active === 'screen3') {
+    if (selectedSchool === 'gen' || selectedSchool === 'gongp') {
+      showScreen(2);
+    } else if (selectedSchool === 'gonnp') {
+      showScreen('1b');
+    } else {
+      selectedSchool = null; selectedGunhak = null; showScreen(1);
+    }
+  } else if (active === 'screen2') {
+    if (selectedSchool === 'gongp') {
+      selectedGunhak = null; showScreen('1b');
+    } else {
+      selectedSchool = null; selectedGunhak = null; showScreen(1);
+    }
+  } else if (active === 'screen1b') {
+    selectedSchool = null; showScreen(1);
   } else {
-    selectedSchool = null;
-    selectedGunhak = null;
-    showScreen(1);
+    selectedSchool = null; selectedGunhak = null; showScreen(1);
   }
 }
 
@@ -639,6 +745,21 @@ function selectSchool(type) {
   selectedSchool = type;
   selectedGunhak = null;
   if (type === 'gen') {
+    buildGunhakGrid();
+    showScreen(2);
+  } else if (type === 'gongnip') {
+    showScreen('1b');
+  } else {
+    buildResult();
+    showScreen(3);
+  }
+}
+
+// ── STEP 1b: 자율형 공립고 지역 유형 선택 ────────────────────────────
+function selectGongType(type) {
+  selectedSchool = type;
+  selectedGunhak = null;
+  if (type === 'gongp') {
     buildGunhakGrid();
     showScreen(2);
   } else {
@@ -850,8 +971,8 @@ function buildResult() {
         <span class="gr-val" style="color:#be5504">내신성적순 선발 (추첨 없음)</span>
       </div>
       <div class="gr-row">
-        <span class="gr-label">복수 지원</span>
-        <span class="gr-val">가능 — 여러 학교에 동시 지원 OK</span>
+        <span class="gr-label">지원 가능 학교 수</span>
+        <span class="gr-val" style="color:#dc2626;font-weight:700;">1개교만 지원 가능 (이중지원 금지)</span>
       </div>
       <div class="gr-row">
         <span class="gr-label">지원 방법</span>
@@ -873,7 +994,7 @@ function buildResult() {
         ⚠️ <strong>성적이 합격을 결정합니다.</strong><br>
         평준화(추첨)와 달리 내신 200점 점수가 낮으면 원하는 학교에 불합격할 수 있어요.<br>
         지원 전 학교별 <strong>전년도 합격선(커트라인)</strong>을 꼭 확인하세요.<br><br>
-        💡 여러 학교에 동시 지원할 수 있으니, 가고 싶은 학교 + 안정권 학교를 함께 지원하는 전략이 좋아요.<br><br>
+        ⛔ <strong>후기학교는 1개교만 지원 가능합니다.</strong> 비평준화 일반고도 후기학교이므로 한 곳만 선택해야 해요. 신중하게 결정하세요.<br><br>
         📌 <strong>합격자 발표: 2026.12.14(월)</strong> — 평준화보다 한 달 이상 빠르게 결과를 알 수 있어요.
       </div>
     </div>`;
@@ -881,12 +1002,12 @@ function buildResult() {
 
   // 학군 정보 (일반고만)
   let gunhakHtml = '';
-  if (selectedSchool === 'gen' && selectedGunhak) {
+  if ((selectedSchool === 'gen' || selectedSchool === 'gongp') && selectedGunhak) {
     const g = selectedGunhak;
     const stage2 = 100 - g.rate;
     gunhakHtml = `
     <div class="gunhak-result">
-      <div class="gr-title" style="color:var(--gen)">🗺️ ${g.name} 학군 배정 안내</div>
+      <div class="gr-title" style="color:${selectedSchool==='gongp'?'var(--gong)':'var(--gen)'}">🗺️ ${g.name} 학군 배정 안내 ${selectedSchool==='gongp'?'(자율형 공립고)':''}</div>
       <div class="gr-row"><span class="gr-label">학군 내 고교 수</span><span class="gr-val">${g.cnt}개교</span></div>
       <div class="gr-row"><span class="gr-label">지망 학교 수</span><span class="gr-val">최대 5개교 (학군 내 학교만)</span></div>
       <div class="gr-row"><span class="gr-label">1단계 학군내배정</span><span class="gr-val" style="color:var(--gen)">정원의 ${g.rate}%</span></div>

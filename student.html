@@ -13,6 +13,7 @@
   --gen:    #0e6e4a;  --gen-l:   #e6f7f0;
   --foreign:#0369a1;  --foreign-l:#e0f2fe;
   --saja:   #6b21a8;  --saja-l:  #f3e8ff;
+  --nonp:   #be5504;  --nonp-l:  #fff4ec;
   --red:    #dc2626;
   --orange: #ea580c;
   --gray:   #64748b;
@@ -332,6 +333,12 @@ body {
         <div class="sc-sub">자율형 사립고등학교<br>독자적 교육과정 운영</div>
         <span class="sc-tag" style="background:var(--saja-l);color:var(--saja);">후기학교</span>
       </div>
+      <div class="school-card" onclick="selectSchool('nonp')" style="border-color:#fdba74;">
+        <span class="sc-icon">📍</span>
+        <div class="sc-name" style="color:var(--nonp);">일반고 (비평준화)</div>
+        <div class="sc-sub">시흥·광주·이천·안성 등<br>추첨 아닌 성적으로 지원</div>
+        <span class="sc-tag" style="background:var(--nonp-l);color:var(--nonp);">후기학교</span>
+      </div>
     </div>
   </div>
 
@@ -540,6 +547,32 @@ const SCHOOLS = {
       '면접·서류 준비 일정 학교별 확인',
     ],
     notice: 'ℹ️ 자사고는 후기학교입니다. 전기학교 불합격자도 지원 가능하며, 일부 자사고는 전국 단위 모집도 합니다.',
+  },
+  nonp: {
+    name:'일반고 (비평준화)',
+    icon:'📍',
+    color:'#be5504',
+    colorL:'#fff4ec',
+    type:'후기학교 · 비평준화',
+    isEarly: false,
+    openDate:  new Date('2026-12-04'),
+    closeDate: new Date('2026-12-10'),
+    timeline: [
+      { phase:'원서접수', date:'2026.12.04(금) ~ 12.10(목)', note:'학교별로 직접 지원 — 여러 학교 동시 지원 가능', highlight:true },
+      { phase:'전형', date:'내신성적(200점) 기준 선발', note:'추첨 없음 — 성적순으로 정원 내 선발 (학교별)' },
+      { phase:'합격자 발표', date:'2026.12.14(월)', note:'지원한 학교에서 개별 통보', highlight:true },
+      { phase:'등록', date:'합격 후 학교별 안내', note:'기한 내 등록 필수 — 미등록 시 불합격 처리' },
+      { phase:'추가모집', date:'2027.01.07(목) ~ 01.12(화)', note:'정원 미달 학교에 한해 실시 / 발표 2027.01.14(목)' },
+    ],
+    prep: [
+      '지원 학교 모집 인원·합격선(전년도 커트라인) 사전 확인',
+      '내신성적 200점이 합격의 핵심 — 교과 성취도(A/B/C) 집중 관리',
+      '봉사활동 3개년 15시간 이상 채우기 (20점 만점)',
+      '출결 관리 철저히 — 결석 0일이 20점 만점 (지각·조퇴·결과 3회=결석 1일)',
+      '여러 학교에 동시 지원 가능 — 가고 싶은 학교 + 안정권 학교 함께 지원 전략',
+    ],
+    notice: null,
+    nonpInfo: true,
   },
 };
 
@@ -806,6 +839,46 @@ function buildResult() {
     </div>
   </div>`;
 
+  // 비평준화 안내
+  let nonpHtml = '';
+  if (selectedSchool === 'nonp') {
+    nonpHtml = `
+    <div class="gunhak-result" style="border-left:4px solid var(--nonp);">
+      <div class="gr-title" style="color:var(--nonp)">📍 비평준화 일반고 — 평준화와 다른 점</div>
+      <div class="gr-row">
+        <span class="gr-label">배정 방식</span>
+        <span class="gr-val" style="color:#be5504">내신성적순 선발 (추첨 없음)</span>
+      </div>
+      <div class="gr-row">
+        <span class="gr-label">복수 지원</span>
+        <span class="gr-val">가능 — 여러 학교에 동시 지원 OK</span>
+      </div>
+      <div class="gr-row">
+        <span class="gr-label">지원 방법</span>
+        <span class="gr-val">원하는 학교에 직접 개별 지원</span>
+      </div>
+      <div class="gr-row">
+        <span class="gr-label">합격 기준</span>
+        <span class="gr-val">내신성적 200점 기준 정원 내 선발</span>
+      </div>
+      <div class="gr-row">
+        <span class="gr-label">경기도 비평준화 지역</span>
+        <span class="gr-val" style="font-size:12px;">시흥, 광주, 이천, 안성, 평택, 포천,<br>동두천, 양주, 구리, 남양주, 하남,<br>오산, 여주, 파주, 가평, 양평, 연천 등<br><span style="color:#aaa;font-size:11px;">※ 평준화 9개 학군(수원·성남·안양권·부천·고양·광명·안산·의정부·용인) 외 지역</span></span>
+      </div>
+      <div class="gr-row">
+        <span class="gr-label">특별전형</span>
+        <span class="gr-val" style="font-size:12px;">모집정원 10% 이내<br><span style="color:#aaa;font-size:11px;">(체육특기자 5% 포함, 학교운영위원회 심의 필요)</span></span>
+      </div>
+      <div style="margin-top:12px;padding:12px;background:var(--nonp-l);border-radius:8px;font-size:12.5px;color:#7c2d12;line-height:1.7;">
+        ⚠️ <strong>성적이 합격을 결정합니다.</strong><br>
+        평준화(추첨)와 달리 내신 200점 점수가 낮으면 원하는 학교에 불합격할 수 있어요.<br>
+        지원 전 학교별 <strong>전년도 합격선(커트라인)</strong>을 꼭 확인하세요.<br><br>
+        💡 여러 학교에 동시 지원할 수 있으니, 가고 싶은 학교 + 안정권 학교를 함께 지원하는 전략이 좋아요.<br><br>
+        📌 <strong>합격자 발표: 2026.12.14(월)</strong> — 평준화보다 한 달 이상 빠르게 결과를 알 수 있어요.
+      </div>
+    </div>`;
+  }
+
   // 학군 정보 (일반고만)
   let gunhakHtml = '';
   if (selectedSchool === 'gen' && selectedGunhak) {
@@ -831,6 +904,7 @@ function buildResult() {
     ${chipHtml}
     ${warnHtml}
     ${noticeHtml}
+    ${nonpHtml}
     ${gunhakHtml}
     ${tlHtml}
     ${prepHtml}

@@ -3,1063 +3,1219 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>2027학년도 고등학교 입학 안내</title>
+<title>2027학년도 고입 담임 업무 가이드</title>
 <style>
 :root {
-  --sci:    #1e4d9b;  --sci-l:   #eef3fc;
-  --art:    #8b2f8f;  --art-l:   #f9eefa;
-  --meis:   #2d5e3e;  --meis-l:  #eaf5ef;
-  --voc:    #b45309;  --voc-l:   #fef3e2;
-  --gen:    #0e6e4a;  --gen-l:   #e6f7f0;
-  --foreign:#0369a1;  --foreign-l:#e0f2fe;
-  --saja:   #6b21a8;  --saja-l:  #f3e8ff;
-  --nonp:   #be5504;  --nonp-l:  #fff4ec;
-  --gong:   #0f6d8a;  --gong-l:  #e0f5fa;
-  --red:    #dc2626;
-  --orange: #ea580c;
-  --gray:   #64748b;
+  --blue: #1e4d9b;
+  --blue-light: #3a6fc4;
+  --blue-pale: #eef3fc;
+  --orange: #e07b00;
+  --orange-pale: #fff5e6;
+  --red: #c0392b;
+  --red-pale: #fdf0ef;
+  --green: #1a7a45;
+  --green-pale: #edf8f2;
+  --gray: #64748b;
+  --gray-pale: #f8f9fa;
   --border: #e2e8f0;
-  --text:   #1e293b;
+  --text: #1e293b;
+  --text-sub: #64748b;
 }
 
-* { margin:0; padding:0; box-sizing:border-box; }
+* { margin: 0; padding: 0; box-sizing: border-box; }
 
 body {
-  font-family: '맑은 고딕','Apple SD Gothic Neo',sans-serif;
-  background: #f0f4f8;
-  min-height: 100vh;
+  font-family: 'Pretendard', '맑은 고딕', 'Apple SD Gothic Neo', sans-serif;
+  font-size: 13.5px;
   color: var(--text);
+  background: #f1f5f9;
+  line-height: 1.6;
 }
 
-/* ── 헤더 ── */
-.site-header {
-  background: linear-gradient(135deg,#1e3a8a,#2563eb);
-  color:#fff;
-  padding: 20px 24px 16px;
-  text-align:center;
-  position: sticky; top:0; z-index:100;
-  box-shadow: 0 2px 12px rgba(0,0,0,.18);
-}
-.site-header h1 { font-size:20px; font-weight:800; letter-spacing:-.3px; }
-.site-header p  { font-size:12.5px; opacity:.8; margin-top:3px; }
-.back-btn {
-  position:absolute; left:16px; top:50%; transform:translateY(-50%);
-  background:rgba(255,255,255,.18); border:1px solid rgba(255,255,255,.3);
-  color:#fff; border-radius:8px; padding:5px 12px; cursor:pointer;
-  font-size:13px; display:none; align-items:center; gap:4px;
-  transition:.2s;
-}
-.back-btn:hover { background:rgba(255,255,255,.28); }
+.wrapper { max-width: 1020px; margin: 0 auto; padding: 24px 16px 40px; }
 
-/* ── 메인 컨테이너 ── */
-.main { max-width:900px; margin:0 auto; padding:28px 16px 60px; }
+/* 헤더 */
+.header {
+  background: linear-gradient(135deg, #1e3a8a 0%, #1e4d9b 60%, #2563eb 100%);
+  border-radius: 14px;
+  padding: 28px 32px 24px;
+  color: #fff;
+  margin-bottom: 20px;
+  position: relative;
+  overflow: hidden;
+}
+.header::before {
+  content: '';
+  position: absolute;
+  top: -40px; right: -40px;
+  width: 200px; height: 200px;
+  background: rgba(255,255,255,0.05);
+  border-radius: 50%;
+}
+.header h1 { font-size: 22px; font-weight: 800; letter-spacing: -0.3px; }
+.header .sub { font-size: 12.5px; margin-top: 4px; opacity: 0.8; }
+.header .meta-row {
+  display: flex; gap: 20px; flex-wrap: wrap;
+  margin-top: 16px;
+  border-top: 1px solid rgba(255,255,255,0.2);
+  padding-top: 14px;
+}
+.meta-chip {
+  background: rgba(255,255,255,0.15);
+  border: 1px solid rgba(255,255,255,0.2);
+  border-radius: 20px;
+  padding: 4px 14px;
+  font-size: 12px;
+  display: flex; align-items: center; gap: 6px;
+}
+.meta-chip strong { font-weight: 700; }
 
-/* ── 화면 전환 ── */
-.screen { display:none; animation: fadeUp .35s ease both; }
-.screen.active { display:block; }
-@keyframes fadeUp {
-  from { opacity:0; transform:translateY(14px); }
-  to   { opacity:1; transform:translateY(0); }
+/* 섹션 공통 */
+.section { margin-bottom: 18px; }
+.section-head {
+  display: flex; align-items: center; gap: 8px;
+  margin-bottom: 10px;
 }
-
-/* ── STEP 표시 ── */
-.step-indicator {
-  display:flex; align-items:center; justify-content:center;
-  gap:8px; margin-bottom:24px; flex-wrap:wrap;
+.section-head .num {
+  width: 26px; height: 26px;
+  background: var(--blue);
+  color: #fff;
+  border-radius: 50%;
+  font-size: 12px;
+  font-weight: 700;
+  display: flex; align-items: center; justify-content: center;
+  flex-shrink: 0;
 }
-.step-dot {
-  width:28px; height:28px; border-radius:50%;
-  display:flex; align-items:center; justify-content:center;
-  font-size:12px; font-weight:700;
-  border:2px solid var(--border);
-  color:var(--gray); background:#fff;
+.section-head h2 {
+  font-size: 15px;
+  font-weight: 700;
+  color: var(--blue);
 }
-.step-dot.done { background:#1e4d9b; border-color:#1e4d9b; color:#fff; }
-.step-dot.active { background:#fff; border-color:#1e4d9b; color:#1e4d9b; box-shadow:0 0 0 3px #dbeafe; }
-.step-line { flex:1; max-width:60px; height:2px; background:var(--border); }
-.step-line.done { background:#1e4d9b; }
-
-/* ── 섹션 타이틀 ── */
-.screen-title { text-align:center; margin-bottom:22px; }
-.screen-title h2 { font-size:20px; font-weight:800; color:var(--text); }
-.screen-title p  { font-size:13.5px; color:var(--gray); margin-top:5px; }
-
-/* ── 학교 유형 카드 ── */
-.school-grid {
-  display:grid;
-  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
-  gap:14px;
-}
-.school-card {
-  background:#fff; border-radius:14px;
-  border:2px solid var(--border);
-  padding:22px 16px 18px;
-  cursor:pointer;
-  transition:all .2s;
-  text-align:center;
-}
-.school-card:hover { transform:translateY(-3px); box-shadow:0 8px 20px rgba(0,0,0,.1); }
-.school-card.selected { border-width:2.5px; }
-.school-card .sc-icon { font-size:36px; margin-bottom:10px; display:block; }
-.school-card .sc-name { font-size:15px; font-weight:800; margin-bottom:4px; }
-.school-card .sc-sub  { font-size:11.5px; color:var(--gray); line-height:1.4; }
-.school-card .sc-tag  {
-  display:inline-block; margin-top:8px;
-  padding:3px 10px; border-radius:20px;
-  font-size:11px; font-weight:700;
+.section-head .badge {
+  font-size: 11px;
+  background: var(--blue-pale);
+  color: var(--blue);
+  padding: 2px 8px;
+  border-radius: 10px;
+  font-weight: 600;
 }
 
-/* ── 학군 선택 ── */
-.gunhak-grid {
-  display:grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap:10px;
+/* ─── 1. 이중지원 금지 ─── */
+.dual-ban {
+  background: var(--red-pale);
+  border: 2px solid #e74c3c;
+  border-radius: 12px;
+  padding: 16px 20px;
 }
-.gunhak-card {
-  background:#fff; border:2px solid var(--border);
-  border-radius:12px; padding:14px 12px;
-  cursor:pointer; transition:all .2s; text-align:center;
+.dual-ban .ban-title {
+  font-size: 14px;
+  font-weight: 800;
+  color: var(--red);
+  display: flex; align-items: center; gap: 6px;
+  margin-bottom: 12px;
 }
-.gunhak-card:hover { box-shadow:0 4px 14px rgba(0,0,0,.1); transform:translateY(-2px); }
-.gunhak-card.selected { border-color:var(--gen); background:var(--gen-l); }
-.gunhak-card .gk-name { font-size:16px; font-weight:800; margin-bottom:4px; }
-.gunhak-card .gk-cnt  { font-size:12px; color:var(--gray); }
-.gunhak-card .gk-rate { font-size:12px; font-weight:700; margin-top:4px; }
+.school-type-row { display: flex; gap: 10px; flex-wrap: wrap; margin-bottom: 14px; }
+.school-chip {
+  border-radius: 8px;
+  padding: 8px 14px;
+  font-size: 12.5px;
+  font-weight: 600;
+  text-align: center;
+  line-height: 1.4;
+}
+.chip-early { background: #fde8cc; color: #7a3100; border: 1.5px solid #f0a050; }
+.chip-late  { background: #dbeafe; color: #1e40af; border: 1.5px solid #93c5fd; }
+.chip-warn  { background: #fee2e2; color: #991b1b; border: 1.5px dashed #fca5a5; }
+.chip-label { font-size: 10px; opacity: 0.7; margin-bottom: 2px; }
 
-/* ── 결과 화면 ── */
+.rule-box {
+  background: #fff;
+  border-radius: 8px;
+  padding: 10px 14px;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+  border: 1px solid #fca5a5;
+}
+.rule-item { font-size: 12.5px; display: flex; align-items: flex-start; gap: 6px; }
+.rule-item .dot { color: var(--red); font-weight: 900; flex-shrink: 0; margin-top: 2px; }
 
-/* D-DAY 배너 */
-.dday-banner {
-  border-radius:16px; padding:26px 28px;
-  color:#fff; text-align:center;
-  margin-bottom:18px;
-  position:relative; overflow:hidden;
+/* ─── 2. 타임라인 ─── */
+.timeline-grid { display: flex; flex-direction: column; gap: 6px; }
+.tl-item {
+  display: grid;
+  grid-template-columns: 80px 140px 1fr;
+  background: #fff;
+  border-radius: 10px;
+  border: 1px solid var(--border);
+  overflow: hidden;
+  min-height: 54px;
 }
-.dday-banner::before {
-  content:'';
-  position:absolute; top:-50px; right:-50px;
-  width:180px; height:180px;
-  background:rgba(255,255,255,.08);
-  border-radius:50%;
+.tl-item:hover { box-shadow: 0 2px 8px rgba(30,77,155,0.10); }
+.tl-month {
+  background: var(--blue-pale);
+  color: var(--blue);
+  font-weight: 800;
+  font-size: 13px;
+  display: flex; align-items: center; justify-content: center;
+  border-right: 2px solid #c7d9f5;
+  text-align: center;
+  padding: 4px;
 }
-.dday-banner .school-label { font-size:13px; opacity:.85; margin-bottom:4px; }
-.dday-banner .dday-num { font-size:68px; font-weight:900; line-height:1; }
-.dday-banner .dday-unit { font-size:20px; font-weight:700; opacity:.9; }
-.dday-banner .dday-sub  { font-size:13px; opacity:.8; margin-top:6px; }
+.tl-type {
+  display: flex; flex-direction: column; justify-content: center;
+  padding: 8px 10px;
+  border-right: 1px solid var(--border);
+  gap: 4px;
+}
+.type-badge {
+  display: inline-block;
+  padding: 2px 8px;
+  border-radius: 4px;
+  font-size: 11.5px;
+  font-weight: 700;
+  width: fit-content;
+}
+.tb-sci  { background: #d1fae5; color: #065f46; }
+.tb-art  { background: #fce7f3; color: #831843; }
+.tb-meis { background: #ede9fe; color: #4c1d95; }
+.tb-voc  { background: #fef3c7; color: #78350f; }
+.tb-gen  { background: #dbeafe; color: #1e3a8a; }
+.tb-spec { background: #fee2e2; color: #7f1d1d; }
 
-.dday-dual {
-  display:grid; grid-template-columns:1fr 1fr; gap:10px; margin-bottom:18px;
+.tl-content {
+  padding: 10px 14px;
+  display: flex; flex-direction: column; justify-content: center;
 }
-.dday-mini {
-  border-radius:12px; padding:16px; text-align:center; color:#fff;
-}
-.dday-mini .dm-label { font-size:12px; opacity:.85; }
-.dday-mini .dm-num   { font-size:36px; font-weight:900; line-height:1.1; }
-.dday-mini .dm-unit  { font-size:13px; }
-.dday-mini .dm-date  { font-size:12px; opacity:.8; margin-top:3px; }
+.tl-content .date-strong { font-weight: 700; color: var(--text); font-size: 13px; }
+.tl-content .date-note { font-size: 11.5px; color: var(--text-sub); margin-top: 2px; }
 
-/* 경고 박스 */
-.warn-banner {
-  background:#fef2f2; border:2px solid #fca5a5;
-  border-radius:12px; padding:14px 18px; margin-bottom:16px;
-  display:flex; gap:10px; align-items:flex-start;
-}
-.warn-banner .wi { font-size:22px; flex-shrink:0; }
-.warn-banner .wt { font-size:13px; font-weight:800; color:var(--red); margin-bottom:4px; }
-.warn-banner .wb { font-size:12.5px; color:#7f1d1d; line-height:1.6; }
+.tl-item.key { border-color: var(--orange); }
+.tl-item.key .tl-month { background: #fff3e0; color: var(--orange); border-color: #ffcc80; }
+.tl-item.key .tl-content .date-strong { color: var(--orange); }
 
-/* 타임라인 */
-.timeline-box {
-  background:#fff; border:1px solid var(--border);
-  border-radius:14px; padding:18px 20px; margin-bottom:16px;
+/* ─── 3. 내신 200점 ─── */
+.score-overview {
+  display: grid;
+  grid-template-columns: repeat(5, 1fr) 10px repeat(1, 100px);
+  gap: 6px;
+  align-items: center;
+  margin-bottom: 16px;
 }
-.tl-box-title { font-size:14px; font-weight:800; margin-bottom:14px; display:flex; align-items:center; gap:6px; }
-.tl-rows { display:flex; flex-direction:column; gap:0; }
-.tl-row  {
-  display:grid; grid-template-columns:100px 1fr;
-  border-bottom:1px dashed var(--border); padding:10px 0;
-  align-items:center;
+.score-card {
+  background: #fff;
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 14px 8px 12px;
+  text-align: center;
 }
-.tl-row:last-child { border-bottom:none; }
-.tl-row .tl-phase { font-size:12px; font-weight:700; color:var(--gray); }
-.tl-row .tl-info  { font-size:13px; }
-.tl-row .tl-info .ti-date { font-weight:800; }
-.tl-row .tl-info .ti-note { font-size:11.5px; color:var(--gray); margin-top:2px; }
-.tl-row.highlight .tl-phase { color:var(--red); }
-.tl-row.highlight .ti-date  { color:var(--red); }
+.score-card .pts {
+  font-size: 28px;
+  font-weight: 900;
+  line-height: 1;
+  margin-bottom: 4px;
+}
+.score-card .label { font-size: 11.5px; font-weight: 600; color: var(--text-sub); }
+.score-card .pct { font-size: 11px; color: #aaa; margin-top: 2px; }
+.sc1 { border-top: 3px solid #1e4d9b; }  .sc1 .pts { color: #1e4d9b; }
+.sc2 { border-top: 3px solid #2e7d9e; }  .sc2 .pts { color: #2e7d9e; }
+.sc3 { border-top: 3px solid #2e8b57; }  .sc3 .pts { color: #2e8b57; }
+.sc4 { border-top: 3px solid #d4a017; }  .sc4 .pts { color: #d4a017; }
+.sc5 { border-top: 3px solid #9b59b6; }  .sc5 .pts { color: #9b59b6; }
+.score-total {
+  background: var(--blue);
+  border-radius: 10px;
+  padding: 14px 8px 12px;
+  text-align: center;
+  color: #fff;
+}
+.score-total .pts { font-size: 28px; font-weight: 900; line-height: 1; margin-bottom: 4px; }
+.score-total .label { font-size: 11.5px; font-weight: 600; }
+.plus-sep { text-align: center; font-size: 18px; color: #aaa; font-weight: 300; }
 
-/* 카드 그리드 */
-.info-grid { display:grid; grid-template-columns:1fr 1fr; gap:12px; margin-bottom:16px; }
-.info-box  {
-  background:#fff; border:1px solid var(--border);
-  border-radius:14px; overflow:hidden;
+.score-detail-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr;
+  gap: 10px;
 }
-.info-box .ib-head {
-  padding:10px 16px; font-size:13px; font-weight:800;
-  display:flex; align-items:center; gap:6px;
-  border-bottom:1px solid var(--border);
+.detail-card {
+  background: #fff;
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  overflow: hidden;
 }
-.info-box .ib-body { padding:12px 16px; }
-.ib-row { display:flex; align-items:flex-start; gap:8px; padding:5px 0; border-bottom:1px solid #f8fafc; font-size:12.5px; }
-.ib-row:last-child { border-bottom:none; }
-.ib-row .ir-dot { color:var(--orange); flex-shrink:0; font-weight:900; margin-top:1px; }
-.ib-row .ir-text { line-height:1.5; }
-.ib-row .ir-text em { font-style:normal; font-weight:700; color:var(--text); }
+.detail-card .dc-head {
+  padding: 9px 14px;
+  font-size: 13px;
+  font-weight: 700;
+  display: flex; align-items: center; gap: 6px;
+  border-bottom: 1px solid var(--border);
+}
+.dc-head.c1 { background: #eef3fc; color: var(--blue); }
+.dc-head.c2 { background: #edf8f2; color: var(--green); }
+.dc-head.c3 { background: #fef3c7; color: #78350f; }
 
-/* 내신 요약 */
-.naesin-grid { display:grid; grid-template-columns:repeat(5,1fr); gap:6px; margin-bottom:16px; }
-.ns-cell {
-  background:#fff; border-radius:10px; border:1px solid var(--border);
-  padding:10px 6px; text-align:center;
-}
-.ns-cell .ns-pt { font-size:22px; font-weight:900; line-height:1.1; }
-.ns-cell .ns-lbl{ font-size:11px; color:var(--gray); margin-top:2px; }
+.detail-card .dc-body { padding: 10px 14px; }
 
-/* 학군 결과 */
-.gunhak-result {
-  background:#fff; border:1px solid var(--border);
-  border-radius:14px; padding:18px 20px; margin-bottom:16px;
+table.mini-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 12px;
 }
-.gr-title { font-size:14px; font-weight:800; margin-bottom:12px; }
-.gr-row { display:flex; justify-content:space-between; align-items:center;
-  padding:8px 0; border-bottom:1px dashed var(--border); font-size:13px; }
-.gr-row:last-child { border-bottom:none; }
-.gr-row .gr-label { color:var(--gray); }
-.gr-row .gr-val   { font-weight:700; }
+table.mini-table th {
+  background: #f1f5f9;
+  padding: 5px 8px;
+  text-align: center;
+  border: 1px solid var(--border);
+  font-weight: 600;
+  color: var(--text-sub);
+  font-size: 11.5px;
+}
+table.mini-table td {
+  padding: 5px 8px;
+  border: 1px solid var(--border);
+  text-align: center;
+  font-size: 12px;
+}
+table.mini-table tr:last-child td { background: #eef3fc; font-weight: 700; }
 
-/* 날짜 알림 칩 */
-.date-chips { display:flex; gap:8px; flex-wrap:wrap; margin-bottom:16px; }
-.date-chip  {
-  background:#fff; border:1.5px solid var(--border);
-  border-radius:10px; padding:10px 14px;
-  display:flex; flex-direction:column; gap:2px;
-  flex:1; min-width:140px;
-}
-.date-chip.today { border-color:#fbbf24; background:#fffbeb; }
-.dc-label { font-size:11px; color:var(--gray); font-weight:600; }
-.dc-date  { font-size:13.5px; font-weight:800; }
-.dc-dday  { font-size:12px; font-weight:700; }
+.row-item { display: flex; align-items: baseline; gap: 6px; padding: 4px 0; border-bottom: 1px dashed var(--border); font-size: 12.5px; }
+.row-item:last-child { border-bottom: none; }
+.row-item .ri-label { color: var(--text-sub); flex: 1; }
+.row-item .ri-val { font-weight: 700; color: var(--text); }
 
-/* 버튼 */
-.btn-primary {
-  background:#1e4d9b; color:#fff;
-  border:none; border-radius:10px;
-  padding:12px 28px; font-size:14px; font-weight:700;
-  cursor:pointer; width:100%; margin-top:8px;
-  transition:.2s;
+/* 결석 게이지 */
+.absence-row { display: flex; gap: 5px; margin-top: 4px; }
+.ab-cell {
+  flex: 1;
+  text-align: center;
+  border-radius: 6px;
+  padding: 6px 2px;
+  font-size: 11px;
 }
-.btn-primary:hover { background:#1a3d80; }
-.btn-primary:disabled { background:#94a3b8; cursor:not-allowed; }
+.ab-cell .ab-day { font-weight: 800; font-size: 13px; }
+.ab-cell .ab-pt { margin-top: 1px; }
+.ab0 { background: #d1fae5; color: #065f46; }
+.ab1 { background: #d9f0e0; color: #1a7a45; }
+.ab2 { background: #fef9c3; color: #7a5500; }
+.ab3 { background: #fde8cc; color: #7a3100; }
+.ab4 { background: #fdd0cc; color: #7a1a0f; }
+.ab5 { background: #fbb9b5; color: #6b1a18; }
+.ab6 { background: #f8a0a0; color: #5c0000; }
 
-/* 반응형 */
-@media(max-width:600px) {
-  .school-grid { grid-template-columns:1fr 1fr; }
-  .gunhak-grid { grid-template-columns:1fr 1fr; }
-  .info-grid   { grid-template-columns:1fr; }
-  .dday-dual   { grid-template-columns:1fr; }
-  .naesin-grid { grid-template-columns:repeat(3,1fr); }
+/* ─── 4. 체크리스트 ─── */
+.checklist-wrapper { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+.cl-card {
+  background: #fff;
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  overflow: hidden;
 }
+.cl-card-head {
+  padding: 9px 14px;
+  font-size: 12.5px;
+  font-weight: 700;
+  display: flex; align-items: center; gap: 6px;
+  border-bottom: 1px solid var(--border);
+}
+.clh-aug  { background: #ede9fe; color: #4c1d95; }
+.clh-oct  { background: #fce7f3; color: #831843; }
+.clh-nov  { background: #fef3c7; color: #78350f; }
+.clh-dec  { background: #dbeafe; color: #1e3a8a; }
+.clh-special { background: #edf8f2; color: #065f46; }
+.clh-warn { background: #fee2e2; color: #7f1d1d; }
+
+.cl-list { list-style: none; padding: 10px 0; }
+.cl-list li {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  padding: 5px 14px;
+  font-size: 12.5px;
+  border-bottom: 1px solid #f8fafc;
+  line-height: 1.5;
+}
+.cl-list li:last-child { border-bottom: none; }
+.cl-list li .chk {
+  width: 16px; height: 16px;
+  border: 1.5px solid #b0c4de;
+  border-radius: 3px;
+  flex-shrink: 0;
+  margin-top: 2px;
+  background: #fff;
+}
+
+/* ─── 5. 학군 ─── */
+.gunhak-layout { display: grid; grid-template-columns: 1.1fr 0.9fr; gap: 12px; }
+table.gunhak-t {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 12.5px;
+  background: #fff;
+  border-radius: 10px;
+  overflow: hidden;
+  border: 1px solid var(--border);
+}
+table.gunhak-t th {
+  background: var(--blue);
+  color: #fff;
+  padding: 8px 12px;
+  text-align: center;
+  font-size: 12px;
+}
+table.gunhak-t td {
+  padding: 7px 12px;
+  border-bottom: 1px solid var(--border);
+  text-align: center;
+}
+table.gunhak-t tr:last-child td { background: #eef3fc; font-weight: 700; border-bottom: none; }
+table.gunhak-t tr:nth-child(odd) td { background: #f8f9fa; }
+table.gunhak-t tr:nth-child(odd):last-child td { background: #eef3fc; }
+
+.ratio-100 { color: var(--blue); font-weight: 700; }
+.ratio-50  { color: var(--green); font-weight: 700; }
+.ratio-40  { color: var(--orange); font-weight: 700; }
+
+.flow-steps { display: flex; flex-direction: column; gap: 8px; }
+.flow-step {
+  background: #fff;
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 10px 14px;
+  display: flex; align-items: center; gap: 12px;
+}
+.step-num {
+  width: 30px; height: 30px;
+  border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  font-weight: 800; font-size: 14px;
+  flex-shrink: 0;
+}
+.sn1 { background: var(--blue); color: #fff; }
+.sn2 { background: #2e7d9e; color: #fff; }
+.sn-arrow { text-align: center; color: #aaa; font-size: 18px; }
+.step-content .step-title { font-weight: 700; font-size: 13px; margin-bottom: 2px; }
+.step-content .step-desc  { font-size: 12px; color: var(--text-sub); }
+
+.date-pills {
+  display: flex; flex-direction: column; gap: 6px;
+  margin-top: 10px;
+}
+.date-pill {
+  background: var(--blue-pale);
+  border-radius: 8px;
+  padding: 8px 14px;
+  display: flex; justify-content: space-between; align-items: center;
+  font-size: 12.5px;
+}
+.date-pill .dp-label { color: var(--text-sub); }
+.date-pill .dp-date  { font-weight: 700; color: var(--blue); }
+
+/* ─── 6. 주의 ─── */
+.notice-box {
+  background: var(--orange-pale);
+  border: 1.5px solid #fbbf24;
+  border-radius: 10px;
+  padding: 14px 18px;
+}
+.notice-box .nt { font-weight: 700; color: var(--orange); font-size: 13px; margin-bottom: 8px; }
+.notice-box ul { padding-left: 18px; }
+.notice-box ul li { font-size: 12.5px; color: var(--text-sub); margin-bottom: 5px; line-height: 1.6; }
+.notice-box ul li strong { color: var(--text); }
+
+/* ─── ★ 경우의 수 섹션 ─── */
+.dual-rules { display:grid; grid-template-columns:repeat(3,1fr); gap:8px; margin-bottom:14px; }
+.dual-rule-card { background:#fff; border:1px solid var(--border); border-radius:10px; padding:10px 14px; display:flex; align-items:flex-start; gap:8px; }
+.drc-icon { font-size:18px; flex-shrink:0; }
+.drc-title { font-weight:700; font-size:12.5px; margin-bottom:3px; }
+.drc-desc { font-size:11.5px; color:var(--text-sub); line-height:1.5; }
+.drc-ok   { border-left:3px solid #22c55e; }
+.drc-ban  { border-left:3px solid #ef4444; }
+.drc-special { border-left:3px solid #f59e0b; }
+
+.sc-grid { display:grid; grid-template-columns:1fr 1fr; gap:10px; margin-bottom:12px; }
+.sc-card { background:#fff; border:1px solid var(--border); border-radius:12px; overflow:hidden; }
+.sc-head { padding:10px 14px; font-weight:700; font-size:13px; display:flex; align-items:center; gap:6px; }
+.sc-head.early { background:#fef3c7; color:#78350f; }
+.sc-head.late  { background:#dbeafe; color:#1e3a8a; }
+.sc-body {}
+.sc-row { display:flex; border-bottom:1px solid #f1f5f9; }
+.sc-row:last-child { border-bottom:none; }
+.sc-label { width:68px; flex-shrink:0; padding:8px 6px; font-size:11px; font-weight:700; display:flex; align-items:center; justify-content:center; text-align:center; border-right:1px solid #f1f5f9; line-height:1.4; }
+.sc-label.pass  { background:#dcfce7; color:#166534; }
+.sc-label.fail  { background:#fee2e2; color:#991b1b; }
+.sc-label.apply { background:#e0f2fe; color:#075985; }
+.sc-items { padding:7px 12px; flex:1; }
+.sc-item { font-size:11.5px; color:var(--text); padding:2px 0; display:flex; align-items:flex-start; gap:5px; line-height:1.5; }
+.sc-item.ok::before     { content:'✅'; flex-shrink:0; }
+.sc-item.ban::before    { content:'❌'; flex-shrink:0; }
+.sc-item.warn::before   { content:'⚠️'; flex-shrink:0; }
+.sc-item.special::before{ content:'★'; color:#f59e0b; font-weight:900; flex-shrink:0; }
+
+table.matrix-t { width:100%; border-collapse:collapse; font-size:12px; background:#fff; border-radius:10px; overflow:hidden; border:1px solid var(--border); }
+table.matrix-t th { background:var(--blue); color:#fff; padding:8px 10px; text-align:center; font-size:11.5px; border:1px solid #3a6fc4; }
+table.matrix-t td { padding:7px 10px; border:1px solid var(--border); vertical-align:middle; }
+table.matrix-t tr:nth-child(even) td { background:#f8fafc; }
+table.matrix-t tr.special-row td { background:#fffbeb !important; }
+.mt-school { font-weight:700; font-size:12.5px; }
+.mt-type { font-size:10.5px; padding:1px 6px; border-radius:3px; display:inline-block; margin-left:4px; vertical-align:middle; }
+.mt-type.e { background:#fef3c7; color:#78350f; }
+.mt-type.l { background:#dbeafe; color:#1e3a8a; }
+.badge-ok   { background:#dcfce7; color:#166534; padding:2px 8px; border-radius:4px; font-weight:700; font-size:11px; white-space:nowrap; }
+.badge-ban  { background:#fee2e2; color:#991b1b; padding:2px 8px; border-radius:4px; font-weight:700; font-size:11px; white-space:nowrap; }
+.badge-cond { background:#fef9c3; color:#78350f; padding:2px 8px; border-radius:4px; font-weight:700; font-size:11px; white-space:nowrap; }
+.badge-apply{ background:#e0f2fe; color:#075985; padding:2px 8px; border-radius:4px; font-weight:700; font-size:11px; white-space:nowrap; }
+.sub-label { font-size:11px; color:var(--text-sub); margin-bottom:6px; font-weight:700; }
 
 /* 인쇄 */
 @media print {
-  .site-header { position:static; }
-  .screen:not(.active){ display:none!important; }
-  .back-btn { display:none!important; }
+  body { background: #fff; font-size: 11px; }
+  .wrapper { padding: 0; max-width: 100%; }
+  .section { page-break-inside: avoid; }
+  .score-overview { grid-template-columns: repeat(5,1fr) 10px 90px; }
 }
 </style>
 </head>
 <body>
+<div class="wrapper">
 
-<div class="site-header">
-  <button class="back-btn" id="backBtn" onclick="goBack()">← 다시 선택</button>
-  <h1>🏫 2027학년도 고등학교 입학 안내</h1>
-  <p>경기도 고등학교 입학전형 · 원서접수 일정 확인</p>
-</div>
-
-<div class="main">
-
-  <!-- ───────────── STEP 1: 학교 유형 ───────────── -->
-  <div class="screen active" id="screen1">
-    <div class="step-indicator">
-      <div class="step-dot active">1</div>
-      <div class="step-line"></div>
-      <div class="step-dot">2</div>
-      <div class="step-line"></div>
-      <div class="step-dot">3</div>
+  <!-- 헤더 -->
+  <div class="header">
+    <h1>2027학년도 경기도 고등학교 입학전형<br>3학년 담임 업무 가이드</h1>
+    <p class="sub">기준 자료: 2027학년도 고입 업무담당자 역량강화 연수 자료 1·2</p>
+    <div class="meta-row">
+      <div class="meta-chip"><span>📌</span><strong>내신 만점</strong> 200점</div>
+      <div class="meta-chip"><span>🏫</span><strong>평준화 학군</strong> 9개 / 201교</div>
+      <div class="meta-chip"><span>📚</span><strong>반영 학년</strong> 중1~3학년 3개년</div>
+      <div class="meta-chip"><span>📍</span><strong>대상</strong> 경기도</div>
     </div>
-    <div class="screen-title">
-      <h2>내가 가고 싶은 고등학교 유형을 선택해요</h2>
-      <p>해당 학교의 원서접수 일정과 준비사항을 바로 확인할 수 있어요</p>
+  </div>
+
+  <!-- 1. 이중지원 금지 -->
+  <div class="section">
+    <div class="section-head">
+      <div class="num">1</div>
+      <h2>이중지원 금지 원칙</h2>
+      <span class="badge">담임 최우선 확인</span>
     </div>
-    <div class="school-grid">
-      <div class="school-card" onclick="selectSchool('sci')" style="border-color:#93c5fd;">
-        <span class="sc-icon">🔬</span>
-        <div class="sc-name" style="color:var(--sci);">과학고</div>
-        <div class="sc-sub">수학·과학 특기 학생을 위한<br>특수목적고</div>
-        <span class="sc-tag" style="background:var(--sci-l);color:var(--sci);">전기학교</span>
+    <div class="dual-ban">
+      <div class="ban-title">🚫 전기학교는 1개교만 지원 가능 – 아래 학교 중 하나만 선택</div>
+      <div class="school-type-row">
+        <div class="school-chip chip-early"><div class="chip-label">전기학교</div>과학고</div>
+        <div class="school-chip chip-early"><div class="chip-label">전기학교</div>예술고</div>
+        <div class="school-chip chip-early"><div class="chip-label">전기학교</div>체육고</div>
+        <div class="school-chip chip-early"><div class="chip-label">전기학교</div>마이스터고</div>
+        <div class="school-chip chip-early"><div class="chip-label">전기학교</div>특성화고</div>
+        <div class="school-chip chip-warn" style="border-style:dashed;"><div class="chip-label">⟶ 불합격·미지원 시</div>후기학교 지원 가능</div>
+        <div class="school-chip chip-late"><div class="chip-label">후기학교</div>일반고·자사고·외고 등</div>
       </div>
-      <div class="school-card" onclick="selectSchool('art')" style="border-color:#d8b4fe;">
-        <span class="sc-icon">🎨</span>
-        <div class="sc-name" style="color:var(--art);">예술고 · 체육고</div>
-        <div class="sc-sub">예술·체육 분야 실기 특기<br>학생을 위한 학교</div>
-        <span class="sc-tag" style="background:var(--art-l);color:var(--art);">전기학교</span>
-      </div>
-      <div class="school-card" onclick="selectSchool('meis')" style="border-color:#6ee7b7;">
-        <span class="sc-icon">⚙️</span>
-        <div class="sc-name" style="color:var(--meis);">마이스터고</div>
-        <div class="sc-sub">졸업 후 바로 취업을 원하는<br>직업계 고등학교</div>
-        <span class="sc-tag" style="background:var(--meis-l);color:var(--meis);">전기학교</span>
-      </div>
-      <div class="school-card" onclick="selectSchool('voc')" style="border-color:#fcd34d;">
-        <span class="sc-icon">🛠️</span>
-        <div class="sc-name" style="color:var(--voc);">특성화고</div>
-        <div class="sc-sub">요리·IT·뷰티·전기 등<br>직업 분야별 전문 학교</div>
-        <span class="sc-tag" style="background:var(--voc-l);color:var(--voc);">전기학교</span>
-      </div>
-      <div class="school-card" onclick="selectSchool('gen')" style="border-color:#6ee7b7;">
-        <span class="sc-icon">🏫</span>
-        <div class="sc-name" style="color:var(--gen);">일반고</div>
-        <div class="sc-sub">평준화 지역 일반 고등학교<br>(학군 배정)</div>
-        <span class="sc-tag" style="background:var(--gen-l);color:var(--gen);">후기학교</span>
-      </div>
-      <div class="school-card" onclick="selectSchool('foreign')" style="border-color:#7dd3fc;">
-        <span class="sc-icon">🌏</span>
-        <div class="sc-name" style="color:var(--foreign);">외고 · 국제고</div>
-        <div class="sc-sub">외국어·국제 분야 특기<br>학생을 위한 특수목적고</div>
-        <span class="sc-tag" style="background:var(--foreign-l);color:var(--foreign);">후기학교</span>
-      </div>
-      <div class="school-card" onclick="selectSchool('saja')" style="border-color:#c4b5fd;">
-        <span class="sc-icon">🎓</span>
-        <div class="sc-name" style="color:var(--saja);">자사고</div>
-        <div class="sc-sub">자율형 사립고등학교<br>독자적 교육과정 운영</div>
-        <span class="sc-tag" style="background:var(--saja-l);color:var(--saja);">후기학교</span>
-      </div>
-      <div class="school-card" onclick="selectSchool('nonp')" style="border-color:#fdba74;">
-        <span class="sc-icon">📍</span>
-        <div class="sc-name" style="color:var(--nonp);">일반고 (비평준화)</div>
-        <div class="sc-sub">시흥·광주·이천·안성 등<br>추첨 아닌 성적으로 지원</div>
-        <span class="sc-tag" style="background:var(--nonp-l);color:var(--nonp);">후기학교</span>
-      </div>
-      <div class="school-card" onclick="selectSchool('gongnip')" style="border-color:#67c2d8;">
-        <span class="sc-icon">🏛️</span>
-        <div class="sc-name" style="color:var(--gong);">자율형 공립고</div>
-        <div class="sc-sub">지역 실정에 맞는 자율적<br>교육과정 운영 공립학교</div>
-        <span class="sc-tag" style="background:var(--gong-l);color:var(--gong);">후기학교</span>
+      <div class="rule-box">
+        <div class="rule-item"><span class="dot">▶</span>전기학교 여러 곳 동시 지원 시 <strong>모두 무효 처리</strong></div>
+        <div class="rule-item"><span class="dot">▶</span>전기학교 합격 후 후기학교 지원 <strong>불가</strong></div>
+        <div class="rule-item"><span class="dot">▶</span>담임은 원서 접수 전 학생 전원에게 <strong>서면 안내 권장</strong></div>
+        <div class="rule-item"><span class="dot">▶</span>외고·국제고는 전기/후기 구분 별도 확인 필요</div>
       </div>
     </div>
   </div>
 
-  <!-- ───────────── STEP 1b: 자율형 공립고 지역 유형 선택 ───────────── -->
-  <div class="screen" id="screen1b">
-    <div class="step-indicator">
-      <div class="step-dot done">✓</div>
-      <div class="step-line done"></div>
-      <div class="step-dot active">2</div>
-      <div class="step-line"></div>
-      <div class="step-dot">3</div>
+  <!-- ★. 전기/후기 지원 경우의 수 완전 정리 -->
+  <div class="section">
+    <div class="section-head">
+      <div class="num" style="background:#b91c1c; font-size:10px; letter-spacing:-1px;">★</div>
+      <h2>전기/후기 지원 경우의 수 완전 정리</h2>
+      <span class="badge" style="background:#fee2e2; color:#b91c1c;">PDF 기준 · 담임 필수</span>
     </div>
-    <div class="screen-title">
-      <h2>🏛️ 자율형 공립고</h2>
-      <p>거주 지역이 평준화인지 비평준화인지 선택해요<br>전형 방법과 일정이 완전히 달라요</p>
-    </div>
-    <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-top:8px;">
-      <div class="school-card" onclick="selectGongType('gongp')" style="border-color:#6ee7b7;padding:24px 16px;">
-        <span class="sc-icon">🗺️</span>
-        <div class="sc-name" style="color:var(--gen);font-size:16px;">평준화 지역</div>
-        <div class="sc-sub" style="margin-top:6px;">수원·성남·안양권·부천·고양<br>광명·안산·의정부·용인</div>
-        <div style="margin-top:10px;font-size:12px;background:var(--gen-l);color:var(--gen);padding:6px 10px;border-radius:6px;font-weight:600;">
-          학군 추첨 배정 방식
+
+    <!-- A. 핵심 규칙 5가지 -->
+    <p class="sub-label">▸ 핵심 규칙 5가지</p>
+    <div class="dual-rules">
+      <div class="dual-rule-card drc-ban">
+        <div class="drc-icon">🚫</div>
+        <div>
+          <div class="drc-title">전기학교는 1개교만</div>
+          <div class="drc-desc">과학고·마이스터고·예술고·체육고·특성화고 중 1개교만 지원 가능. 동시 지원 시 <strong>모두 무효 처리</strong>.</div>
         </div>
       </div>
-      <div class="school-card" onclick="selectGongType('gonnp')" style="border-color:#fdba74;padding:24px 16px;">
-        <span class="sc-icon">📍</span>
-        <div class="sc-name" style="color:var(--nonp);font-size:16px;">비평준화 지역</div>
-        <div class="sc-sub" style="margin-top:6px;">시흥·광주·이천·안성·평택<br>파주·남양주·구리 등</div>
-        <div style="margin-top:10px;font-size:12px;background:var(--nonp-l);color:var(--nonp);padding:6px 10px;border-radius:6px;font-weight:600;">
-          내신성적순 학교별 선발
+      <div class="dual-rule-card drc-ban">
+        <div class="drc-icon">🚫</div>
+        <div>
+          <div class="drc-title">전기 합격 → 후기 불가</div>
+          <div class="drc-desc">전기학교에 합격한 학생은 후기학교(일반고·외고·국제고·자사고 등) 지원 자격 없음.</div>
+        </div>
+      </div>
+      <div class="dual-rule-card drc-ok">
+        <div class="drc-icon">✅</div>
+        <div>
+          <div class="drc-title">전기 불합격 → 후기 가능</div>
+          <div class="drc-desc">전기학교 불합격 시 후기학교 1개교 지원 가능. 전기학교 추가모집(11.26~11.27)에도 지원 가능.</div>
+        </div>
+      </div>
+      <div class="dual-rule-card drc-special">
+        <div class="drc-icon">★</div>
+        <div>
+          <div class="drc-title">마이스터고 특례</div>
+          <div class="drc-desc">마이스터고 불합격 시 직업계열 특성화고(특별·일반전형 모두) 지원 가능. (초중등교육법 시행령 제81조 제7항)</div>
+        </div>
+      </div>
+      <div class="dual-rule-card drc-special">
+        <div class="drc-icon">★</div>
+        <div>
+          <div class="drc-title">특성화고 특별전형 특례</div>
+          <div class="drc-desc">진로적성(취업희망자) 특별전형 불합격 시 직업계열 특성화고 일반전형 지원 가능. (시행령 제81조 제8항)</div>
+        </div>
+      </div>
+      <div class="dual-rule-card drc-ok">
+        <div class="drc-icon">✅</div>
+        <div>
+          <div class="drc-title">외고·국제고·자사고 동시 지원</div>
+          <div class="drc-desc">외고·국제고·자사고(후기) 지원 시 평준화 일반고 동시 지원 가능. 합격 시 일반고 배정 명단 자동 제외.</div>
         </div>
       </div>
     </div>
-    <div style="margin-top:14px;padding:12px 14px;background:#f8fafc;border:1px solid var(--border);border-radius:10px;font-size:12px;color:var(--gray);line-height:1.6;">
-      💡 평준화 9개 학군(수원·성남·안양권·부천·고양·광명·안산·의정부·용인) 소재 학교면 <strong>평준화</strong>,<br>그 외 지역이면 <strong>비평준화</strong>를 선택하세요.
-    </div>
-  </div>
 
-  <!-- ───────────── STEP 2: 학군 선택 (일반고만) ───────────── -->
-  <div class="screen" id="screen2">
-    <div class="step-indicator">
-      <div class="step-dot done">✓</div>
-      <div class="step-line done"></div>
-      <div class="step-dot active">2</div>
-      <div class="step-line"></div>
-      <div class="step-dot">3</div>
-    </div>
-    <div class="screen-title">
-      <h2>내가 사는 지역 학군을 선택해요</h2>
-      <p>학군에 따라 지망 가능한 학교와 배정 비율이 달라져요</p>
-    </div>
-    <div class="gunhak-grid" id="gunhakGrid"></div>
-    <button class="btn-primary" id="gunhakNextBtn" disabled onclick="goToResult()" style="margin-top:16px;">
-      선택 완료 → 일정 확인하기
-    </button>
-  </div>
+    <!-- B. 학교 유형별 시나리오 카드 -->
+    <p class="sub-label">▸ 학교 유형별 시나리오 — 합격·불합격 시 다음 선택지</p>
+    <div class="sc-grid">
 
-  <!-- ───────────── STEP 3: 결과 ───────────── -->
-  <div class="screen" id="screen3">
-    <div class="step-indicator">
-      <div class="step-dot done">✓</div>
-      <div class="step-line done"></div>
-      <div class="step-dot done">✓</div>
-      <div class="step-line done"></div>
-      <div class="step-dot active">3</div>
-    </div>
-    <div id="resultContent"></div>
-  </div>
-
-</div>
-
-<script>
-// ── 데이터 ──────────────────────────────────────────
-const TODAY = new Date('2026-07-01');
-
-const SCHOOLS = {
-  sci: {
-    name:'과학고',
-    icon:'🔬',
-    color:'#1e4d9b',
-    colorL:'#eef3fc',
-    type:'전기학교',
-    isEarly: true,
-    openDate:  new Date('2026-08-24'),
-    closeDate: new Date('2026-08-28'),
-    timeline: [
-      { phase:'원서접수', date:'2026.08.24(월) ~ 08.28(금)', note:'학교별 접수 방법 상이 – 개별 확인 필수', highlight:true },
-      { phase:'1단계', date:'서류평가', note:'학교생활기록부, 자기소개서 등 서류 심사' },
-      { phase:'2단계\n소집면접', date:'2026.11.20(금)', note:'수학·과학 구술평가', highlight:true },
-      { phase:'합격자 발표', date:'2026.11.26(목)', note:'', highlight:true },
-      { phase:'전기학교\n추가모집\n원서접수', date:'2026.11.26(목) ~ 11.27(금)', note:'불합격한 경우 정원 미달 학교에 한해 지원 가능' },
-      { phase:'전기학교\n추가모집\n합격자 발표', date:'2026.12.01(화)', note:'', highlight:true },
-    ],
-    prep: [
-      '수학·과학 성취도 성적 집중 관리 (학교별 반영 비중 상이 — 전형요강 확인)',
-      '봉사활동 3개년 15시간 이상 채우기',
-      '지각·조퇴·결과 3회 = 결석 1일, 출결 관리 철저히',
-      '수상 실적 학기당 1개 인정 (초과분 반영 안 됨)',
-      '각 과학고 자기소개서·추천서 양식 사전 확인',
-    ],
-    warn: '⚠️ 전기학교는 1개교만 지원 가능합니다.\n다른 전기학교(예술고, 마이스터고 등)에 동시 지원하면 모두 무효 처리됩니다.',
-  },
-  art: {
-    name:'예술고 · 체육고',
-    icon:'🎨',
-    color:'#8b2f8f',
-    colorL:'#f9eefa',
-    type:'전기학교',
-    isEarly: true,
-    openDate:  new Date('2026-10-12'),
-    closeDate: new Date('2026-10-15'),
-    timeline: [
-      { phase:'원서접수', date:'2026.10.12(월) ~ 10.15(목)', note:'', highlight:true },
-      { phase:'예술고 전형기간', date:'2026.10.19(월) ~ 10.23(금)', note:'분야별 실기 평가' },
-      { phase:'예술고\n합격자 발표', date:'2026.10.27(화)', note:'', highlight:true },
-      { phase:'체육고 전형기간', date:'2026.10.22(목) ~ 10.28(수)', note:'실기 평가' },
-      { phase:'체육고\n합격자 발표', date:'2026.11.09(월)', note:'전형요강 확인 필수', highlight:true },
-      { phase:'전기학교\n추가모집\n원서접수', date:'2026.11.26(목) ~ 11.27(금)', note:'불합격한 경우 정원 미달 학교에 한해 지원 가능' },
-      { phase:'전기학교\n추가모집\n합격자 발표', date:'2026.12.01(화)', note:'', highlight:true },
-    ],
-    prep: [
-      '지원 학교 홈페이지에서 실기 과목·평가 방식 미리 확인',
-      '내신성적(200점 구조) 반영 여부 학교별 확인',
-      '봉사활동 3개년 15시간 이상 채우기',
-      '출결 관리 — 결석 1일당 출결 점수 10% 감점',
-      '실기 준비 사교육·학원 병행 여부 개인 판단',
-    ],
-    warn: '⚠️ 전기학교는 1개교만 지원 가능합니다.\n과학고, 마이스터고, 특성화고 등 다른 전기학교와 중복 지원 불가합니다.',
-  },
-  meis: {
-    name:'마이스터고',
-    icon:'⚙️',
-    color:'#2d5e3e',
-    colorL:'#eaf5ef',
-    type:'전기학교',
-    isEarly: true,
-    openDate:  new Date('2026-10-19'),
-    closeDate: new Date('2026-10-22'),
-    timeline: [
-      { phase:'원서접수', date:'2026.10.19(월) ~ 10.22(목)', note:'', highlight:true },
-      { phase:'전형기간', date:'2026.10.26(월) ~ 10.30(금)', note:'서류 + 면접 — 학교별 전형 방법 상이' },
-      { phase:'합격자 발표', date:'2026.11.02(월)', note:'', highlight:true },
-      { phase:'전기학교\n추가모집\n원서접수', date:'2026.11.26(목) ~ 11.27(금)', note:'불합격한 경우 정원 미달 학교에 한해 지원 가능' },
-      { phase:'전기학교\n추가모집\n합격자 발표', date:'2026.12.01(화)', note:'', highlight:true },
-    ],
-    prep: [
-      '관심 분야 마이스터고 목록 및 모집 인원 사전 확인',
-      '학교생활기록부 전반 관리 (전형 방법 학교별 자율 — 지원 학교 전형요강 반드시 확인)',
-      '봉사활동 3개년 15시간 이상',
-      '졸업 후 대학 진학 제한 여부 가족과 충분히 상의',
-      '취업 연계 분야와 본인 진로 방향 일치 여부 확인',
-    ],
-    warn: '⚠️ 전기학교는 1개교만 지원 가능합니다.\n마이스터고 합격 후 일반고 등 후기학교에 지원할 수 없습니다.\n\n✅ 예외: 마이스터고에 불합격한 경우에 한해 직업계열 특성화고에 지원할 수 있습니다. (초·중등교육법 시행령 제81조 제7항)',
-    notice: 'ℹ️ 마이스터고는 졸업 후 바로 취업하는 것이 원칙인 직업계 고등학교입니다. 일반 대학 진학에 제한이 있을 수 있으므로 진로 계획을 신중히 고려하세요.',
-  },
-  voc: {
-    name:'특성화고',
-    icon:'🛠️',
-    color:'#b45309',
-    colorL:'#fef3e2',
-    type:'전기학교',
-    isEarly: true,
-    openDate:  new Date('2026-11-03'),
-    closeDate: new Date('2026-11-13'),
-    open2Date: new Date('2026-11-03'),
-    close2Date:new Date('2026-11-05'),
-    open3Date: new Date('2026-11-12'),
-    close3Date:new Date('2026-11-13'),
-    timeline: [
-      { phase:'특별전형\n원서접수', date:'2026.11.03(화) ~ 11.05(목)', note:'진로적성(취업희망자) 등 특별전형 대상자', highlight:true },
-      { phase:'특별전형\n전형기간', date:'2026.11.06(금) ~ 11.10(화)', note:'서류·면접 등 학교별 전형' },
-      { phase:'특별전형\n합격자 발표', date:'2026.11.11(수)', note:'', highlight:true },
-      { phase:'일반전형\n원서접수', date:'2026.11.12(목) ~ 11.13(금)', note:'일반 학생 대상', highlight:true },
-      { phase:'일반전형\n전형기간', date:'2026.11.14(토) ~ 11.17(화)', note:'서류·면접 등 학교별 전형' },
-      { phase:'일반전형\n합격자 발표', date:'2026.11.23(월)', note:'', highlight:true },
-      { phase:'전기학교\n추가모집\n원서접수', date:'2026.11.26(목) ~ 11.27(금)', note:'정원 미달 학교에 한해 실시' },
-      { phase:'전기학교\n추가모집\n합격자 발표', date:'2026.12.01(화)', note:'', highlight:true },
-    ],
-    prep: [
-      '진로적성(취업희망자) 특별전형 해당 여부 먼저 확인 — 해당 시 11.03~11.05 원서접수',
-      '지원 학교 모집 분야와 본인 희망 직종 일치 확인',
-      '내신성적 반영 방법 학교별 전형요강 확인',
-      '봉사활동 3개년 15시간 이상',
-      '출결 관리 철저히 (결석 1일당 출결 점수 10% 감점)',
-    ],
-    warn: '⚠️ 전기학교는 1개교만 지원 가능합니다. 다른 전기학교와 중복 지원할 수 없습니다.\n\n✅ 예외: 진로적성(취업희망자) 특별전형에 불합격한 경우에 한해 직업계열 특성화고 일반전형에 지원할 수 있습니다. (초·중등교육법 시행령 제81조 제8항)',
-  },
-  gen: {
-    name:'일반고 (평준화)',
-    icon:'🏫',
-    color:'#0e6e4a',
-    colorL:'#e6f7f0',
-    type:'후기학교',
-    isEarly: false,
-    openDate:  new Date('2026-12-04'),
-    closeDate: new Date('2026-12-10'),
-    timeline: [
-      { phase:'원서접수', date:'2026.12.04(금) ~ 12.10(목)', note:'학군 내 지망 5개교 작성', highlight:true },
-      { phase:'배정대상자\n발표', date:'2027.01.06(수)', note:'교육청 홈페이지 또는 중학교 통해 확인' },
-      { phase:'배정학교\n발표', date:'2027.01.22(금)', note:'내가 배정받은 학교 공지', highlight:true },
-      { phase:'등록', date:'2027.01.25(월) ~ 01.27(수)', note:'기한 내 등록 필수 — 미등록 시 취소 처리 가능' },
-      { phase:'추가배정\n및 발표', date:'2027.02.04(목)', note:'미배정 학생 추가 배정 / 등록 02.04~02.05' },
-    ],
-    prep: [
-      '학군 내 5개교 지망 순서 신중하게 결정 (순서가 배정에 영향)',
-      '거주지 학군 소재 학교만 지망 가능 — 다른 학군 기재 불가',
-      '전입 예정이라면 원서접수 전에 주민등록 이전 완료',
-      '내신성적 200점 구조 최종 점검 (출결·봉사 확인)',
-      '배정학교 발표(1.22 금) 확인 후 등록(1.25 월~1.27 수) 기한 준수',
-    ],
-  },
-  foreign: {
-    name:'외고 · 국제고',
-    icon:'🌏',
-    color:'#0369a1',
-    colorL:'#e0f2fe',
-    type:'후기학교',
-    isEarly: false,
-    openDate:  new Date('2026-12-04'),
-    closeDate: new Date('2026-12-10'),
-    timeline: [
-      { phase:'원서접수', date:'2026.12.04(금) ~ 12.10(목)', note:'후기학교 일괄 접수', highlight:true },
-      { phase:'1단계\n전형기간', date:'2026.12.11(금) ~ 12.12(토)', note:'영어 내신성적(160점) + 출결 — 정원의 1.5~2배수 선발' },
-      { phase:'1단계\n합격자 발표', date:'2026.12.14(월)', note:'', highlight:true },
-      { phase:'서류접수', date:'2026.12.15(화) ~ 12.16(수)', note:'2단계 면접 관련 서류 접수' },
-      { phase:'2단계\n전형기간', date:'2026.12.17(목) ~ 12.24(목)', note:'1단계 성적(160점) + 면접(40점) — 최종 합격자 선발' },
-      { phase:'최종\n합격자 발표', date:'2026.12.29(화)', note:'', highlight:true },
-    ],
-    prep: [
-      '영어 내신성적(2·3학년 4개 학기 성취도)이 1단계 핵심 — A(40점)/B(36점)/C(32점)/D(28점)/E(24점)',
-      '출결 관리 중요 — 미인정결석이 감점 요소',
-      '2단계 면접: 자기주도학습 영역(꿈과 끼) + 인성 영역 평가 (개별 면접)',
-      '봉사활동 3개년 15시간 이상',
-      '각종 인증시험 점수·수상 실적 등은 전형 요소로 활용 불가',
-    ],
-    notice: 'ℹ️ 외고·국제고는 자기주도학습전형(2단계)으로 선발합니다.\n외고·국제고 지원자는 평준화지역 일반고에 동시 지원할 수 있으나, 합격 시 일반고 배정 명단에서 제외됩니다.',
-  },
-  saja: {
-    name:'자사고',
-    icon:'🎓',
-    color:'#6b21a8',
-    colorL:'#f3e8ff',
-    type:'후기학교',
-    isEarly: false,
-    openDate:  new Date('2026-12-04'),
-    closeDate: new Date('2026-12-10'),
-    timeline: [
-      { phase:'원서접수', date:'2026.12.04(금) ~ 12.10(목)', note:'후기학교 일괄 접수', highlight:true },
-      { phase:'1단계\n전형기간', date:'2026.12.11(금) ~ 12.12(토)', note:'모집 정원의 일부 또는 전부를 추첨으로 선발 (1단계)' },
-      { phase:'1단계\n합격자 발표', date:'2026.12.14(월)', note:'', highlight:true },
-      { phase:'서류접수', date:'2026.12.15(화) ~ 12.16(수)', note:'2단계 면접 관련 서류 접수' },
-      { phase:'2단계\n전형기간', date:'2026.12.17(목) ~ 12.24(목)', note:'1단계 성적 + 면접(개별 면접) — 최종 합격자 선발' },
-      { phase:'최종\n합격자 발표', date:'2026.12.29(화)', note:'', highlight:true },
-    ],
-    prep: [
-      '1단계에서 추첨으로 선발하는 방식 적용 — 학교별 비율 확인',
-      '내신성적 반영: 교과 성취도 수준(원점수·과목평균 미반영, 3학년 2학기 학기말까지)',
-      '2단계 면접: 자기주도학습 영역 + 인성 영역 (개별 면접)',
-      '봉사활동 3개년 15시간 이상',
-      '필기고사·교과지식 측정 등 사교육 유발 전형 금지 — 자기소개서 내용 위주 준비',
-    ],
-    notice: 'ℹ️ 자사고는 자기주도학습전형(2단계)으로 선발합니다.\n자사고 지원자는 평준화지역 일반고에 동시 지원할 수 있으나, 합격 시 일반고 배정 명단에서 제외됩니다.',
-  },
-  nonp: {
-    name:'일반고 (비평준화)',
-    icon:'📍',
-    color:'#be5504',
-    colorL:'#fff4ec',
-    type:'후기학교 · 비평준화',
-    isEarly: false,
-    openDate:  new Date('2026-12-04'),
-    closeDate: new Date('2026-12-10'),
-    timeline: [
-      { phase:'원서접수', date:'2026.12.04(금) ~ 12.10(목)', note:'학교별로 직접 지원 — 후기학교는 1개교만 지원 가능 (이중지원 금지)', highlight:true },
-      { phase:'전형', date:'내신성적(200점) 기준 선발', note:'추첨 없음 — 성적순으로 정원 내 선발 (학교별)' },
-      { phase:'합격자 발표', date:'2026.12.14(월)', note:'지원한 학교에서 개별 통보', highlight:true },
-      { phase:'등록', date:'합격 후 학교별 안내', note:'기한 내 등록 필수 — 미등록 시 불합격 처리' },
-      { phase:'추가모집', date:'2027.01.07(목) ~ 01.12(화)', note:'정원 미달 학교에 한해 실시 / 발표 2027.01.14(목)' },
-    ],
-    prep: [
-      '지원 학교 모집 인원·합격선(전년도 커트라인) 사전 확인',
-      '내신성적 200점이 합격의 핵심 — 교과 성취도(A/B/C) 집중 관리',
-      '봉사활동 3개년 15시간 이상 채우기 (20점 만점)',
-      '출결 관리 철저히 — 결석 0일이 20점 만점 (지각·조퇴·결과 3회=결석 1일)',
-      '후기학교는 1개교만 지원 가능 — 이중지원 절대 금지 (위반 시 합격 무효)',
-    ],
-    notice: null,
-    nonpInfo: true,
-  },
-  gongp: {
-    name:'자율형 공립고 (평준화)',
-    icon:'🏛️',
-    color:'#0f6d8a',
-    colorL:'#e0f5fa',
-    type:'후기학교 · 평준화',
-    isEarly: false,
-    openDate:  new Date('2026-12-04'),
-    closeDate: new Date('2026-12-10'),
-    timeline: [
-      { phase:'원서접수', date:'2026.12.04(금) ~ 12.10(목)', note:'학군 내 지망 학교 작성 — 후기학교 1개교 지원 원칙', highlight:true },
-      { phase:'배정대상자\n발표', date:'2027.01.06(수)', note:'교육청 또는 중학교 통해 확인' },
-      { phase:'배정학교\n발표', date:'2027.01.22(금)', note:'추첨 결과 발표' },
-      { phase:'등록', date:'2027.01.25(월) ~ 01.27(수)', note:'기한 내 등록 필수' },
-      { phase:'추가배정', date:'2027.02.04(목)', note:'미배정 학생 추가 배정 / 등록 02.04~02.05' },
-    ],
-    prep: [
-      '지망 학교 순서 신중하게 결정 (순서가 배정에 영향)',
-      '거주지 학군 소재 학교만 지망 가능',
-      '내신성적 200점 구조 최종 점검 (출결·봉사 확인)',
-      '전입 예정이라면 원서접수 전에 주민등록 이전 완료',
-      '배정 결과 발표일(1.22) 확인 후 등록(1.25~1.27) 기한 준수',
-    ],
-    isGongp: true,
-  },
-  gonnp: {
-    name:'자율형 공립고 (비평준화)',
-    icon:'🏛️',
-    color:'#0f6d8a',
-    colorL:'#e0f5fa',
-    type:'후기학교 · 비평준화',
-    isEarly: false,
-    openDate:  new Date('2026-12-04'),
-    closeDate: new Date('2026-12-10'),
-    timeline: [
-      { phase:'원서접수', date:'2026.12.04(금) ~ 12.10(목)', note:'학교별 직접 지원 — 후기학교는 1개교만 지원 가능 (이중지원 금지)', highlight:true },
-      { phase:'전형', date:'내신성적(200점) 기준 선발', note:'추첨 없음 — 성적순으로 정원 내 선발 (학교별)' },
-      { phase:'합격자 발표', date:'2026.12.14(월)', note:'지원한 학교에서 개별 통보', highlight:true },
-      { phase:'등록', date:'합격 후 학교별 안내', note:'기한 내 등록 필수 — 미등록 시 불합격 처리' },
-      { phase:'추가모집', date:'2027.01.07(목) ~ 01.12(화)', note:'정원 미달 학교에 한해 실시 / 발표 2027.01.14(목)' },
-    ],
-    prep: [
-      '지원 학교 모집 인원·합격선(전년도 커트라인) 사전 확인',
-      '내신성적 200점이 합격의 핵심 — 교과 성취도(A/B/C) 집중 관리',
-      '봉사활동 3개년 15시간 이상 채우기 (20점 만점)',
-      '출결 관리 철저히 — 결석 0일이 20점 만점',
-      '후기학교는 1개교만 지원 가능 — 이중지원 절대 금지 (위반 시 합격 무효)',
-    ],
-    notice: null,
-    nonpInfo: true,
-  },
-};
-
-const GUNHAK = [
-  { id:'suwon',    name:'수원',    cnt:31, rate:50  },
-  { id:'seongnam', name:'성남',    cnt:26, rate:50  },
-  { id:'anyang',   name:'안양권',  cnt:26, rate:40  },
-  { id:'bucheon',  name:'부천',    cnt:22, rate:100 },
-  { id:'goyang',   name:'고양',    cnt:29, rate:50  },
-  { id:'gwangmyeong',name:'광명',  cnt:9,  rate:100 },
-  { id:'ansan',    name:'안산',    cnt:16, rate:50  },
-  { id:'uijeongbu',name:'의정부',  cnt:13, rate:100 },
-  { id:'yongin',   name:'용인',    cnt:29, rate:50  },
-];
-
-// ── 상태 ──────────────────────────────────────────
-let selectedSchool = null;
-let selectedGunhak = null;
-
-// ── 유틸 ──────────────────────────────────────────
-function diffDays(target) {
-  const diff = target - TODAY;
-  return Math.ceil(diff / (1000 * 60 * 60 * 24));
-}
-function fmt(d) {
-  return `${d.getFullYear()}.${String(d.getMonth()+1).padStart(2,'0')}.${String(d.getDate()).padStart(2,'0')}`;
-}
-function ddayLabel(d) {
-  const n = diffDays(d);
-  if (n < 0) return `D+${Math.abs(n)} (마감됨)`;
-  if (n === 0) return 'D-DAY (오늘!)';
-  return `D-${n}`;
-}
-function ddayColor(d) {
-  const n = diffDays(d);
-  if (n < 0) return '#6b7280';
-  if (n <= 14) return '#dc2626';
-  if (n <= 30) return '#ea580c';
-  return '#1e4d9b';
-}
-
-// ── 화면 전환 ──────────────────────────────────────
-function showScreen(id) {
-  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
-  document.getElementById('screen'+id).classList.add('active');
-  const backBtn = document.getElementById('backBtn');
-  backBtn.style.display = (id !== 1 && id !== '1') ? 'flex' : 'none';
-  window.scrollTo({top:0, behavior:'smooth'});
-}
-
-function goBack() {
-  const active = document.querySelector('.screen.active').id;
-  if (active === 'screen3') {
-    if (selectedSchool === 'gen' || selectedSchool === 'gongp') {
-      showScreen(2);
-    } else if (selectedSchool === 'gonnp') {
-      showScreen('1b');
-    } else {
-      selectedSchool = null; selectedGunhak = null; showScreen(1);
-    }
-  } else if (active === 'screen2') {
-    if (selectedSchool === 'gongp') {
-      selectedGunhak = null; showScreen('1b');
-    } else {
-      selectedSchool = null; selectedGunhak = null; showScreen(1);
-    }
-  } else if (active === 'screen1b') {
-    selectedSchool = null; showScreen(1);
-  } else {
-    selectedSchool = null; selectedGunhak = null; showScreen(1);
-  }
-}
-
-// ── STEP 1: 학교 선택 ────────────────────────────
-function selectSchool(type) {
-  selectedSchool = type;
-  selectedGunhak = null;
-  if (type === 'gen') {
-    buildGunhakGrid();
-    showScreen(2);
-  } else if (type === 'gongnip') {
-    showScreen('1b');
-  } else {
-    buildResult();
-    showScreen(3);
-  }
-}
-
-// ── STEP 1b: 자율형 공립고 지역 유형 선택 ────────────────────────────
-function selectGongType(type) {
-  selectedSchool = type;
-  selectedGunhak = null;
-  if (type === 'gongp') {
-    buildGunhakGrid();
-    showScreen(2);
-  } else {
-    buildResult();
-    showScreen(3);
-  }
-}
-
-// ── STEP 2: 학군 선택 ────────────────────────────
-function buildGunhakGrid() {
-  const grid = document.getElementById('gunhakGrid');
-  grid.innerHTML = GUNHAK.map(g => `
-    <div class="gunhak-card" id="gc_${g.id}" onclick="selectGunhak('${g.id}')">
-      <div class="gk-name">${g.name}</div>
-      <div class="gk-cnt">${g.cnt}개 고교</div>
-      <div class="gk-rate" style="color:${g.rate===100?'#0e6e4a':g.rate===50?'#0369a1':'#b45309'}">
-        학군내 배정 ${g.rate}%
-      </div>
-    </div>
-  `).join('');
-}
-
-function selectGunhak(id) {
-  selectedGunhak = GUNHAK.find(g => g.id === id);
-  document.querySelectorAll('.gunhak-card').forEach(c => c.classList.remove('selected'));
-  document.getElementById('gc_'+id).classList.add('selected');
-  document.getElementById('gunhakNextBtn').disabled = false;
-}
-
-function goToResult() {
-  buildResult();
-  showScreen(3);
-}
-
-// ── STEP 3: 결과 렌더링 ───────────────────────────
-function buildResult() {
-  const s = SCHOOLS[selectedSchool];
-  const container = document.getElementById('resultContent');
-
-  // D-DAY 배너
-  let ddayHtml = '';
-  if (selectedSchool === 'voc') {
-    // 특성화고: 특별전형 / 일반전형 두 개
-    const d1 = diffDays(s.open2Date);
-    const d2 = diffDays(s.open3Date);
-    ddayHtml = `
-    <div class="dday-dual">
-      <div class="dday-mini" style="background:${d1>=0?s.color:'#6b7280'}">
-        <div class="dm-label">🔷 특별전형 원서접수 시작까지</div>
-        <div class="dm-num">${d1>=0?'D-'+d1:'마감'}</div>
-        <div class="dm-date">2026.11.03 ~ 11.05</div>
-      </div>
-      <div class="dday-mini" style="background:${d2>=0?'#b45309':'#6b7280'}">
-        <div class="dm-label">🔶 일반전형 원서접수 시작까지</div>
-        <div class="dm-num">${d2>=0?'D-'+d2:'마감'}</div>
-        <div class="dm-date">2026.11.12 ~ 11.13</div>
-      </div>
-    </div>`;
-  } else {
-    const dOpen  = diffDays(s.openDate);
-    const dClose = diffDays(s.closeDate);
-    const big = dOpen >= 0 ? dOpen : (dClose >= 0 ? dClose : null);
-    const bigLabel = dOpen >= 0 ? '원서접수 시작까지' : (dClose >= 0 ? '원서접수 마감까지' : '원서접수 마감됨');
-
-    ddayHtml = `
-    <div class="dday-banner" style="background:linear-gradient(135deg,${s.color},${s.color}cc)">
-      <div class="school-label">${s.icon} ${s.name} · ${s.type}</div>
-      <div class="dday-num">${big !== null ? 'D-'+big : '마감'}</div>
-      <div class="dday-unit">${bigLabel}</div>
-      <div class="dday-sub">원서접수 ${fmt(s.openDate)} ~ ${fmt(s.closeDate)}</div>
-    </div>`;
-  }
-
-  // 날짜 칩
-  let chipHtml = '';
-  if (selectedSchool !== 'voc') {
-    chipHtml = `
-    <div class="date-chips">
-      <div class="date-chip ${diffDays(s.openDate)>=0&&diffDays(s.openDate)<=7?'today':''}">
-        <div class="dc-label">📅 원서접수 시작</div>
-        <div class="dc-date">${fmt(s.openDate)}</div>
-        <div class="dc-dday" style="color:${ddayColor(s.openDate)}">${ddayLabel(s.openDate)}</div>
-      </div>
-      <div class="date-chip ${diffDays(s.closeDate)>=0&&diffDays(s.closeDate)<=7?'today':''}">
-        <div class="dc-label">🚨 원서접수 마감</div>
-        <div class="dc-date">${fmt(s.closeDate)}</div>
-        <div class="dc-dday" style="color:${ddayColor(s.closeDate)}">${ddayLabel(s.closeDate)}</div>
-      </div>
-      ${selectedSchool==='gen'?`
-      <div class="date-chip">
-        <div class="dc-label">📢 배정학교 발표</div>
-        <div class="dc-date">2027.01.22</div>
-        <div class="dc-dday" style="color:#1e4d9b">${ddayLabel(new Date('2027-01-22'))}</div>
-      </div>
-      <div class="date-chip">
-        <div class="dc-label">✅ 등록 마감</div>
-        <div class="dc-date">2027.01.27</div>
-        <div class="dc-dday" style="color:#1e4d9b">${ddayLabel(new Date('2027-01-27'))}</div>
-      </div>`:''}
-    </div>`;
-  } else {
-    chipHtml = `
-    <div class="date-chips">
-      <div class="date-chip"><div class="dc-label">🔷 특별전형 시작</div><div class="dc-date">2026.11.03</div><div class="dc-dday" style="color:${ddayColor(new Date('2026-11-03'))}">${ddayLabel(new Date('2026-11-03'))}</div></div>
-      <div class="date-chip"><div class="dc-label">🔷 특별전형 마감</div><div class="dc-date">2026.11.05</div><div class="dc-dday" style="color:${ddayColor(new Date('2026-11-05'))}">${ddayLabel(new Date('2026-11-05'))}</div></div>
-      <div class="date-chip"><div class="dc-label">🔶 일반전형 시작</div><div class="dc-date">2026.11.12</div><div class="dc-dday" style="color:${ddayColor(new Date('2026-11-12'))}">${ddayLabel(new Date('2026-11-12'))}</div></div>
-      <div class="date-chip"><div class="dc-label">🔶 일반전형 마감</div><div class="dc-date">2026.11.13</div><div class="dc-dday" style="color:${ddayColor(new Date('2026-11-13'))}">${ddayLabel(new Date('2026-11-13'))}</div></div>
-    </div>`;
-  }
-
-  // 이중지원 경고
-  const warnHtml = s.isEarly ? `
-  <div class="warn-banner">
-    <div class="wi">🚫</div>
-    <div>
-      <div class="wt">이중지원 금지 — 꼭 확인하세요!</div>
-      <div class="wb">전기학교(과학고·예술고·체육고·마이스터고·특성화고)는 <strong>1개교만 지원 가능</strong>합니다.<br>
-      다른 전기학교와 동시에 지원하면 <strong>두 학교 모두 무효</strong>가 됩니다.</div>
-    </div>
-  </div>` : '';
-
-  // 공지 박스
-  const noticeHtml = s.notice ? `
-  <div style="background:#f0f9ff;border:1.5px solid #7dd3fc;border-radius:12px;padding:13px 16px;margin-bottom:16px;font-size:12.5px;color:#0c4a6e;line-height:1.6;">
-    ${s.notice}
-  </div>` : '';
-
-  // 타임라인
-  const tlHtml = `
-  <div class="timeline-box">
-    <div class="tl-box-title" style="color:${s.color}">📅 전형 일정</div>
-    <div class="tl-rows">
-      ${s.timeline.map(t => `
-        <div class="tl-row ${t.highlight?'highlight':''}">
-          <div class="tl-phase">${t.phase}</div>
-          <div class="tl-info">
-            <div class="ti-date">${t.date}</div>
-            ${t.note ? `<div class="ti-note">${t.note}</div>` : ''}
+      <!-- 과학고 -->
+      <div class="sc-card">
+        <div class="sc-head early">🔬 과학고 &nbsp;<span style="font-size:11px;font-weight:400;">전기학교 · 원서접수 08.24~08.28</span></div>
+        <div class="sc-body">
+          <div class="sc-row">
+            <div class="sc-label pass">합격</div>
+            <div class="sc-items">
+              <div class="sc-item ban">전기학교 추가모집 지원 불가</div>
+              <div class="sc-item ban">후기학교(일반고·외고·자사고 등) 지원 불가</div>
+            </div>
+          </div>
+          <div class="sc-row">
+            <div class="sc-label fail">불합격</div>
+            <div class="sc-items">
+              <div class="sc-item ok">전기학교 추가모집 지원 가능 (11.26~11.27)</div>
+              <div class="sc-item ok">후기학교 1개교 지원 가능 (12.04~12.10)</div>
+            </div>
           </div>
         </div>
-      `).join('')}
-    </div>
-  </div>`;
+      </div>
 
-  // 준비사항
-  const prepHtml = `
-  <div class="info-box" style="margin-bottom:16px;">
-    <div class="ib-head" style="background:${s.colorL};color:${s.color};">
-      ✅ 내가 준비해야 할 것들
-    </div>
-    <div class="ib-body">
-      ${s.prep.map((p,i) => `
-        <div class="ib-row">
-          <span class="ir-dot">${i+1}</span>
-          <span class="ir-text">${p}</span>
+      <!-- 마이스터고 -->
+      <div class="sc-card">
+        <div class="sc-head early">⚙️ 마이스터고 &nbsp;<span style="font-size:11px;font-weight:400;">전기학교 · 원서접수 10.19~10.22</span></div>
+        <div class="sc-body">
+          <div class="sc-row">
+            <div class="sc-label pass">합격</div>
+            <div class="sc-items">
+              <div class="sc-item ban">전기학교 추가모집 지원 불가</div>
+              <div class="sc-item ban">후기학교 지원 불가</div>
+            </div>
+          </div>
+          <div class="sc-row">
+            <div class="sc-label fail">불합격</div>
+            <div class="sc-items">
+              <div class="sc-item special">직업계열 특성화고 지원 가능 (★특례 — 시행령 제81조 제7항)</div>
+              <div class="sc-item ok">전기학교 추가모집 지원 가능 (11.26~11.27)</div>
+              <div class="sc-item ok">후기학교 1개교 지원 가능 (12.04~12.10)</div>
+            </div>
+          </div>
         </div>
-      `).join('')}
-    </div>
-  </div>`;
+      </div>
 
-  // 내신 구조 요약
-  const naesinHtml = `
-  <div class="info-box" style="margin-bottom:16px;">
-    <div class="ib-head" style="background:#f1f5f9;color:#1e293b;">📊 내신성적 200점 구조</div>
-    <div class="ib-body">
-      <div class="naesin-grid">
-        <div class="ns-cell" style="border-top:3px solid #1e4d9b">
-          <div class="ns-pt" style="color:#1e4d9b">120점</div>
-          <div class="ns-lbl">일반교과<br>(60%)</div>
-        </div>
-        <div class="ns-cell" style="border-top:3px solid #2e7d9e">
-          <div class="ns-pt" style="color:#2e7d9e">30점</div>
-          <div class="ns-lbl">체육·예술<br>(15%)</div>
-        </div>
-        <div class="ns-cell" style="border-top:3px solid #2e8b57">
-          <div class="ns-pt" style="color:#2e8b57">20점</div>
-          <div class="ns-lbl">출결<br>(10%)</div>
-        </div>
-        <div class="ns-cell" style="border-top:3px solid #d4a017">
-          <div class="ns-pt" style="color:#d4a017">20점</div>
-          <div class="ns-lbl">봉사<br>(10%)</div>
-        </div>
-        <div class="ns-cell" style="border-top:3px solid #9b59b6">
-          <div class="ns-pt" style="color:#9b59b6">10점</div>
-          <div class="ns-lbl">학교활동<br>(5%)</div>
+      <!-- 예술고·체육고 -->
+      <div class="sc-card">
+        <div class="sc-head early">🎨 예술고·체육고 &nbsp;<span style="font-size:11px;font-weight:400;">전기학교 · 원서접수 10.12~10.15</span></div>
+        <div class="sc-body">
+          <div class="sc-row">
+            <div class="sc-label pass">합격</div>
+            <div class="sc-items">
+              <div class="sc-item ban">전기학교 추가모집 지원 불가</div>
+              <div class="sc-item ban">후기학교 지원 불가</div>
+            </div>
+          </div>
+          <div class="sc-row">
+            <div class="sc-label fail">불합격</div>
+            <div class="sc-items">
+              <div class="sc-item ok">전기학교 추가모집 지원 가능 (11.26~11.27)</div>
+              <div class="sc-item ok">후기학교 1개교 지원 가능 (12.04~12.10)</div>
+            </div>
+          </div>
         </div>
       </div>
-      <div style="display:flex;gap:12px;margin-top:10px;flex-wrap:wrap;">
-        <div class="ib-row" style="border:none;padding:0;flex:1;min-width:200px;">
-          <span class="ir-dot">▶</span>
-          <span class="ir-text">출결: 결석 <em>0일→20점</em>, 1일→18점, 2일→16점… 6일+→8점<br><small style="color:#94a3b8;">지각·조퇴·결과 3회 = 결석 1일</small></span>
+
+      <!-- 특성화고 -->
+      <div class="sc-card">
+        <div class="sc-head early">🛠️ 특성화고 &nbsp;<span style="font-size:11px;font-weight:400;">전기학교 · 특별 11.03~11.05 / 일반 11.12~11.13</span></div>
+        <div class="sc-body">
+          <div class="sc-row">
+            <div class="sc-label pass" style="font-size:10px;">진로적성<br>특별전형<br>합격</div>
+            <div class="sc-items">
+              <div class="sc-item ban">후기학교 지원 불가</div>
+              <div class="sc-item ban">전기학교 추가모집 지원 불가</div>
+            </div>
+          </div>
+          <div class="sc-row">
+            <div class="sc-label fail" style="font-size:10px;">진로적성<br>특별전형<br>불합격</div>
+            <div class="sc-items">
+              <div class="sc-item special">직업계열 특성화고 일반전형 지원 가능 (★특례)</div>
+              <div class="sc-item ok">전기학교 추가모집 가능 (11.26~11.27)</div>
+              <div class="sc-item ok">후기학교 1개교 가능 (12.04~12.10)</div>
+            </div>
+          </div>
+          <div class="sc-row">
+            <div class="sc-label pass" style="font-size:10px;">일반전형<br>합격</div>
+            <div class="sc-items">
+              <div class="sc-item ban">후기학교 지원 불가</div>
+              <div class="sc-item ban">전기학교 추가모집 지원 불가</div>
+            </div>
+          </div>
+          <div class="sc-row">
+            <div class="sc-label fail" style="font-size:10px;">일반전형<br>불합격</div>
+            <div class="sc-items">
+              <div class="sc-item ok">전기학교 추가모집 가능 (11.26~11.27)</div>
+              <div class="sc-item ok">후기학교 1개교 가능 (12.04~12.10)</div>
+            </div>
+          </div>
         </div>
-        <div class="ib-row" style="border:none;padding:0;flex:1;min-width:200px;">
-          <span class="ir-dot">▶</span>
-          <span class="ir-text">봉사: 3개년 <em>15시간 이상</em>→20점 만점<br>수상: 학기당 <em>1개</em>만 반영 (+0.5점)</span>
+      </div>
+
+      <!-- 외고·국제고 -->
+      <div class="sc-card">
+        <div class="sc-head late">🌏 외고·국제고 &nbsp;<span style="font-size:11px;font-weight:400;">후기학교 · 원서접수 12.04~12.10</span></div>
+        <div class="sc-body">
+          <div class="sc-row">
+            <div class="sc-label apply">지원 시</div>
+            <div class="sc-items">
+              <div class="sc-item ok">평준화 일반고 동시 지원 가능</div>
+              <div class="sc-item warn">원서에 외고·국제고를 학군내 1지망으로 작성, 2지망부터 일반고 기재</div>
+            </div>
+          </div>
+          <div class="sc-row">
+            <div class="sc-label pass">합격</div>
+            <div class="sc-items">
+              <div class="sc-item ban">평준화 일반고 배정 명단에서 자동 제외</div>
+            </div>
+          </div>
+          <div class="sc-row">
+            <div class="sc-label fail">불합격</div>
+            <div class="sc-items">
+              <div class="sc-item ok">평준화 일반고 배정 절차 그대로 유지</div>
+              <div class="sc-item ok">후기학교 추가모집 지원 가능 (2027.01.07~01.12)</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 자사고 -->
+      <div class="sc-card">
+        <div class="sc-head late">🎓 자사고 &nbsp;<span style="font-size:11px;font-weight:400;">후기학교 · 원서접수 12.04~12.10</span></div>
+        <div class="sc-body">
+          <div class="sc-row">
+            <div class="sc-label apply">지원 시</div>
+            <div class="sc-items">
+              <div class="sc-item ok">평준화 일반고 동시 지원 가능</div>
+              <div class="sc-item warn">원서에 자사고를 학군내 1지망으로 작성, 2지망부터 일반고 기재</div>
+            </div>
+          </div>
+          <div class="sc-row">
+            <div class="sc-label pass">합격</div>
+            <div class="sc-items">
+              <div class="sc-item ban">평준화 일반고 배정 명단에서 자동 제외</div>
+            </div>
+          </div>
+          <div class="sc-row">
+            <div class="sc-label fail">불합격</div>
+            <div class="sc-items">
+              <div class="sc-item ok">평준화 일반고 배정 절차 그대로 유지</div>
+              <div class="sc-item ok">후기학교 추가모집 지원 가능 (2027.01.07~01.12)</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </div><!-- end sc-grid -->
+
+    <!-- C. 한눈에 보는 전체 매트릭스 -->
+    <p class="sub-label">▸ 한눈에 보는 전체 지원 가능 여부 (PDF 공식 기준)</p>
+    <table class="matrix-t">
+      <thead>
+        <tr>
+          <th style="width:150px; text-align:left; padding-left:12px;">지원 학교</th>
+          <th style="width:60px;">결과</th>
+          <th style="width:90px;">전기학교<br>추가모집</th>
+          <th style="width:90px;">후기학교<br>1개교 지원</th>
+          <th>추가로 가능한 것</th>
+          <th>비고</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td rowspan="2"><span class="mt-school">🔬 과학고</span><span class="mt-type e">전기</span></td>
+          <td style="text-align:center;"><span class="badge-ok">합격</span></td>
+          <td style="text-align:center;"><span class="badge-ban">불가</span></td>
+          <td style="text-align:center;"><span class="badge-ban">불가</span></td>
+          <td style="font-size:11.5px;">—</td>
+          <td style="font-size:11.5px;">전기 합격 → 추가 지원 없음</td>
+        </tr>
+        <tr>
+          <td style="text-align:center;"><span class="badge-ban">불합격</span></td>
+          <td style="text-align:center;"><span class="badge-ok">가능</span></td>
+          <td style="text-align:center;"><span class="badge-ok">가능</span></td>
+          <td style="font-size:11.5px;">—</td>
+          <td style="font-size:11.5px;">추가모집 OR 후기 중 선택</td>
+        </tr>
+        <tr>
+          <td rowspan="2"><span class="mt-school">⚙️ 마이스터고</span><span class="mt-type e">전기</span></td>
+          <td style="text-align:center;"><span class="badge-ok">합격</span></td>
+          <td style="text-align:center;"><span class="badge-ban">불가</span></td>
+          <td style="text-align:center;"><span class="badge-ban">불가</span></td>
+          <td style="font-size:11.5px;">—</td>
+          <td style="font-size:11.5px;">전기 합격 → 추가 지원 없음</td>
+        </tr>
+        <tr class="special-row">
+          <td style="text-align:center;"><span class="badge-ban">불합격</span></td>
+          <td style="text-align:center;"><span class="badge-ok">가능</span></td>
+          <td style="text-align:center;"><span class="badge-ok">가능</span></td>
+          <td style="font-size:11.5px;"><span class="badge-cond">★ 직업계 특성화고도 가능</span></td>
+          <td style="font-size:11.5px;">시행령 제81조 제7항 특례</td>
+        </tr>
+        <tr>
+          <td rowspan="2"><span class="mt-school">🎨 예술고·체육고</span><span class="mt-type e">전기</span></td>
+          <td style="text-align:center;"><span class="badge-ok">합격</span></td>
+          <td style="text-align:center;"><span class="badge-ban">불가</span></td>
+          <td style="text-align:center;"><span class="badge-ban">불가</span></td>
+          <td style="font-size:11.5px;">—</td>
+          <td style="font-size:11.5px;">전기 합격 → 추가 지원 없음</td>
+        </tr>
+        <tr>
+          <td style="text-align:center;"><span class="badge-ban">불합격</span></td>
+          <td style="text-align:center;"><span class="badge-ok">가능</span></td>
+          <td style="text-align:center;"><span class="badge-ok">가능</span></td>
+          <td style="font-size:11.5px;">—</td>
+          <td style="font-size:11.5px;">추가모집 OR 후기 중 선택</td>
+        </tr>
+        <tr>
+          <td rowspan="2"><span class="mt-school">🛠️ 특성화고<br><span style="font-size:10.5px;font-weight:400;">(진로적성 특별전형)</span></span><span class="mt-type e">전기</span></td>
+          <td style="text-align:center;"><span class="badge-ok">합격</span></td>
+          <td style="text-align:center;"><span class="badge-ban">불가</span></td>
+          <td style="text-align:center;"><span class="badge-ban">불가</span></td>
+          <td style="font-size:11.5px;">—</td>
+          <td style="font-size:11.5px;"></td>
+        </tr>
+        <tr class="special-row">
+          <td style="text-align:center;"><span class="badge-ban">불합격</span></td>
+          <td style="text-align:center;"><span class="badge-ok">가능</span></td>
+          <td style="text-align:center;"><span class="badge-ok">가능</span></td>
+          <td style="font-size:11.5px;"><span class="badge-cond">★ 특성화고 일반전형도 가능</span></td>
+          <td style="font-size:11.5px;">시행령 제81조 제8항 특례</td>
+        </tr>
+        <tr>
+          <td rowspan="2"><span class="mt-school">🛠️ 특성화고<br><span style="font-size:10.5px;font-weight:400;">(일반전형)</span></span><span class="mt-type e">전기</span></td>
+          <td style="text-align:center;"><span class="badge-ok">합격</span></td>
+          <td style="text-align:center;"><span class="badge-ban">불가</span></td>
+          <td style="text-align:center;"><span class="badge-ban">불가</span></td>
+          <td style="font-size:11.5px;">—</td>
+          <td style="font-size:11.5px;"></td>
+        </tr>
+        <tr>
+          <td style="text-align:center;"><span class="badge-ban">불합격</span></td>
+          <td style="text-align:center;"><span class="badge-ok">가능</span></td>
+          <td style="text-align:center;"><span class="badge-ok">가능</span></td>
+          <td style="font-size:11.5px;">—</td>
+          <td style="font-size:11.5px;"></td>
+        </tr>
+        <tr>
+          <td rowspan="3"><span class="mt-school">🌏 외고·국제고</span><span class="mt-type l">후기</span></td>
+          <td style="text-align:center;"><span class="badge-apply">지원</span></td>
+          <td style="text-align:center;">—</td>
+          <td style="text-align:center;"><span class="badge-ok">동시가능</span></td>
+          <td style="font-size:11.5px;">평준화 일반고 동시 지원 가능</td>
+          <td style="font-size:11.5px;">외고·국제고를 1지망으로 작성</td>
+        </tr>
+        <tr>
+          <td style="text-align:center;"><span class="badge-ok">합격</span></td>
+          <td style="text-align:center;">—</td>
+          <td style="text-align:center;"><span class="badge-ban">배정제외</span></td>
+          <td style="font-size:11.5px;">—</td>
+          <td style="font-size:11.5px;">일반고 배정 명단 자동 제외</td>
+        </tr>
+        <tr>
+          <td style="text-align:center;"><span class="badge-ban">불합격</span></td>
+          <td style="text-align:center;">—</td>
+          <td style="text-align:center;"><span class="badge-ok">배정유지</span></td>
+          <td style="font-size:11.5px;">후기 추가모집 가능 (01.07~01.12)</td>
+          <td style="font-size:11.5px;">일반고 배정 절차 유지</td>
+        </tr>
+        <tr>
+          <td rowspan="3"><span class="mt-school">🎓 자사고</span><span class="mt-type l">후기</span></td>
+          <td style="text-align:center;"><span class="badge-apply">지원</span></td>
+          <td style="text-align:center;">—</td>
+          <td style="text-align:center;"><span class="badge-ok">동시가능</span></td>
+          <td style="font-size:11.5px;">평준화 일반고 동시 지원 가능</td>
+          <td style="font-size:11.5px;">자사고를 1지망으로 작성</td>
+        </tr>
+        <tr>
+          <td style="text-align:center;"><span class="badge-ok">합격</span></td>
+          <td style="text-align:center;">—</td>
+          <td style="text-align:center;"><span class="badge-ban">배정제외</span></td>
+          <td style="font-size:11.5px;">—</td>
+          <td style="font-size:11.5px;">일반고 배정 명단 자동 제외</td>
+        </tr>
+        <tr>
+          <td style="text-align:center;"><span class="badge-ban">불합격</span></td>
+          <td style="text-align:center;">—</td>
+          <td style="text-align:center;"><span class="badge-ok">배정유지</span></td>
+          <td style="font-size:11.5px;">후기 추가모집 가능 (01.07~01.12)</td>
+          <td style="font-size:11.5px;">일반고 배정 절차 유지</td>
+        </tr>
+      </tbody>
+    </table>
+
+    <!-- 추가모집 안내 -->
+    <div style="background:#fffbeb; border:1.5px solid #fbbf24; border-radius:8px; padding:10px 16px; margin-top:10px; font-size:12px; line-height:1.8;">
+      <strong style="color:#78350f;">📌 추가모집(2027.01.07~01.12) 지원 자격:</strong>
+      전기·후기학교 모두 불합격이거나 한 번도 지원하지 않은 학생만 가능. 추가모집에서도 이중지원은 절대 금지.<br>
+      <strong style="color:#78350f;">📌 추가모집 대상:</strong>
+      전기학교 미달교 / 비평준화 일반고·자공고 미달교 / 외고·국제고·자사고 미달교. (합격자 발표 2027.01.14)
+    </div>
+  </div>
+
+  <!-- 2. 전형 일정 -->
+  <div class="section">
+    <div class="section-head">
+      <div class="num">2</div>
+      <h2>전형 일정 타임라인</h2>
+      <span class="badge">2026.08 → 2027.01</span>
+    </div>
+    <div class="timeline-grid">
+
+      <div class="tl-item">
+        <div class="tl-month">2026<br>08월</div>
+        <div class="tl-type"><span class="type-badge tb-sci">과학고</span></div>
+        <div class="tl-content">
+          <div class="date-strong">원서접수 8.24(월) ~ 8.28(금)</div>
+          <div class="date-note">1단계 서류평가 → 2단계 수학·과학 소집 구술면접</div>
+        </div>
+      </div>
+
+      <div class="tl-item">
+        <div class="tl-month">2026<br>10월</div>
+        <div class="tl-type">
+          <span class="type-badge tb-art">예술고</span>
+          <span class="type-badge tb-art">체육고</span>
+        </div>
+        <div class="tl-content">
+          <div class="date-strong">원서접수 10.12(월) ~ 10.15(목)</div>
+          <div class="date-note">실기고사 포함 — 학교별 내신 반영 방법 개별 확인 필요</div>
+        </div>
+      </div>
+
+      <div class="tl-item">
+        <div class="tl-month">2026<br>10월</div>
+        <div class="tl-type"><span class="type-badge tb-meis">마이스터고</span></div>
+        <div class="tl-content">
+          <div class="date-strong">원서접수 10.19(월) ~ 10.22(목)</div>
+          <div class="date-note">취업 연계형 직업계고 — 대학 진학 제한 사항 사전 안내 권장</div>
+        </div>
+      </div>
+
+      <div class="tl-item">
+        <div class="tl-month">2026<br>11월</div>
+        <div class="tl-type"><span class="type-badge tb-voc">특성화고</span></div>
+        <div class="tl-content">
+          <div class="date-strong">특별전형 11.03(화) ~ 11.05(목) &nbsp;|&nbsp; 일반전형 11.12(목) ~ 11.13(금)</div>
+          <div class="date-note">특별전형: 체험입학·직업인자녀·특수교육대상자·국가유공자 등</div>
+        </div>
+      </div>
+
+      <div class="tl-item key">
+        <div class="tl-month">2026<br>12월</div>
+        <div class="tl-type">
+          <span class="type-badge tb-spec">외고·국제고</span>
+          <span class="type-badge tb-spec">자사고</span>
+          <span class="type-badge tb-gen">일반고</span>
+        </div>
+        <div class="tl-content">
+          <div class="date-strong">후기학교 원서접수 12.04(금) ~ 12.10(목)</div>
+          <div class="date-note">📌 평준화 일반고: 학군 내 지망 5개교 작성 / 비평준화 지역은 별도 일정 확인</div>
+        </div>
+      </div>
+
+      <div class="tl-item">
+        <div class="tl-month">2027<br>01월</div>
+        <div class="tl-type"><span class="type-badge tb-gen">평준화 일반고</span></div>
+        <div class="tl-content">
+          <div class="date-strong">배정대상자 1.6 → 배정학교 발표 1.22 → 등록 1.25~1.27</div>
+          <div class="date-note">학생에게 배정 결과 확인 및 등록 마감일 안내 필수</div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- 3. 내신 200점 구조 -->
+  <div class="section">
+    <div class="section-head">
+      <div class="num">3</div>
+      <h2>내신성적 반영 구조</h2>
+      <span class="badge">총 200점 만점</span>
+    </div>
+
+    <!-- 요약 바 -->
+    <div class="score-overview">
+      <div class="score-card sc1">
+        <div class="pts">120<span style="font-size:14px;">점</span></div>
+        <div class="label">일반교과</div>
+        <div class="pct">60%</div>
+      </div>
+      <div class="score-card sc2">
+        <div class="pts">30<span style="font-size:14px;">점</span></div>
+        <div class="label">체육·예술교과</div>
+        <div class="pct">15%</div>
+      </div>
+      <div class="score-card sc3">
+        <div class="pts">20<span style="font-size:14px;">점</span></div>
+        <div class="label">출결상황</div>
+        <div class="pct">10%</div>
+      </div>
+      <div class="score-card sc4">
+        <div class="pts">20<span style="font-size:14px;">점</span></div>
+        <div class="label">봉사활동</div>
+        <div class="pct">10%</div>
+      </div>
+      <div class="score-card sc5">
+        <div class="pts">10<span style="font-size:14px;">점</span></div>
+        <div class="label">학교활동</div>
+        <div class="pct">5%</div>
+      </div>
+      <div class="plus-sep">=</div>
+      <div class="score-total">
+        <div class="pts">200<span style="font-size:14px;">점</span></div>
+        <div class="label">만점</div>
+      </div>
+    </div>
+
+    <!-- 세부 -->
+    <div class="score-detail-grid">
+
+      <!-- 교과 -->
+      <div class="detail-card">
+        <div class="dc-head c1">📚 교과활동상황 (150점)</div>
+        <div class="dc-body">
+          <div class="row-item">
+            <span class="ri-label">일반교과 (120점)</span>
+            <span class="ri-val">60%</span>
+          </div>
+          <p style="font-size:11.5px; color:var(--text-sub); padding: 2px 0 6px;">국어·도덕·사회·수학·과학·기술가정·정보·영어·한문·교양</p>
+          <div class="row-item">
+            <span class="ri-label">체육·예술교과 (30점)</span>
+            <span class="ri-val">15%</span>
+          </div>
+          <p style="font-size:11.5px; color:var(--text-sub); padding: 2px 0 6px;">체육·음악·미술</p>
+          <div class="row-item" style="margin-top:4px;">
+            <span class="ri-label">성취도 A</span><span class="ri-val" style="color:var(--green);">100%</span>
+          </div>
+          <div class="row-item">
+            <span class="ri-label">성취도 B</span><span class="ri-val" style="color:var(--orange);">90%</span>
+          </div>
+          <div class="row-item">
+            <span class="ri-label">성취도 C</span><span class="ri-val" style="color:var(--red);">80%</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- 출결 -->
+      <div class="detail-card">
+        <div class="dc-head c2">🏫 출결상황 (20점)</div>
+        <div class="dc-body">
+          <div class="absence-row">
+            <div class="ab-cell ab0"><div class="ab-day">0일</div><div class="ab-pt">20점</div></div>
+            <div class="ab-cell ab1"><div class="ab-day">1일</div><div class="ab-pt">18점</div></div>
+            <div class="ab-cell ab2"><div class="ab-day">2일</div><div class="ab-pt">16점</div></div>
+            <div class="ab-cell ab3"><div class="ab-day">3일</div><div class="ab-pt">14점</div></div>
+            <div class="ab-cell ab4"><div class="ab-day">4일</div><div class="ab-pt">12점</div></div>
+            <div class="ab-cell ab5"><div class="ab-day">5일</div><div class="ab-pt">10점</div></div>
+            <div class="ab-cell ab6"><div class="ab-day">6일+</div><div class="ab-pt">8점</div></div>
+          </div>
+          <div style="margin-top:10px;">
+            <div class="row-item"><span class="ri-label">결석 산출 방식</span></div>
+            <div class="row-item"><span class="ri-label">지각·조퇴·결과</span><span class="ri-val">3회 = 결석 1일</span></div>
+            <div class="row-item"><span class="ri-label">집계 기간</span><span class="ri-val">중1~3학년 합산</span></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 봉사 + 학교활동 -->
+      <div class="detail-card">
+        <div class="dc-head c3">🤝 봉사 (20점) · 학교활동 (10점)</div>
+        <div class="dc-body">
+          <table class="mini-table" style="margin-bottom:10px;">
+            <tr><th>3개년 봉사시간</th><th>점수</th></tr>
+            <tr><td>15시간 이상</td><td><strong style="color:var(--green);">20점 만점</strong></td></tr>
+            <tr><td>14시간</td><td>19점</td></tr>
+            <tr><td>13시간</td><td>18점</td></tr>
+            <tr><td>1시간 감소당</td><td>–1점</td></tr>
+            <tr><td>0시간</td><td>5점</td></tr>
+          </table>
+          <div class="row-item"><span class="ri-label">기본점수</span><span class="ri-val">8점</span></div>
+          <div class="row-item"><span class="ri-label">수상 (학기당 1개)</span><span class="ri-val">+0.5점</span></div>
+          <div class="row-item"><span class="ri-label">자치회 임원 (월당)</span><span class="ri-val">+0.1점</span></div>
+          <div class="row-item"><span class="ri-label">학교활동 만점</span><span class="ri-val" style="color:var(--blue);">10점</span></div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- 4. 담임 체크리스트 -->
+  <div class="section">
+    <div class="section-head">
+      <div class="num">4</div>
+      <h2>시기별 담임 체크리스트</h2>
+    </div>
+    <div class="checklist-wrapper">
+
+      <div class="cl-card">
+        <div class="cl-card-head clh-aug">🔬 8월 – 과학고 원서접수 전</div>
+        <ul class="cl-list">
+          <li><div class="chk"></div>과학고 지원 예정 학생 이중지원 금지 서면 안내</li>
+          <li><div class="chk"></div>원서접수 8.24~8.28 일정 공지</li>
+          <li><div class="chk"></div>중3 1학기 학생부 기재 최신화 확인</li>
+          <li><div class="chk"></div>봉사시간 누계 15시간 미만 학생 개별 안내</li>
+        </ul>
+      </div>
+
+      <div class="cl-card">
+        <div class="cl-card-head clh-oct">🎭 10월 – 예술고·체육고·마이스터고</div>
+        <ul class="cl-list">
+          <li><div class="chk"></div>예술고·체육고 실기고사 일정 개별 안내 (10.12~10.15)</li>
+          <li><div class="chk"></div>마이스터고 진학 희망 학생 면담 (10.19~10.22)</li>
+          <li><div class="chk"></div>이중지원 여부 재확인 — 전기학교 1개교 원칙 강조</li>
+          <li><div class="chk"></div>학생부 출결·봉사·학교활동 기재 오류 점검</li>
+        </ul>
+      </div>
+
+      <div class="cl-card">
+        <div class="cl-card-head clh-nov">🏭 11월 – 특성화고 원서접수</div>
+        <ul class="cl-list">
+          <li><div class="chk"></div>특별전형 11.03~11.05 대상자 확인 (국가유공자·특수교육 등)</li>
+          <li><div class="chk"></div>일반전형 11.12~11.13 일정 전체 학생 공지</li>
+          <li><div class="chk"></div>특성화고 지원 학생 내신 점수 사전 산출</li>
+          <li><div class="chk"></div>전기학교 합격자 후기 지원 불가 재안내</li>
+        </ul>
+      </div>
+
+      <div class="cl-card">
+        <div class="cl-card-head clh-dec">🏫 12월 – 후기학교 원서접수</div>
+        <ul class="cl-list">
+          <li><div class="chk"></div>후기학교 원서접수 12.04~12.10 전체 안내</li>
+          <li><div class="chk"></div>평준화 지역: 학군 내 지망 5개교 신중 선택 지도</li>
+          <li><div class="chk"></div>외고·국제고·자사고 지원 학생 별도 전형 확인</li>
+          <li><div class="chk"></div>전입 예정 학생 주민등록 이전 일자 확인 (접수 전 완료 필요)</li>
+          <li><div class="chk"></div>비평준화 지역 학생 별도 일정 안내</li>
+        </ul>
+      </div>
+
+      <div class="cl-card">
+        <div class="cl-card-head clh-special">🌟 특수 배정 대상자 안내</div>
+        <ul class="cl-list">
+          <li><div class="chk"></div>국가유공자 자녀 → 지정 학교 우선 배정 신청</li>
+          <li><div class="chk"></div>체육특기자 → 해당 종목 학교 우선 배정</li>
+          <li><div class="chk"></div>쌍둥이·다둥이 → 같은 학교 배정 신청 가능</li>
+          <li><div class="chk"></div>세 자녀 이상 → 형제자매 재학교 우선 배정 신청</li>
+          <li><div class="chk"></div>학교폭력 관련 학생 → 전학 배정 특례 여부 확인</li>
+          <li><div class="chk"></div>특수교육대상자 → 통합교육 학교 우선 배정 검토</li>
+        </ul>
+      </div>
+
+      <div class="cl-card">
+        <div class="cl-card-head clh-warn">⚠️ 원서 작성 시 주의사항</div>
+        <ul class="cl-list">
+          <li><div class="chk"></div>지망 순서가 배정에 영향 — 신중 작성 안내</li>
+          <li><div class="chk"></div>학군 내 거주지 소재 학교만 지망 기재 가능</li>
+          <li><div class="chk"></div>원서 수정 가능 기간 사전 확인 후 학생 안내</li>
+          <li><div class="chk"></div>특례입학 증빙서류 기한 내 제출 여부 확인</li>
+          <li><div class="chk"></div>2027.01.06 배정대상자 발표 — 학생 확인 안내</li>
+        </ul>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- 5. 평준화 학군 배정 -->
+  <div class="section">
+    <div class="section-head">
+      <div class="num">5</div>
+      <h2>평준화 지역 학군 배정 안내</h2>
+      <span class="badge">9개 학군 201교</span>
+    </div>
+    <div class="gunhak-layout">
+      <table class="gunhak-t">
+        <tr>
+          <th>학군</th>
+          <th>고교 수</th>
+          <th>1단계 학군내배정 비율</th>
+        </tr>
+        <tr><td>수원</td><td>31교</td><td class="ratio-50">50%</td></tr>
+        <tr><td>성남</td><td>26교</td><td class="ratio-50">50%</td></tr>
+        <tr><td>안양권</td><td>26교</td><td class="ratio-40">40%</td></tr>
+        <tr><td>부천</td><td>22교</td><td class="ratio-100">100%</td></tr>
+        <tr><td>고양</td><td>29교</td><td class="ratio-50">50%</td></tr>
+        <tr><td>광명</td><td>9교</td><td class="ratio-100">100%</td></tr>
+        <tr><td>안산</td><td>16교</td><td class="ratio-50">50%</td></tr>
+        <tr><td>의정부</td><td>13교</td><td class="ratio-100">100%</td></tr>
+        <tr><td>용인</td><td>29교</td><td class="ratio-50">50%</td></tr>
+        <tr><td><strong>합계</strong></td><td><strong>201교</strong></td><td>학군별 상이</td></tr>
+      </table>
+
+      <div>
+        <div class="flow-steps">
+          <div class="flow-step">
+            <div class="step-num sn1">1</div>
+            <div class="step-content">
+              <div class="step-title">학군내배정 (1단계)</div>
+              <div class="step-desc">학생이 선택한 지망 5개교 내에서 추첨 배정<br>비율은 학군별 40~100% (좌측 표 참조)</div>
+            </div>
+          </div>
+          <div class="sn-arrow">↓</div>
+          <div class="flow-step">
+            <div class="step-num sn2">2</div>
+            <div class="step-content">
+              <div class="step-title">구역내배정 (2단계)</div>
+              <div class="step-desc">1단계 미배정 학생 → 거주 구역 내 잔여 정원 학교 추첨 배정</div>
+            </div>
+          </div>
+        </div>
+        <div class="date-pills" style="margin-top:12px;">
+          <div class="date-pill"><span class="dp-label">원서접수</span><span class="dp-date">2026.12.04 ~ 12.10</span></div>
+          <div class="date-pill"><span class="dp-label">배정대상자 발표</span><span class="dp-date">2027.01.06</span></div>
+          <div class="date-pill"><span class="dp-label">배정학교 발표</span><span class="dp-date">2027.01.22</span></div>
+          <div class="date-pill"><span class="dp-label">등록</span><span class="dp-date">2027.01.25 ~ 01.27</span></div>
         </div>
       </div>
     </div>
-  </div>`;
+  </div>
 
-  // 비평준화 안내
-  let nonpHtml = '';
-  if (selectedSchool === 'nonp') {
-    nonpHtml = `
-    <div class="gunhak-result" style="border-left:4px solid var(--nonp);">
-      <div class="gr-title" style="color:var(--nonp)">📍 비평준화 일반고 — 평준화와 다른 점</div>
-      <div class="gr-row">
-        <span class="gr-label">배정 방식</span>
-        <span class="gr-val" style="color:#be5504">내신성적순 선발 (추첨 없음)</span>
-      </div>
-      <div class="gr-row">
-        <span class="gr-label">지원 가능 학교 수</span>
-        <span class="gr-val" style="color:#dc2626;font-weight:700;">1개교만 지원 가능 (이중지원 금지)</span>
-      </div>
-      <div class="gr-row">
-        <span class="gr-label">지원 방법</span>
-        <span class="gr-val">원하는 학교에 직접 개별 지원</span>
-      </div>
-      <div class="gr-row">
-        <span class="gr-label">합격 기준</span>
-        <span class="gr-val">내신성적 200점 기준 정원 내 선발</span>
-      </div>
-      <div class="gr-row">
-        <span class="gr-label">경기도 비평준화 지역</span>
-        <span class="gr-val" style="font-size:12px;">시흥, 광주, 이천, 안성, 평택, 포천,<br>동두천, 양주, 구리, 남양주, 하남,<br>오산, 여주, 파주, 가평, 양평, 연천 등<br><span style="color:#aaa;font-size:11px;">※ 평준화 9개 학군(수원·성남·안양권·부천·고양·광명·안산·의정부·용인) 외 지역</span></span>
-      </div>
-      <div class="gr-row">
-        <span class="gr-label">특별전형</span>
-        <span class="gr-val" style="font-size:12px;">모집정원 10% 이내<br><span style="color:#aaa;font-size:11px;">(체육특기자 5% 포함, 학교운영위원회 심의 필요)</span></span>
-      </div>
-      <div style="margin-top:12px;padding:12px;background:var(--nonp-l);border-radius:8px;font-size:12.5px;color:#7c2d12;line-height:1.7;">
-        ⚠️ <strong>성적이 합격을 결정합니다.</strong><br>
-        평준화(추첨)와 달리 내신 200점 점수가 낮으면 원하는 학교에 불합격할 수 있어요.<br>
-        지원 전 학교별 <strong>전년도 합격선(커트라인)</strong>을 꼭 확인하세요.<br><br>
-        ⛔ <strong>후기학교는 1개교만 지원 가능합니다.</strong> 비평준화 일반고도 후기학교이므로 한 곳만 선택해야 해요. 신중하게 결정하세요.<br><br>
-        📌 <strong>합격자 발표: 2026.12.14(월)</strong> — 평준화보다 한 달 이상 빠르게 결과를 알 수 있어요.
-      </div>
-    </div>`;
-  }
-
-  // 학군 정보 (일반고만)
-  let gunhakHtml = '';
-  if ((selectedSchool === 'gen' || selectedSchool === 'gongp') && selectedGunhak) {
-    const g = selectedGunhak;
-    const stage2 = 100 - g.rate;
-    gunhakHtml = `
-    <div class="gunhak-result">
-      <div class="gr-title" style="color:${selectedSchool==='gongp'?'var(--gong)':'var(--gen)'}">🗺️ ${g.name} 학군 배정 안내 ${selectedSchool==='gongp'?'(자율형 공립고)':''}</div>
-      <div class="gr-row"><span class="gr-label">학군 내 고교 수</span><span class="gr-val">${g.cnt}개교</span></div>
-      <div class="gr-row"><span class="gr-label">지망 학교 수</span><span class="gr-val">최대 5개교 (학군 내 학교만)</span></div>
-      <div class="gr-row"><span class="gr-label">1단계 학군내배정</span><span class="gr-val" style="color:var(--gen)">정원의 ${g.rate}%</span></div>
-      <div class="gr-row"><span class="gr-label">2단계 구역내배정</span><span class="gr-val">1단계 미배정 학생 → 구역 내 잔여 학교</span></div>
-      <div class="gr-row"><span class="gr-label">배정 방법</span><span class="gr-val">추첨 배정 (성적 순 아님)</span></div>
-      <div style="margin-top:10px;padding:10px 12px;background:var(--gen-l);border-radius:8px;font-size:12.5px;color:#0e6e4a;line-height:1.6;">
-        💡 지망 순서가 배정에 영향을 줍니다. 가장 가고 싶은 학교를 1순위에 적으세요.<br>
-        단, <strong>거주지 학군(${g.name}) 소재 학교만</strong> 기재할 수 있습니다.
-      </div>
-    </div>`;
-  }
-
-  container.innerHTML = `
-    ${ddayHtml}
-    ${chipHtml}
-    ${warnHtml}
-    ${noticeHtml}
-    ${nonpHtml}
-    ${gunhakHtml}
-    ${tlHtml}
-    ${prepHtml}
-    ${naesinHtml}
-    <div style="text-align:center;padding:10px 0 4px;">
-      <button class="btn-primary" onclick="goBack()" style="background:#fff;color:#1e4d9b;border:2px solid #1e4d9b;width:auto;padding:10px 28px;margin-top:0;">
-        ← 다른 학교 유형 확인하기
-      </button>
+  <!-- 6. 2028 예고 -->
+  <div class="section">
+    <div class="section-head">
+      <div class="num">6</div>
+      <h2>2028학년도 예고사항</h2>
+      <span class="badge">현 중2 학생 기준</span>
     </div>
-    <div style="text-align:center;color:#aaa;font-size:11px;margin-top:14px;line-height:1.7;">
-      본 안내는 2027학년도 경기도 고입 업무담당자 역량강화 연수 자료를 기반으로 작성되었습니다.<br>
-      세부 일정은 각 학교 전형요강 및 경기도교육청 공문을 반드시 확인하세요.
+    <div class="notice-box">
+      <div class="nt">📢 현재 중2 학생(2028학년도 고입 대상)에게 안내 시 참고</div>
+      <ul>
+        <li>내신성적 반영 방식 및 학교 유형별 전형 기준 <strong>일부 변경 예정</strong> → 확정 공문 발표 후 재안내</li>
+        <li>현 시점에서 안내할 때는 <strong>"예고사항이므로 확정 전 변경 가능"</strong>임을 반드시 강조</li>
+        <li>지역별 비평준화 전환 또는 신설 학교 변동 가능 → 경기도교육청 공지 지속 모니터링 필요</li>
+      </ul>
     </div>
-  `;
-}
-</script>
+  </div>
+
+  <div style="text-align:center; color:#aaa; font-size:11px; padding-bottom:10px; margin-top:4px;">
+    본 자료는 2027학년도 고입 업무담당자 역량강화 연수 자료(자료1·자료2)를 기반으로 작성되었습니다.<br>
+    세부 기준은 경기도교육청 공문 및 각 학교 전형요강을 반드시 병행 확인하시기 바랍니다.
+  </div>
+
+</div>
 </body>
 </html>

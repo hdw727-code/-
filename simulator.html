@@ -1,0 +1,616 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>이중지원 시뮬레이터 – 2027 경기도 고입</title>
+<style>
+:root {
+  --sci:     #1e4d9b; --sci-l:    #eef3fc;
+  --art:     #8b2f8f; --art-l:    #f9eefa;
+  --meis:    #2d5e3e; --meis-l:   #eaf5ef;
+  --voc:     #b45309; --voc-l:    #fef3e2;
+  --foreign: #0369a1; --foreign-l:#e0f2fe;
+  --saja:    #6b21a8; --saja-l:   #f3e8ff;
+  --gen:     #0e6e4a; --gen-l:    #e6f7f0;
+  --nonp:    #be5504; --nonp-l:   #fff4ec;
+  --red:   #dc2626;
+  --green: #16a34a;
+  --amber: #d97706;
+  --gray:  #64748b;
+  --border:#e2e8f0;
+  --text:  #1e293b;
+}
+*{margin:0;padding:0;box-sizing:border-box;}
+body{font-family:'맑은 고딕','Apple SD Gothic Neo',sans-serif;background:#f0f4f8;color:var(--text);min-height:100vh;}
+
+/* ── 헤더 ── */
+.top-header{
+  background:linear-gradient(135deg,#1e3a8a,#2563eb);
+  color:#fff;padding:18px 20px 14px;text-align:center;
+  position:sticky;top:0;z-index:200;
+  box-shadow:0 2px 12px rgba(0,0,0,.2);
+}
+.top-header h1{font-size:17px;font-weight:800;letter-spacing:-.3px;}
+.top-header p{font-size:11.5px;opacity:.8;margin-top:3px;}
+
+/* ── 레이아웃 ── */
+.wrap{max-width:860px;margin:0 auto;padding:18px 14px 60px;}
+
+/* ── 안내 박스 ── */
+.guide-box{
+  background:#fffbeb;border:1.5px solid #fcd34d;border-radius:12px;
+  padding:12px 16px;margin-bottom:18px;font-size:12.5px;line-height:1.7;
+}
+.guide-box strong{color:#78350f;}
+.guide-note{
+  background:#fef2f2;border:1.5px solid #fca5a5;border-radius:10px;
+  padding:10px 14px;margin-top:10px;font-size:12px;color:#7f1d1d;line-height:1.6;
+}
+
+/* ── 섹션 레이블 ── */
+.sec-label{
+  font-size:13px;font-weight:800;margin-bottom:10px;
+  display:flex;align-items:center;gap:6px;
+}
+.sec-label .badge{
+  font-size:11px;padding:2px 10px;border-radius:20px;font-weight:700;
+}
+.badge-early{background:#fef3c7;color:#78350f;}
+.badge-late {background:#dbeafe;color:#1e3a8a;}
+
+/* ── 카드 그리드 ── */
+.card-grid{
+  display:grid;
+  grid-template-columns:repeat(4,1fr);
+  gap:10px;margin-bottom:14px;
+}
+@media(max-width:640px){.card-grid{grid-template-columns:repeat(2,1fr);}}
+
+/* ── 학교 카드 ── */
+.sc-card{
+  position:relative;
+  background:#fff;border:2px solid var(--border);border-radius:14px;
+  padding:16px 12px 14px;text-align:center;cursor:pointer;
+  transition:all .2s;user-select:none;
+  -webkit-tap-highlight-color:transparent;
+}
+.sc-card:hover:not(.state-blocked){transform:translateY(-2px);box-shadow:0 6px 18px rgba(0,0,0,.1);}
+.sc-card .card-icon{font-size:30px;margin-bottom:8px;display:block;}
+.sc-card .card-name{font-size:13px;font-weight:800;margin-bottom:3px;line-height:1.3;}
+.sc-card .card-sub{font-size:10.5px;color:var(--gray);line-height:1.4;margin-bottom:6px;}
+.sc-card .card-dates{font-size:10px;color:var(--gray);margin-top:4px;line-height:1.5;}
+
+/* ── 카드 상태 ── */
+.state-open{}
+.state-selected{border-width:2.5px;box-shadow:0 4px 14px rgba(0,0,0,.15);}
+.state-pass   {border-color:var(--green)!important;background:#f0fdf4;}
+.state-fail   {border-color:var(--red)!important;background:#fef2f2;}
+.state-special{border-color:var(--amber)!important;background:#fffbeb;border-style:dashed!important;}
+.state-blocked{
+  background:#f8fafc;opacity:.55;cursor:not-allowed;
+  background-image:repeating-linear-gradient(
+    45deg,transparent,transparent 5px,rgba(0,0,0,.03) 5px,rgba(0,0,0,.03) 10px
+  );
+}
+.state-blocked:hover{transform:none!important;box-shadow:none!important;}
+
+/* ── 상태 배지 (카드 우상단) ── */
+.status-badge{
+  position:absolute;top:8px;right:8px;
+  font-size:16px;line-height:1;
+}
+
+/* ── 차단 이유 툴팁 ── */
+.block-reason{
+  position:absolute;bottom:calc(100% + 6px);left:50%;transform:translateX(-50%);
+  background:#1e293b;color:#fff;border-radius:8px;padding:8px 12px;
+  font-size:11px;line-height:1.6;white-space:nowrap;z-index:50;
+  box-shadow:0 4px 14px rgba(0,0,0,.25);pointer-events:none;
+  opacity:0;transition:opacity .15s;
+  min-width:180px;text-align:left;white-space:pre-line;
+}
+.block-reason::after{
+  content:'';position:absolute;top:100%;left:50%;transform:translateX(-50%);
+  border:6px solid transparent;border-top-color:#1e293b;
+}
+.sc-card.state-blocked:hover .block-reason{opacity:1;}
+@media(max-width:640px){.block-reason{left:0;transform:none;min-width:160px;}}
+
+/* ── 전기 결과 입력 ── */
+.result-box{
+  background:#fff;border:1.5px solid var(--border);border-radius:12px;
+  padding:14px 16px;margin-bottom:14px;
+}
+.result-box .rb-title{font-size:13px;font-weight:700;margin-bottom:10px;display:flex;align-items:center;gap:6px;}
+.result-btns{display:flex;gap:8px;flex-wrap:wrap;}
+.rb-btn{
+  padding:9px 20px;border-radius:8px;border:2px solid var(--border);
+  font-size:13px;font-weight:700;cursor:pointer;background:#fff;transition:.15s;
+}
+.rb-btn:hover{transform:translateY(-1px);}
+.rb-btn.active-pass{background:#f0fdf4;border-color:var(--green);color:var(--green);}
+.rb-btn.active-fail{background:#fef2f2;border-color:var(--red);color:var(--red);}
+.rb-btn.active-none{background:#f8fafc;border-color:var(--gray);color:var(--gray);}
+
+/* ── 마이스터고→특성화고 특례 안내 ── */
+.meis-special-box{
+  background:#fffbeb;border:1.5px dashed var(--amber);border-radius:10px;
+  padding:12px 16px;margin-bottom:14px;
+  font-size:12px;line-height:1.7;
+}
+.meis-special-box .ms-title{font-size:13px;font-weight:800;color:var(--amber);margin-bottom:4px;}
+
+/* ── 요약 패널 ── */
+.summary{
+  background:#fff;border:2px solid #c7d9f5;border-radius:14px;
+  padding:16px 18px;margin-top:4px;
+}
+.summary .s-title{font-size:14px;font-weight:800;margin-bottom:12px;color:var(--text);}
+.s-row{
+  display:flex;align-items:flex-start;gap:8px;
+  padding:7px 0;border-bottom:1px dashed var(--border);font-size:12.5px;
+}
+.s-row:last-child{border-bottom:none;}
+.s-icon{font-size:18px;flex-shrink:0;margin-top:0;}
+.s-content .s-name{font-weight:700;}
+.s-content .s-detail{font-size:11.5px;color:var(--gray);margin-top:2px;}
+.s-content .s-reason{font-size:11.5px;color:var(--red);margin-top:2px;}
+
+.summary-empty{
+  text-align:center;color:var(--gray);font-size:13px;padding:20px 0;
+}
+
+/* ── 초기화 버튼 ── */
+.reset-btn{
+  display:block;margin:14px auto 0;
+  background:#f8fafc;border:1.5px solid var(--border);
+  border-radius:8px;padding:8px 24px;
+  font-size:13px;font-weight:600;cursor:pointer;color:var(--gray);
+  transition:.15s;
+}
+.reset-btn:hover{background:#f1f5f9;color:var(--text);}
+
+/* ── 규칙 참고 ── */
+.rules-ref{
+  margin-top:18px;background:#fff;border:1px solid var(--border);
+  border-radius:12px;overflow:hidden;
+}
+.rules-ref summary{
+  padding:12px 16px;font-size:13px;font-weight:700;cursor:pointer;
+  display:flex;align-items:center;gap:6px;
+  background:#f8fafc;user-select:none;
+}
+.rules-ref .rule-body{padding:14px 16px;}
+.rule-item{display:flex;gap:8px;font-size:12.5px;padding:5px 0;border-bottom:1px solid #f1f5f9;line-height:1.6;}
+.rule-item:last-child{border-bottom:none;}
+.rule-item .ri{flex-shrink:0;font-weight:700;}
+.ri-ok  {color:var(--green);}
+.ri-ban {color:var(--red);}
+.ri-warn{color:var(--amber);}
+
+.disclaimer{
+  margin-top:14px;background:#f8fafc;border-radius:8px;
+  padding:10px 14px;font-size:11px;color:var(--gray);line-height:1.6;
+}
+
+/* ── 공통 사이트 네비게이션 ── */
+.site-top-nav {
+  background:#1e3a8a; display:flex; align-items:center;
+  gap:4px; padding:8px 14px; overflow-x:auto;
+  -webkit-overflow-scrolling:touch; flex-wrap:nowrap;
+}
+.site-top-nav::-webkit-scrollbar{display:none;}
+.site-top-nav .stn-home {
+  color:rgba(255,255,255,.85); font-size:12px; font-weight:700;
+  text-decoration:none; white-space:nowrap; padding:5px 10px;
+  border-radius:6px; flex-shrink:0; background:rgba(255,255,255,.12);
+}
+.site-top-nav .stn-home:hover{background:rgba(255,255,255,.22);}
+.site-top-nav .stn-sep{color:rgba(255,255,255,.3);font-size:14px;flex-shrink:0;}
+.site-top-nav a.stn-btn {
+  color:rgba(255,255,255,.8); font-size:12px; font-weight:600;
+  text-decoration:none; white-space:nowrap; padding:5px 10px;
+  border-radius:6px; flex-shrink:0; transition:.15s;
+}
+.site-top-nav a.stn-btn:hover{background:rgba(255,255,255,.15);color:#fff;}
+.site-top-nav a.stn-btn.active{background:rgba(255,255,255,.25);color:#fff;font-weight:700;}
+
+</style>
+</head>
+<body>
+<div class="site-top-nav"><a class="stn-home" href="index.html">🏠 메인</a><span class="stn-sep">|</span><a class="stn-btn" href="student.html">🏫 학생 안내</a><a class="stn-btn active" href="simulator.html">🎯 시뮬레이터</a><a class="stn-btn" href="guide.html">📋 담임 가이드</a></div>
+
+
+<div class="top-header">
+  <h1>🎯 이중지원 시뮬레이터</h1>
+  <p>2027학년도 경기도 고등학교 입학전형 · 지원 가능 조합 확인</p>
+</div>
+
+<div class="wrap">
+
+  <div class="guide-box">
+    <strong>사용 방법:</strong> 아래에서 지원하려는 학교를 클릭하세요. 선택에 따라 지원 가능한 학교와 불가능한 학교가 자동으로 표시됩니다.<br>
+    전기학교를 선택한 경우, 결과(합격/불합격)를 입력하면 이후 가능한 선택지가 업데이트됩니다.
+    <div class="guide-note">
+      ⚠️ 이 시뮬레이터는 <strong>2027학년도 경기도 고등학교 입학전형 기본계획(공식 자료)</strong> 기준입니다.<br>
+      최종 지원 전 반드시 담임선생님 및 학교 공지를 재확인하세요.
+    </div>
+  </div>
+
+  <!-- 전기학교 -->
+  <div class="sec-label">
+    🔶 전기학교 <span class="badge badge-early">한 곳만 지원 가능</span>
+  </div>
+  <div class="card-grid" id="earlyGrid"></div>
+
+  <!-- 전기 결과 입력 (전기 선택 시 표시) -->
+  <div class="result-box" id="resultBox" style="display:none;">
+    <div class="rb-title">📋 전기학교 결과 입력 <span style="font-size:11px;font-weight:400;color:var(--gray);">(선택 – 결과에 따라 후기 선택지가 바뀝니다)</span></div>
+    <div class="result-btns">
+      <button class="rb-btn" id="btnPass" onclick="setResult('pass')">✅ 합격</button>
+      <button class="rb-btn" id="btnFail" onclick="setResult('fail')">❌ 불합격</button>
+      <button class="rb-btn rb-btn active-none" id="btnNone" onclick="setResult(null)">— 결과 미정</button>
+    </div>
+  </div>
+
+  <!-- 마이스터고→특성화고 특례 안내 (조건부 표시) -->
+  <div class="meis-special-box" id="meisSpecialBox" style="display:none;">
+    <div class="ms-title">★ 마이스터고 불합격 → 특성화고 일반전형 가능 (특례)</div>
+    마이스터고에 불합격한 경우, <strong>특성화고 일반전형</strong>에 별도 지원할 수 있습니다.<br>
+    ⚠️ 이는 순차 지원이며, 동시 지원이 아닙니다. 특성화고 일반전형 원서접수: <strong>11.12~11.13</strong>
+  </div>
+
+  <!-- 후기학교 -->
+  <div class="sec-label">
+    🔷 후기학교 <span class="badge badge-late">외고·자사고 중 1개, 일반고 평준화/비평준화 중 1개</span>
+  </div>
+  <div class="card-grid" id="lateGrid"></div>
+
+  <!-- 결과 요약 -->
+  <div class="summary" id="summary">
+    <div class="s-title">📌 현재 지원 가능한 조합</div>
+    <div class="summary-empty" id="summaryEmpty">학교를 선택하면 지원 가능한 조합이 표시됩니다.</div>
+    <div id="summaryList"></div>
+  </div>
+
+  <button class="reset-btn" onclick="resetAll()">↺ 전체 초기화</button>
+
+  <!-- 이중지원 규칙 참고 -->
+  <details class="rules-ref">
+    <summary>📋 이중지원 규칙 전체 보기 (PDF 기준)</summary>
+    <div class="rule-body">
+      <div class="rule-item"><span class="ri ri-ban">❌</span><span>전기학교(과학고·예술고·체육고·마이스터고·특성화고) 중 2곳 이상 동시 지원 금지 — 위반 시 <strong>전체 무효 처리</strong></span></div>
+      <div class="rule-item"><span class="ri ri-ban">❌</span><span>전기학교 합격자는 후기학교 지원 불가</span></div>
+      <div class="rule-item"><span class="ri ri-ok">✅</span><span>전기학교 불합격 또는 미지원 시 후기학교 지원 가능</span></div>
+      <div class="rule-item"><span class="ri ri-ban">❌</span><span>외고·국제고와 자사고는 동시 지원 불가 (자기주도학습전형 1개교만 허용)</span></div>
+      <div class="rule-item"><span class="ri ri-ok">✅</span><span>외고·국제고 또는 자사고는 일반고(평준화 또는 비평준화)와 동시 지원 가능</span></div>
+      <div class="rule-item"><span class="ri ri-ban">❌</span><span>평준화 일반고와 비평준화 일반고는 동시 지원 불가 (배정 방식이 다름)</span></div>
+      <div class="rule-item"><span class="ri ri-warn">★</span><span><strong>예외:</strong> 마이스터고 불합격 후 특성화고 일반전형에 별도 지원 가능 (초중등교육법 시행령 제81조)</span></div>
+      <div class="rule-item"><span class="ri ri-ok">✅</span><span>특성화고 특별전형 불합격 시 일반전형 추가 지원 가능 (같은 유형 내 순차 지원)</span></div>
+    </div>
+  </details>
+
+  <div class="disclaimer">
+    ※ 본 시뮬레이터는 학생의 이해를 돕기 위한 참고 도구입니다. 실제 지원 전 반드시 담임교사와 상담하고 경기도교육청 공식 공고를 확인하세요.<br>
+    근거: 2027학년도 경기도 고등학교 입학전형 기본계획 / 초·중등교육법 시행령 제81조
+  </div>
+
+</div><!-- /wrap -->
+
+<script>
+/* ─────────────────────────────────────────────────
+   학교 데이터 (PDF 공식 날짜 기준)
+───────────────────────────────────────────────── */
+const SCHOOLS_EARLY = {
+  sci: {
+    name:'과학고', icon:'🔬',
+    color:'var(--sci)', light:'var(--sci-l)',
+    app:'원서접수: 08.24~08.28',
+    result:'합격자 발표: 11.26(목)',
+    sub:'수학·과학 특기 학생',
+  },
+  art: {
+    name:'예술고·체육고', icon:'🎨',
+    color:'var(--art)', light:'var(--art-l)',
+    app:'원서접수: 10.12~10.15',
+    result:'예술고 10.27(화) / 체육고 11.09(월)',
+    sub:'예술·체육 특기 학생',
+  },
+  meis: {
+    name:'마이스터고', icon:'⚙️',
+    color:'var(--meis)', light:'var(--meis-l)',
+    app:'원서접수: 10.19~10.22',
+    result:'합격자 발표: 11.02(월)',
+    sub:'졸업 후 즉시 취업 희망',
+  },
+  voc: {
+    name:'특성화고', icon:'🛠️',
+    color:'var(--voc)', light:'var(--voc-l)',
+    app:'특별 11.03~11.05 / 일반 11.12~11.13',
+    result:'특별 11.11(수) / 일반 11.23(월)',
+    sub:'직업계 전문 고등학교',
+  },
+};
+
+const SCHOOLS_LATE = {
+  foreign: {
+    name:'외고·국제고', icon:'🌏',
+    color:'var(--foreign)', light:'var(--foreign-l)',
+    app:'원서접수: 12.04~12.10',
+    result:'최종발표: 12.29(화)',
+    sub:'자기주도학습전형 1·2단계',
+  },
+  saja: {
+    name:'자사고', icon:'🎓',
+    color:'var(--saja)', light:'var(--saja-l)',
+    app:'원서접수: 12.04~12.10',
+    result:'최종발표: 12.29(화)',
+    sub:'자기주도학습전형 1·2단계',
+  },
+  gen: {
+    name:'일반고·자율공립\n(평준화)', icon:'🏫',
+    color:'var(--gen)', light:'var(--gen-l)',
+    app:'원서접수: 12.04~12.10',
+    result:'배정학교 발표: 01.22(금)',
+    sub:'9개 학군 추첨 배정',
+  },
+  nonp: {
+    name:'일반고·자율공립\n(비평준화)', icon:'📍',
+    color:'var(--nonp)', light:'var(--nonp-l)',
+    app:'원서접수: 12.04~12.10',
+    result:'합격자 발표: 12.14(월)',
+    sub:'성적순 학교별 선발',
+  },
+};
+
+/* ─────────────────────────────────────────────────
+   이중지원 금지 조합 (후기 내부)
+   검증 완료: 전체 시나리오 14개 정상 처리
+───────────────────────────────────────────────── */
+const BLOCKED_LATE_PAIRS = {
+  'foreign:saja': '외고·국제고와 자사고는\n동시 지원 불가\n(자기주도학습전형 1개교만 허용)',
+  'saja:foreign': '외고·국제고와 자사고는\n동시 지원 불가\n(자기주도학습전형 1개교만 허용)',
+  'gen:nonp':     '평준화와 비평준화 일반고는\n동시 지원 불가\n(배정 방식이 다름)',
+  'nonp:gen':     '평준화와 비평준화 일반고는\n동시 지원 불가\n(배정 방식이 다름)',
+};
+
+/* ─────────────────────────────────────────────────
+   상태
+───────────────────────────────────────────────── */
+const S = {
+  earlyKey: null,    // 선택된 전기학교 키
+  earlyResult: null, // 'pass' | 'fail' | null
+  lateKeys: new Set(),
+};
+
+/* ─────────────────────────────────────────────────
+   상태 계산: 각 카드가 어떤 상태인지 반환
+───────────────────────────────────────────────── */
+function getEarlyStatus(key) {
+  if (S.earlyKey === key) {
+    if (S.earlyResult === 'pass') return { code:'pass',   badge:'✅', reason:'' };
+    if (S.earlyResult === 'fail') return { code:'fail',   badge:'❌', reason:'' };
+    return { code:'selected', badge:'●', reason:'' };
+  }
+  if (S.earlyKey !== null) {
+    // 특례: 마이스터고 불합격 후 특성화고
+    if (S.earlyKey === 'meis' && S.earlyResult === 'fail' && key === 'voc') {
+      return { code:'special', badge:'★', reason:'' };
+    }
+    const nm = SCHOOLS_EARLY[S.earlyKey].name;
+    return { code:'blocked', badge:'🚫', reason:`전기학교는 1개교만 지원 가능\n(이미 ${nm} 선택됨)` };
+  }
+  return { code:'open', badge:'', reason:'' };
+}
+
+function getLateStatus(key) {
+  // 전기 합격 → 후기 전부 불가
+  if (S.earlyKey && S.earlyResult === 'pass') {
+    const nm = SCHOOLS_EARLY[S.earlyKey].name;
+    return { code:'blocked', badge:'🚫', reason:`전기학교(${nm})\n합격자는 후기학교 지원 불가` };
+  }
+  if (S.lateKeys.has(key)) {
+    return { code:'selected', badge:'●', reason:'' };
+  }
+  // 후기 내부 호환성
+  for (const sel of S.lateKeys) {
+    const k = `${key}:${sel}`;
+    if (BLOCKED_LATE_PAIRS[k]) {
+      return { code:'blocked', badge:'🚫', reason: BLOCKED_LATE_PAIRS[k] };
+    }
+  }
+  return { code:'open', badge:'', reason:'' };
+}
+
+/* ─────────────────────────────────────────────────
+   클릭 핸들러
+───────────────────────────────────────────────── */
+function clickEarly(key) {
+  const st = getEarlyStatus(key);
+
+  // 특례 카드 (마이스터고 불합격 → 특성화고): 정보 표시만, 실제 선택 X
+  if (st.code === 'special') {
+    alert('★ 마이스터고 불합격 → 특성화고 일반전형 지원 가능 (특례)\n\n원서접수: 11.12~11.13\n합격자 발표: 11.23(월)\n\n※ 동시 지원이 아닌 순차 지원입니다.\n   마이스터고 불합격 확인 후 별도 접수해야 합니다.');
+    return;
+  }
+
+  // 차단 카드: 이유 표시 (모바일에서 툴팁 대신)
+  if (st.code === 'blocked') {
+    alert(st.reason);
+    return;
+  }
+
+  if (S.earlyKey === key) {
+    // 같은 카드 클릭 → 선택 해제
+    S.earlyKey = null;
+    S.earlyResult = null;
+    render();
+    return;
+  }
+
+  S.earlyKey = key;
+  S.earlyResult = null;
+  render();
+}
+
+function clickLate(key) {
+  const st = getLateStatus(key);
+  if (st.code === 'blocked') {
+    // 모바일에서도 차단 이유 표시
+    alert(st.reason);
+    return;
+  }
+  if (S.lateKeys.has(key)) {
+    S.lateKeys.delete(key);
+  } else {
+    S.lateKeys.add(key);
+  }
+  render();
+}
+
+function setResult(result) {
+  S.earlyResult = result;
+  if (result === 'pass') {
+    S.lateKeys.clear(); // 합격 시 후기 선택 모두 해제
+  }
+  render();
+}
+
+function resetAll() {
+  S.earlyKey = null;
+  S.earlyResult = null;
+  S.lateKeys.clear();
+  render();
+}
+
+/* ─────────────────────────────────────────────────
+   렌더링
+───────────────────────────────────────────────── */
+function renderCard(key, info, statusFn, clickFn) {
+  const st = statusFn(key);
+  const stateClass = 'state-' + st.code;
+
+  let borderStyle = '';
+  if (st.code === 'selected' || st.code === 'pass' || st.code === 'fail') {
+    borderStyle = `border-color:${info.color};background:${info.light};`;
+  }
+
+  const nameDisplay = info.name.replace(/\n/g, '<br>');
+
+  return `
+  <div class="sc-card ${stateClass}" style="${borderStyle}" onclick="${clickFn}('${key}')">
+    ${st.badge ? `<div class="status-badge">${st.badge}</div>` : ''}
+    ${st.reason ? `<div class="block-reason">${st.reason.replace(/\n/g,'<br>')}</div>` : ''}
+    <span class="card-icon">${info.icon}</span>
+    <div class="card-name" style="${(st.code==='selected'||st.code==='pass'||st.code==='fail')?`color:${info.color};`:''}">${nameDisplay}</div>
+    <div class="card-sub">${info.sub}</div>
+    <div class="card-dates">${info.app}</div>
+  </div>`;
+}
+
+function buildSummary() {
+  const rows = [];
+
+  // 전기학교
+  if (S.earlyKey) {
+    const info = SCHOOLS_EARLY[S.earlyKey];
+    const resultLabel = S.earlyResult === 'pass' ? ' — ✅ 합격' : S.earlyResult === 'fail' ? ' — ❌ 불합격' : '';
+    rows.push({
+      icon: info.icon,
+      name: `${info.name}${resultLabel}`,
+      detail: `${info.app} / ${info.result}`,
+      status: S.earlyResult === 'pass' ? 'pass' : S.earlyResult === 'fail' ? 'fail' : 'selected',
+    });
+
+    // 마이스터고 불합격 → 특성화고 특례
+    if (S.earlyKey === 'meis' && S.earlyResult === 'fail') {
+      rows.push({
+        icon: '★',
+        name: '특성화고 일반전형 — 별도 지원 가능 (특례)',
+        detail: '원서접수: 11.12~11.13 / 합격자 발표: 11.23(월)',
+        status: 'special',
+      });
+    }
+  }
+
+  // 후기학교
+  if (S.earlyKey && S.earlyResult === 'pass') {
+    rows.push({
+      icon: '🚫',
+      name: '후기학교 전체 지원 불가',
+      detail: `전기학교(${SCHOOLS_EARLY[S.earlyKey].name}) 합격자는 후기학교를 지원할 수 없습니다.`,
+      status: 'blocked',
+    });
+  } else {
+    for (const key of S.lateKeys) {
+      const info = SCHOOLS_LATE[key];
+      rows.push({
+        icon: info.icon,
+        name: info.name.replace(/\n/g,' '),
+        detail: `${info.app} / ${info.result}`,
+        status: 'selected',
+      });
+    }
+  }
+
+  return rows;
+}
+
+function render() {
+  // 전기 카드
+  const earlyGrid = document.getElementById('earlyGrid');
+  earlyGrid.innerHTML = Object.keys(SCHOOLS_EARLY)
+    .map(k => renderCard(k, SCHOOLS_EARLY[k], getEarlyStatus, 'clickEarly'))
+    .join('');
+
+  // 전기 결과 입력
+  const resultBox = document.getElementById('resultBox');
+  if (S.earlyKey) {
+    resultBox.style.display = 'block';
+    document.getElementById('btnPass').className = 'rb-btn' + (S.earlyResult==='pass' ? ' active-pass' : '');
+    document.getElementById('btnFail').className = 'rb-btn' + (S.earlyResult==='fail' ? ' active-fail' : '');
+    document.getElementById('btnNone').className = 'rb-btn' + (!S.earlyResult ? ' active-none' : '');
+  } else {
+    resultBox.style.display = 'none';
+  }
+
+  // 마이스터고→특성화고 특례 안내
+  const meisBox = document.getElementById('meisSpecialBox');
+  meisBox.style.display = (S.earlyKey === 'meis' && S.earlyResult === 'fail') ? 'block' : 'none';
+
+  // 후기 카드
+  const lateGrid = document.getElementById('lateGrid');
+  lateGrid.innerHTML = Object.keys(SCHOOLS_LATE)
+    .map(k => renderCard(k, SCHOOLS_LATE[k], getLateStatus, 'clickLate'))
+    .join('');
+
+  // 요약
+  const rows = buildSummary();
+  const emptyEl  = document.getElementById('summaryEmpty');
+  const listEl   = document.getElementById('summaryList');
+
+  if (rows.length === 0) {
+    emptyEl.style.display = 'block';
+    listEl.innerHTML = '';
+  } else {
+    emptyEl.style.display = 'none';
+    listEl.innerHTML = rows.map(r => {
+      const detailColor = r.status==='blocked' ? 's-reason' : 's-detail';
+      return `
+      <div class="s-row">
+        <span class="s-icon">${r.icon}</span>
+        <div class="s-content">
+          <div class="s-name">${r.name}</div>
+          <div class="${detailColor}">${r.detail}</div>
+        </div>
+      </div>`;
+    }).join('');
+  }
+}
+
+// 초기 렌더
+render();
+</script>
+</body>
+</html>

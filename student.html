@@ -467,6 +467,41 @@ table.matrix-t tr.special-row td { background:#fffbeb !important; }
 .badge-apply{ background:#e0f2fe; color:#075985; padding:2px 8px; border-radius:4px; font-weight:700; font-size:11px; white-space:nowrap; }
 .sub-label { font-size:11px; color:var(--text-sub); margin-bottom:6px; font-weight:700; }
 
+/* ─── 상담용 네비게이션 ─── */
+.sticky-nav {
+  position: sticky; top: 0; z-index: 100;
+  background: #fff;
+  border-bottom: 2px solid var(--border);
+  margin: 0 -16px 14px;
+  padding: 8px 16px;
+  display: flex; align-items: center; gap: 6px;
+  overflow-x: auto;
+  box-shadow: 0 2px 10px rgba(0,0,0,0.08);
+  -webkit-overflow-scrolling: touch;
+}
+.sticky-nav::-webkit-scrollbar { display:none; }
+.snav-label { font-size:11px; font-weight:700; color:var(--text-sub); white-space:nowrap; flex-shrink:0; margin-right:4px; }
+.snav-btn {
+  padding: 5px 12px; border-radius: 20px;
+  border: 1.5px solid var(--border);
+  background: #fff; font-size: 11.5px; font-weight: 600;
+  cursor: pointer; white-space: nowrap; flex-shrink: 0;
+  transition: all 0.15s;
+}
+.snav-btn.e { border-color: #f0a050; color: #7a3100; background: #fffbf5; }
+.snav-btn.e:hover { background: #fef3c7; border-color: #d97706; }
+.snav-btn.l { border-color: #93c5fd; color: #1e40af; background: #f0f7ff; }
+.snav-btn.l:hover { background: #dbeafe; border-color: #3b82f6; }
+.snav-btn.all { border-color: #a78bfa; color: #4c1d95; background: #f5f3ff; }
+.snav-btn.all:hover { background: #ede9fe; }
+
+.counsel-tip {
+  background: #f0fdf4; border: 1.5px solid #86efac;
+  border-radius: 10px; padding: 10px 16px; margin-bottom: 14px;
+  font-size: 12px; line-height: 1.7;
+}
+.counsel-tip .ct-title { font-weight: 700; color: #166534; margin-bottom: 4px; font-size: 12.5px; }
+
 /* 인쇄 */
 @media print {
   body { background: #fff; font-size: 11px; }
@@ -489,6 +524,29 @@ table.matrix-t tr.special-row td { background:#fffbeb !important; }
       <div class="meta-chip"><span>📚</span><strong>반영 학년</strong> 중1~3학년 3개년</div>
       <div class="meta-chip"><span>📍</span><strong>대상</strong> 경기도</div>
     </div>
+  </div>
+
+  <!-- 상담용 바로가기 네비 -->
+  <div class="sticky-nav">
+    <span class="snav-label">📌 학교 유형 바로가기</span>
+    <button class="snav-btn e" onclick="document.getElementById('sc-sci').scrollIntoView({behavior:'smooth',block:'center'})">🔬 과학고</button>
+    <button class="snav-btn e" onclick="document.getElementById('sc-meis').scrollIntoView({behavior:'smooth',block:'center'})">⚙️ 마이스터고</button>
+    <button class="snav-btn e" onclick="document.getElementById('sc-art').scrollIntoView({behavior:'smooth',block:'center'})">🎨 예술고·체육고</button>
+    <button class="snav-btn e" onclick="document.getElementById('sc-voc').scrollIntoView({behavior:'smooth',block:'center'})">🛠️ 특성화고</button>
+    <button class="snav-btn l" onclick="document.getElementById('sc-foreign').scrollIntoView({behavior:'smooth',block:'center'})">🌏 외고·국제고</button>
+    <button class="snav-btn l" onclick="document.getElementById('sc-saja').scrollIntoView({behavior:'smooth',block:'center'})">🎓 자사고</button>
+    <button class="snav-btn l" onclick="document.getElementById('sc-gen').scrollIntoView({behavior:'smooth',block:'center'})">🏫 일반고(평준화)</button>
+    <button class="snav-btn all" onclick="document.getElementById('sc-rule').scrollIntoView({behavior:'smooth',block:'center'})">★ 경우의 수 전체</button>
+  </div>
+
+  <!-- 상담 활용 팁 -->
+  <div class="counsel-tip">
+    <div class="ct-title">💡 학생 상담 시 이렇게 활용하세요</div>
+    ① 상단 버튼으로 학생이 희망하는 학교 유형을 바로 찾기 &nbsp;→&nbsp;
+    ② 해당 카드에서 <strong>합격·불합격 시 가능한 선택지</strong> 확인 &nbsp;→&nbsp;
+    ③ 원서접수 기간·이중지원 규칙 함께 확인<br>
+    <span style="color:#166534; font-weight:600;">전기학교(주황색)</span>는 1개교만 지원 가능 &nbsp;|&nbsp;
+    <span style="color:#1e40af; font-weight:600;">후기학교(파란색)</span>는 외고·국제고·자사고→일반고 동시 지원 가능
   </div>
 
   <!-- 1. 이중지원 금지 -->
@@ -522,7 +580,7 @@ table.matrix-t tr.special-row td { background:#fffbeb !important; }
   <div class="section">
     <div class="section-head">
       <div class="num" style="background:#b91c1c; font-size:10px; letter-spacing:-1px;">★</div>
-      <h2>전기/후기 지원 경우의 수 완전 정리</h2>
+      <h2 id="sc-rule">전기/후기 지원 경우의 수 완전 정리</h2>
       <span class="badge" style="background:#fee2e2; color:#b91c1c;">PDF 기준 · 담임 필수</span>
     </div>
 
@@ -578,7 +636,7 @@ table.matrix-t tr.special-row td { background:#fffbeb !important; }
     <div class="sc-grid">
 
       <!-- 과학고 -->
-      <div class="sc-card">
+      <div class="sc-card" id="sc-sci">
         <div class="sc-head early">🔬 과학고 &nbsp;<span style="font-size:11px;font-weight:400;">전기학교 · 원서접수 08.24~08.28</span></div>
         <div class="sc-body">
           <div class="sc-row">
@@ -599,7 +657,7 @@ table.matrix-t tr.special-row td { background:#fffbeb !important; }
       </div>
 
       <!-- 마이스터고 -->
-      <div class="sc-card">
+      <div class="sc-card" id="sc-meis">
         <div class="sc-head early">⚙️ 마이스터고 &nbsp;<span style="font-size:11px;font-weight:400;">전기학교 · 원서접수 10.19~10.22</span></div>
         <div class="sc-body">
           <div class="sc-row">
@@ -621,7 +679,7 @@ table.matrix-t tr.special-row td { background:#fffbeb !important; }
       </div>
 
       <!-- 예술고·체육고 -->
-      <div class="sc-card">
+      <div class="sc-card" id="sc-art">
         <div class="sc-head early">🎨 예술고·체육고 &nbsp;<span style="font-size:11px;font-weight:400;">전기학교 · 원서접수 10.12~10.15</span></div>
         <div class="sc-body">
           <div class="sc-row">
@@ -642,7 +700,7 @@ table.matrix-t tr.special-row td { background:#fffbeb !important; }
       </div>
 
       <!-- 특성화고 -->
-      <div class="sc-card">
+      <div class="sc-card" id="sc-voc">
         <div class="sc-head early">🛠️ 특성화고 &nbsp;<span style="font-size:11px;font-weight:400;">전기학교 · 특별 11.03~11.05 / 일반 11.12~11.13</span></div>
         <div class="sc-body">
           <div class="sc-row">
@@ -678,7 +736,7 @@ table.matrix-t tr.special-row td { background:#fffbeb !important; }
       </div>
 
       <!-- 외고·국제고 -->
-      <div class="sc-card">
+      <div class="sc-card" id="sc-foreign">
         <div class="sc-head late">🌏 외고·국제고 &nbsp;<span style="font-size:11px;font-weight:400;">후기학교 · 원서접수 12.04~12.10</span></div>
         <div class="sc-body">
           <div class="sc-row">
@@ -705,7 +763,7 @@ table.matrix-t tr.special-row td { background:#fffbeb !important; }
       </div>
 
       <!-- 자사고 -->
-      <div class="sc-card">
+      <div class="sc-card" id="sc-saja">
         <div class="sc-head late">🎓 자사고 &nbsp;<span style="font-size:11px;font-weight:400;">후기학교 · 원서접수 12.04~12.10</span></div>
         <div class="sc-body">
           <div class="sc-row">
@@ -879,7 +937,7 @@ table.matrix-t tr.special-row td { background:#fffbeb !important; }
   </div>
 
   <!-- 2. 전형 일정 -->
-  <div class="section">
+  <div class="section" id="sc-gen">
     <div class="section-head">
       <div class="num">2</div>
       <h2>전형 일정 타임라인</h2>
@@ -1204,6 +1262,7 @@ table.matrix-t tr.special-row td { background:#fffbeb !important; }
     <div class="notice-box">
       <div class="nt">📢 현재 중2 학생(2028학년도 고입 대상)에게 안내 시 참고</div>
       <ul>
+        <li><strong style="color:#b91c1c;">🏫 부천고등학교 → 과학고로 전환 예정</strong>: 현 부천학군 평준화 배정 대상에서 제외되며, 전기학교(과학고) 전형으로 선발하게 됩니다. 현 중2 학생(2028학년도 고입 대상)부터 영향. 세부 모집 방법 및 일정은 경기도교육청 공문 확인 필요.</li>
         <li>내신성적 반영 방식 및 학교 유형별 전형 기준 <strong>일부 변경 예정</strong> → 확정 공문 발표 후 재안내</li>
         <li>현 시점에서 안내할 때는 <strong>"예고사항이므로 확정 전 변경 가능"</strong>임을 반드시 강조</li>
         <li>지역별 비평준화 전환 또는 신설 학교 변동 가능 → 경기도교육청 공지 지속 모니터링 필요</li>

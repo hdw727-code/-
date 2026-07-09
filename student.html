@@ -251,6 +251,50 @@ body {
 .btn-primary:hover { background:#1a3d80; }
 .btn-primary:disabled { background:#94a3b8; cursor:not-allowed; }
 
+/* ── 내신 계산기 ── */
+.calc-box { background:#fff; border-radius:14px; border:1px solid var(--border); margin-bottom:12px; overflow:hidden; }
+.calc-box .cb-head { padding:11px 16px; font-size:13px; font-weight:800; border-bottom:1px solid var(--border); display:flex; align-items:center; gap:6px; flex-wrap:wrap; }
+.calc-box .cb-body { padding:14px 16px; }
+.grade-grid { display:grid; grid-template-columns:repeat(5,1fr); gap:6px; }
+.grade-grid.three-col { grid-template-columns:repeat(3,1fr); }
+.grade-btn { border-radius:10px; border:2px solid var(--border); background:#fff; padding:10px 4px 8px; cursor:pointer; font-size:11px; text-align:center; transition:.15s; line-height:1.3; }
+.grade-btn:hover { border-color:#93c5fd; transform:translateY(-1px); }
+.grade-btn.active { border-color:#1e4d9b; background:#eef3fc; }
+.grade-btn .gb-label { font-weight:800; font-size:12px; margin-bottom:3px; }
+.grade-btn .gb-pts { font-size:10.5px; color:var(--gray); }
+.grade-btn.active .gb-pts { color:#1e4d9b; }
+.absence-grid { display:grid; grid-template-columns:repeat(7,1fr); gap:4px; }
+.ab-btn { border-radius:8px; border:2px solid transparent; padding:8px 2px 6px; cursor:pointer; font-size:11px; text-align:center; transition:.15s; line-height:1.3; font-weight:700; }
+.ab-btn.active { border-color:#1e293b !important; box-shadow:0 0 0 2px #1e293b; }
+.volunteer-wrap { display:flex; align-items:center; gap:14px; }
+.volunteer-wrap input[type=range] { flex:1; accent-color:#1e4d9b; height:6px; cursor:pointer; }
+.volunteer-label { font-size:13px; font-weight:800; color:#1e4d9b; white-space:nowrap; min-width:100px; text-align:right; }
+.activity-row { display:flex; align-items:center; justify-content:space-between; padding:7px 0; border-bottom:1px solid #f8fafc; font-size:13px; gap:10px; }
+.activity-row:last-child { border-bottom:none; }
+.activity-row input[type=number] { width:64px; padding:5px 8px; border-radius:8px; border:1.5px solid var(--border); font-size:13px; text-align:center; }
+.calc-result-box { border-radius:14px; overflow:hidden; margin-bottom:14px; border:2px solid var(--border); }
+.cr-total { padding:22px 20px; text-align:center; color:#fff; }
+.cr-total .cr-score { font-size:62px; font-weight:900; line-height:1; }
+.cr-total .cr-unit  { font-size:18px; font-weight:600; opacity:.85; }
+.cr-total .cr-label { font-size:12.5px; opacity:.85; margin-top:6px; }
+.cr-breakdown { padding:12px 16px 14px; background:#fff; display:grid; grid-template-columns:repeat(5,1fr); gap:6px; }
+.cr-cell { text-align:center; padding:8px 4px; border-radius:8px; background:#f8fafc; }
+.cr-cell .cc-val { font-size:17px; font-weight:900; }
+.cr-cell .cc-lbl { font-size:10.5px; color:var(--gray); margin-top:2px; }
+.school-naesin-guide { background:#fff; border:1px solid var(--border); border-radius:14px; overflow:hidden; margin-bottom:14px; }
+.sng-head { padding:11px 16px; font-size:13px; font-weight:800; background:#f8fafc; border-bottom:1px solid var(--border); }
+.sng-row { display:flex; gap:10px; align-items:center; padding:10px 16px; border-bottom:1px solid #f8fafc; }
+.sng-row:last-child { border-bottom:none; }
+.sng-icon { font-size:20px; flex-shrink:0; }
+.sng-info .sng-name { font-weight:700; font-size:12.5px; margin-bottom:2px; }
+.sng-info .sng-desc { font-size:11.5px; color:var(--gray); line-height:1.5; }
+.sng-badge { margin-left:auto; flex-shrink:0; font-size:10.5px; font-weight:700; padding:3px 8px; border-radius:6px; white-space:nowrap; }
+.badge-vimp   { background:#fef2f2; color:#dc2626; }
+.badge-imp    { background:#fef3c7; color:#b45309; }
+.badge-part   { background:#e0f2fe; color:#0369a1; }
+.badge-free   { background:#f0fdf4; color:#16a34a; }
+.calc-intro-btn { margin-top:18px; padding-top:16px; border-top:1px dashed var(--border); }
+
 /* 반응형 */
 @media(max-width:600px) {
   /* 헤더 */
@@ -319,6 +363,28 @@ body {
 
   /* 버튼 */
   .btn-primary { padding: 12px 20px; font-size: 13.5px; }
+
+  /* 내신 계산기 */
+  .grade-grid { grid-template-columns: repeat(5,1fr); gap:4px; }
+  .grade-grid.three-col { grid-template-columns: repeat(3,1fr); }
+  .grade-btn { padding: 8px 2px 6px; }
+  .grade-btn .gb-label { font-size: 10.5px; }
+  .grade-btn .gb-pts   { font-size: 9.5px; }
+  .absence-grid { grid-template-columns: repeat(7,1fr); gap:2px; }
+  .ab-btn { font-size: 10px; padding: 6px 1px 5px; }
+  .volunteer-wrap { gap: 8px; }
+  .volunteer-label { font-size: 12px; min-width: 80px; }
+  .cr-breakdown { grid-template-columns: repeat(5,1fr); gap:4px; }
+  .cr-cell { padding: 6px 2px; }
+  .cr-cell .cc-val { font-size: 14px; }
+  .cr-cell .cc-lbl { font-size: 9.5px; }
+  .cr-total .cr-score { font-size: 50px; }
+  .sng-row { gap: 8px; }
+  .sng-icon { font-size: 16px; }
+  .sng-info .sng-name { font-size: 12px; }
+  .sng-info .sng-desc { font-size: 11px; }
+  .sng-badge { font-size: 10px; padding: 2px 6px; }
+  .activity-row input[type=number] { width: 54px; font-size: 12px; }
 }
 
 /* 인쇄 */
@@ -433,6 +499,12 @@ body {
         <span class="sc-tag" style="background:var(--gong-l);color:var(--gong);">후기학교</span>
       </div>
     </div>
+    <div class="calc-intro-btn">
+      <button class="btn-primary" onclick="showScreen(4)" style="background:linear-gradient(135deg,#0e6e4a,#16a34a);">
+        📊 내 내신 점수 계산해보기
+      </button>
+      <div style="text-align:center;font-size:11.5px;color:#64748b;margin-top:8px;">200점 환산 점수 + 학교별 내신 기준 안내</div>
+    </div>
   </div>
 
   <!-- ───────────── STEP 1b: 자율형 공립고 지역 유형 선택 ───────────── -->
@@ -500,6 +572,95 @@ body {
       <div class="step-dot active">3</div>
     </div>
     <div id="resultContent"></div>
+  </div>
+
+  <!-- ───────────── SCREEN 4: 내신 200점 계산기 ───────────── -->
+  <div class="screen" id="screen4">
+    <div style="padding:0 0 10px;">
+      <div style="font-size:15px;font-weight:800;color:#1e293b;margin-bottom:4px;">📊 내신 200점 계산기</div>
+      <div style="font-size:12px;color:#64748b;line-height:1.6;">2027학년도 경기도 고입 내신 성적 환산 기준</div>
+    </div>
+    <div class="calc-box">
+      <div class="cb-head">① 일반교과 <span style="font-weight:400;color:#64748b;font-size:11.5px;">기준 120점 (국어·도덕·사회·수학·과학·기술가정·정보·영어·한문·교양)</span></div>
+      <div class="cb-body">
+        <div class="grade-grid" id="genGradeGrid">
+          <button class="grade-btn active" onclick="setGenGrade(100)"><div class="gb-label">전과목 A</div><div class="gb-pts">120점</div></button>
+          <button class="grade-btn" onclick="setGenGrade(95)"><div class="gb-label">A/B 혼합</div><div class="gb-pts">114점</div></button>
+          <button class="grade-btn" onclick="setGenGrade(90)"><div class="gb-label">주로 B</div><div class="gb-pts">108점</div></button>
+          <button class="grade-btn" onclick="setGenGrade(85)"><div class="gb-label">B/C 혼합</div><div class="gb-pts">102점</div></button>
+          <button class="grade-btn" onclick="setGenGrade(80)"><div class="gb-label">전과목 C</div><div class="gb-pts">96점</div></button>
+        </div>
+      </div>
+    </div>
+    <div class="calc-box">
+      <div class="cb-head">② 체육·예술교과 <span style="font-weight:400;color:#64748b;font-size:11.5px;">기준 30점 (체육·음악·미술)</span></div>
+      <div class="cb-body">
+        <div class="grade-grid three-col" id="artsGradeGrid">
+          <button class="grade-btn active" onclick="setArtsGrade(100)"><div class="gb-label">A (100%)</div><div class="gb-pts">30점</div></button>
+          <button class="grade-btn" onclick="setArtsGrade(90)"><div class="gb-label">B (90%)</div><div class="gb-pts">27점</div></button>
+          <button class="grade-btn" onclick="setArtsGrade(80)"><div class="gb-label">C (80%)</div><div class="gb-pts">24점</div></button>
+        </div>
+      </div>
+    </div>
+    <div class="calc-box">
+      <div class="cb-head">③ 출결 <span style="font-weight:400;color:#64748b;font-size:11.5px;">기준 20점</span></div>
+      <div class="cb-body">
+        <div class="absence-grid">
+          <button class="ab-btn active" onclick="setAbsence(0)" style="background:#f0fdf4;border-color:#16a34a;color:#166534;">0일<br><span style="font-size:10px;">20점</span></button>
+          <button class="ab-btn" onclick="setAbsence(1)" style="background:#f0fdf4;border-color:#22c55e;color:#15803d;">1일<br><span style="font-size:10px;">18점</span></button>
+          <button class="ab-btn" onclick="setAbsence(2)" style="background:#fefce8;border-color:#eab308;color:#854d0e;">2일<br><span style="font-size:10px;">16점</span></button>
+          <button class="ab-btn" onclick="setAbsence(3)" style="background:#fefce8;border-color:#f59e0b;color:#92400e;">3일<br><span style="font-size:10px;">14점</span></button>
+          <button class="ab-btn" onclick="setAbsence(4)" style="background:#fff7ed;border-color:#f97316;color:#c2410c;">4일<br><span style="font-size:10px;">12점</span></button>
+          <button class="ab-btn" onclick="setAbsence(5)" style="background:#fef2f2;border-color:#ef4444;color:#dc2626;">5일<br><span style="font-size:10px;">10점</span></button>
+          <button class="ab-btn" onclick="setAbsence(6)" style="background:#fef2f2;border-color:#dc2626;color:#991b1b;">6일+<br><span style="font-size:10px;">8점</span></button>
+        </div>
+      </div>
+    </div>
+    <div class="calc-box">
+      <div class="cb-head">④ 봉사 <span style="font-weight:400;color:#64748b;font-size:11.5px;">기준 20점 (0시간→5점, 1시간당 +1점, 15시간→20점)</span></div>
+      <div class="cb-body">
+        <div class="volunteer-wrap">
+          <span style="font-size:12.5px;white-space:nowrap;">봉사시간:</span>
+          <input type="range" id="volunteerSlider" min="0" max="15" value="0" oninput="setVolunteer(this.value)">
+          <span class="volunteer-label" id="volunteerLabel">0시간 → 5점</span>
+        </div>
+      </div>
+    </div>
+    <div class="calc-box">
+      <div class="cb-head">⑤ 학교활동 <span style="font-weight:400;color:#64748b;font-size:11.5px;">기준 10점 (기본 8점)</span></div>
+      <div class="cb-body">
+        <div class="activity-row"><span>🏆 수상 건수 <span style="font-size:11px;color:#64748b;">(건당 +0.5점)</span></span><input type="number" id="awardInput" min="0" max="4" value="0" oninput="updateCalc()"></div>
+        <div class="activity-row"><span>👑 자치회 임원 기간 <span style="font-size:11px;color:#64748b;">(월당 +0.1점)</span></span><input type="number" id="leaderInput" min="0" max="20" value="0" oninput="updateCalc()"></div>
+        <div style="font-size:11px;color:#94a3b8;margin-top:8px;">기본 8점 + 수상×0.5 + 임원기간(월)×0.1 → 최대 10점</div>
+      </div>
+    </div>
+    <div class="calc-result-box" id="calcResultBox">
+      <div class="cr-total" id="crTotalBg" style="background:#1e4d9b;">
+        <div class="cr-score" id="calcTotalScore">183</div>
+        <div class="cr-unit">점 / 200점</div>
+        <div class="cr-label">내신 환산 총점 (예상)</div>
+      </div>
+      <div class="cr-breakdown">
+        <div class="cr-cell"><div class="cc-val" id="cr-gen">120</div><div class="cc-lbl">일반교과</div></div>
+        <div class="cr-cell"><div class="cc-val" id="cr-arts">30</div><div class="cc-lbl">체육·예술</div></div>
+        <div class="cr-cell"><div class="cc-val" id="cr-abs">20</div><div class="cc-lbl">출결</div></div>
+        <div class="cr-cell"><div class="cc-val" id="cr-vol">5</div><div class="cc-lbl">봉사</div></div>
+        <div class="cr-cell"><div class="cc-val" id="cr-act">8</div><div class="cc-lbl">학교활동</div></div>
+      </div>
+    </div>
+    <div class="school-naesin-guide">
+      <div class="sng-head">🏫 학교 유형별 내신 반영 기준</div>
+      <div class="sng-row"><div class="sng-icon">🔬</div><div class="sng-info"><div class="sng-name">과학고</div><div class="sng-desc">내신 점수 활용 안 함 · 수학·과학 면접·서류 중심 선발</div></div><span class="sng-badge badge-free">반영 없음</span></div>
+      <div class="sng-row"><div class="sng-icon">🌏</div><div class="sng-info"><div class="sng-name">외고 · 국제고</div><div class="sng-desc">영어 성취도가 사실상 핵심 · A 없으면 불리 · 출결·봉사도 반영</div></div><span class="sng-badge badge-imp">영어 핵심</span></div>
+      <div class="sng-row"><div class="sng-icon">🎓</div><div class="sng-info"><div class="sng-name">자사고</div><div class="sng-desc">내신 200점 + 면접 전형 · 성취도 전반이 중요</div></div><span class="sng-badge badge-imp">중요</span></div>
+      <div class="sng-row"><div class="sng-icon">📍</div><div class="sng-info"><div class="sng-name">비평준화 일반고</div><div class="sng-desc">내신 200점 성적 순으로 선발 · 점수 경쟁이 핵심</div></div><span class="sng-badge badge-vimp">매우 중요</span></div>
+      <div class="sng-row"><div class="sng-icon">⚙️</div><div class="sng-info"><div class="sng-name">마이스터고 · 특성화고</div><div class="sng-desc">내신 외 실기·적성검사 병행 · 학교마다 기준 상이</div></div><span class="sng-badge badge-part">일부 반영</span></div>
+      <div class="sng-row"><div class="sng-icon">🏫</div><div class="sng-info"><div class="sng-name">일반고 (평준화) · 자율형공립고</div><div class="sng-desc">추첨 배정 · 내신 성적으로 합격 여부 결정 안 됨</div></div><span class="sng-badge badge-free">반영 없음</span></div>
+    </div>
+    <div style="font-size:11px;color:#94a3b8;text-align:center;line-height:1.8;margin-top:4px;margin-bottom:12px;">※ 이 계산기는 2027학년도 경기도 고입 내신 200점 환산 기준을 적용합니다.<br>최종 점수는 학교 제출 서류 및 담임교사 확인을 기준으로 하세요.</div>
+    <div style="text-align:center;padding:6px 0 14px;">
+      <button class="btn-primary" onclick="showScreen(1)" style="background:#fff;color:#1e4d9b;border:2px solid #1e4d9b;width:auto;padding:10px 28px;margin-top:0;">← 학교 유형 안내로 돌아가기</button>
+    </div>
   </div>
 
 </div>
@@ -820,11 +981,14 @@ function showScreen(id) {
   const backBtn = document.getElementById('backBtn');
   backBtn.style.display = (id !== 1 && id !== '1') ? 'flex' : 'none';
   window.scrollTo({top:0, behavior:'smooth'});
+  if (id === 4) updateCalc();
 }
 
 function goBack() {
   const active = document.querySelector('.screen.active').id;
-  if (active === 'screen3') {
+  if (active === 'screen4') {
+    showScreen(1);
+  } else   if (active === 'screen3') {
     if (selectedSchool === 'gen' || selectedSchool === 'gongp') {
       showScreen(2);
     } else if (selectedSchool === 'gonnp') {
@@ -1145,6 +1309,68 @@ function buildResult() {
       세부 일정은 각 학교 전형요강 및 경기도교육청 공문을 반드시 확인하세요.
     </div>
   `;
+}
+// ── 내신 200점 계산기 ─────────────────────────────
+const calcState = { genRate:100, artsRate:100, absenceDays:0, volunteerHours:0 };
+
+function setGenGrade(rate) {
+  calcState.genRate = rate;
+  const rates = [100,95,90,85,80];
+  document.querySelectorAll('#genGradeGrid .grade-btn').forEach((btn, i) => {
+    btn.classList.toggle('active', rates[i] === rate);
+  });
+  updateCalc();
+}
+
+function setArtsGrade(rate) {
+  calcState.artsRate = rate;
+  const rates = [100,90,80];
+  document.querySelectorAll('#artsGradeGrid .grade-btn').forEach((btn, i) => {
+    btn.classList.toggle('active', rates[i] === rate);
+  });
+  updateCalc();
+}
+
+function setAbsence(days) {
+  calcState.absenceDays = days;
+  document.querySelectorAll('.ab-btn').forEach((btn, i) => {
+    btn.classList.toggle('active', i === days);
+  });
+  updateCalc();
+}
+
+function setVolunteer(hours) {
+  calcState.volunteerHours = parseInt(hours);
+  const pts = Math.min(5 + calcState.volunteerHours, 20);
+  document.getElementById('volunteerLabel').textContent = hours + '시간 → ' + pts + '점';
+  updateCalc();
+}
+
+function updateCalc() {
+  const genPts  = Math.round(calcState.genRate * 120 / 100);
+  const artsPts = Math.round(calcState.artsRate * 30 / 100);
+  const absPts  = [20,18,16,14,12,10,8][Math.min(calcState.absenceDays, 6)];
+  const volPts  = Math.min(5 + calcState.volunteerHours, 20);
+  const awards  = parseInt(document.getElementById('awardInput').value) || 0;
+  const leaders = parseInt(document.getElementById('leaderInput').value) || 0;
+  const actRaw  = 8 + awards * 0.5 + leaders * 0.1;
+  const actPts  = Math.min(actRaw, 10);
+  const total   = genPts + artsPts + absPts + volPts + actPts;
+  const totalEl = document.getElementById('calcTotalScore');
+  if (totalEl) totalEl.textContent = parseFloat(total.toFixed(1));
+  const el = (id) => document.getElementById(id);
+  if (el('cr-gen'))  el('cr-gen').textContent  = genPts;
+  if (el('cr-arts')) el('cr-arts').textContent = artsPts;
+  if (el('cr-abs'))  el('cr-abs').textContent  = absPts;
+  if (el('cr-vol'))  el('cr-vol').textContent  = volPts;
+  if (el('cr-act'))  el('cr-act').textContent  = parseFloat(actPts.toFixed(1));
+  const bg = document.getElementById('crTotalBg');
+  if (bg) {
+    if      (total >= 195) bg.style.background = '#0e6e4a';
+    else if (total >= 185) bg.style.background = '#2563eb';
+    else if (total >= 175) bg.style.background = '#b45309';
+    else                   bg.style.background = '#64748b';
+  }
 }
 </script>
 </body>

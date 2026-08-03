@@ -432,6 +432,9 @@ input::placeholder,textarea::placeholder{color:var(--mut2);}
   border:1.6px solid rgba(231,197,101,.3);
   box-shadow:0 6px 20px rgba(0,0,0,.45),inset 0 1px 0 rgba(255,255,255,.1);}
 .mtile::after{content:none !important;}
+/* 카드가 세로로 길어져도 캡션이 눌려서 글자가 잘리지 않게 */
+.mtile .cap{flex:0 0 auto;}
+.mtile .mp{flex:0 0 auto;line-height:1.5;}
 .mtile .mi{position:absolute;top:6px;right:7px;margin:0;font-size:13px;
   filter:drop-shadow(0 2px 5px rgba(0,0,0,.9));z-index:3;}
 .mtile .cap{position:relative;z-index:3;width:100%;padding:5px 7px 7px;
@@ -776,6 +779,150 @@ input::placeholder,textarea::placeholder{color:var(--mut2);}
   .varrow{font-size:10px}
 }
 
+/* ══════════════════════════════════════════════════════════════════════
+   PC · 태블릿 가로 · 교실 TV 2단 레이아웃
+   ─────────────────────────────────────────────────────────────────────
+   문제: 모바일 기준 1단 세로 배치를 그대로 쓰면 넓은 화면에서 양옆이
+   600px 씩 비고, 정작 지도는 440px 로 눌리며, 문서가 화면보다 길어져
+   스크롤이 생기는데 고정 하단바가 그 아래를 계속 가린다.
+   해결: 1180px 이상에서 화면 높이에 딱 맞는 2단 그리드로 바꾼다.
+     왼쪽 = 상태 패널(고정) + 긴 내용(자체 스크롤) + 하단 메뉴(정적)
+     오른쪽 = 지도 (남는 높이 전부 사용)
+   모바일에서는 이 블록이 통째로 적용되지 않으므로 기존 배치 그대로다. */
+#mapRailTop,#mapRailBot,#misLeft,#misRight{display:contents;}
+
+/* ══ 미션 화면 PC 2단 — 왼쪽 무대(크게), 오른쪽 카드/전송 ══ */
+@media(min-width:1180px){
+  #missionScreen{
+    max-width:none;width:100%;
+    height:100vh;height:100dvh;
+    padding:12px 18px 14px;box-sizing:border-box;
+    display:grid;
+    grid-template-columns:1fr minmax(360px,30vw);
+    grid-template-rows:auto minmax(0,1fr);
+    column-gap:18px;
+  }
+  #missionScreen>.mhead{grid-column:1 / -1;grid-row:1;margin-bottom:8px;}
+  #misLeft{display:flex;flex-direction:column;grid-column:1;grid-row:2;
+    min-width:0;min-height:0;overflow-y:auto;overscroll-behavior:contain;padding-right:4px;}
+  #misRight{display:flex;flex-direction:column;grid-column:2;grid-row:2;
+    min-width:0;min-height:0;overflow-y:auto;overscroll-behavior:contain;padding-right:4px;}
+  #misLeft::-webkit-scrollbar,#misRight::-webkit-scrollbar{width:9px;}
+  #misLeft::-webkit-scrollbar-thumb,#misRight::-webkit-scrollbar-thumb{
+    background:rgba(231,197,101,.32);border-radius:9px;}
+  #misLeft::-webkit-scrollbar-track,#misRight::-webkit-scrollbar-track{
+    background:rgba(255,255,255,.05);border-radius:9px;}
+  #missionScreen .mbtns{position:sticky;bottom:0;z-index:12;flex-wrap:wrap;
+    background:linear-gradient(180deg,rgba(11,16,38,0),rgba(11,16,38,.94) 34%);
+    padding-top:10px;margin-bottom:0;}
+  #missionScreen .mbtns .sendbtn{flex:1 1 100%;}
+  #missionScreen #freeText{min-height:132px;}
+  /* 무대가 세로 가운데 오도록 — safe 를 붙여 내용이 넘칠 땐 잘리지 않고 위로 붙는다 */
+  #misLeft{justify-content:safe center;}
+}
+@media(min-width:1700px){
+  #missionScreen{grid-template-columns:1fr minmax(420px,27vw);padding:16px 26px 18px;column-gap:24px;}
+  #missionScreen .mgoal,#missionScreen .term{font-size:17px;}
+  #missionScreen .optcard{font-size:15px;}
+  #missionScreen #assembled{font-size:17px;}
+  #missionScreen .sendbtn{font-size:19px;}
+  #missionScreen #mTitle{font-size:22px;}
+}
+
+@media(min-width:1180px){
+  #mapScreen{
+    max-width:none;width:100%;
+    height:100vh;height:100dvh;
+    padding:14px 18px 0;
+    box-sizing:border-box;
+    display:grid;
+    grid-template-columns:minmax(340px,25vw) 1fr;
+    grid-template-rows:auto minmax(0,1fr) auto;
+    column-gap:18px;
+    align-content:stretch;
+  }
+  /* 고정 하단바 → 왼쪽 칸 맨 아래 정적 배치. 지도를 가리지 않는다. */
+  #mapScreen{padding-bottom:0;}
+  #mapRailTop{display:flex;flex-direction:column;gap:0;
+    grid-column:1;grid-row:1;min-width:0;}
+  #mapRailBot{display:flex;flex-direction:column;
+    grid-column:1;grid-row:2;min-width:0;min-height:0;
+    overflow-y:auto;overscroll-behavior:contain;
+    padding-right:6px;margin-top:8px;}
+  #mapRailBot::-webkit-scrollbar{width:9px;}
+  #mapRailBot::-webkit-scrollbar-thumb{background:rgba(231,197,101,.32);border-radius:9px;}
+  #mapRailBot::-webkit-scrollbar-track{background:rgba(255,255,255,.05);border-radius:9px;}
+
+  #mapScreen>.gbar{position:static;grid-column:1;grid-row:3;
+    padding:9px 0 calc(10px + env(safe-area-inset-bottom,0px));
+    margin-top:6px;background:none;border-top:1px solid rgba(231,197,101,.22);
+    box-shadow:none;backdrop-filter:none;-webkit-backdrop-filter:none;}
+
+  /* 지도 = 오른쪽 칸 전체 높이 */
+  #mapWorld{grid-column:2;grid-row:1 / span 3;
+    display:flex;flex-direction:column;min-height:0;
+    margin:0 0 14px;}
+  #mapWrap{flex:1 1 auto;min-height:0;border-radius:20px;}
+  #mapCv{height:100%;}
+  #mapTip{flex:0 0 auto;margin:9px 4px 0;font-size:13px;}
+  #mapHere{left:14px;top:14px;font-size:15px;padding:8px 15px;}
+  #mapPad{right:16px;bottom:16px;gap:7px;
+    grid-template-columns:repeat(3,54px);grid-template-rows:repeat(3,54px);}
+  #mapPad button{width:54px;height:54px;font-size:19px;border-radius:15px;}
+  #mapPad button.pe{font-size:15px;}
+  /* 왼쪽 패널은 화면이 넓어도 폭이 좁다 — 카드가 5칸으로 쪼그라들지 않게 2칸 고정 */
+  #mapRailBot .mgrid{grid-template-columns:repeat(2,1fr);gap:10px;}
+  #mapRailBot .chapter{margin-bottom:12px;}
+  #mapRailBot #btnMapMode{margin-top:0;}
+  #mapRailBot .mtile .cap .nm{font-size:12px;}
+  #mapRailBot .mtile .mp{font-size:9.5px;padding:2px 7px;}
+  #mapRailBot .mtile .stars{font-size:11px;}
+
+  /* 📋 목록 모드 — 지도가 없으니 전체 폭을 쓴다 */
+  #mapScreen.listMode{grid-template-columns:1fr;}
+  #mapScreen.listMode #mapRailTop{grid-column:1;}
+  #mapScreen.listMode #mapRailBot{grid-column:1;}
+  #mapScreen.listMode>.gbar{grid-column:1;}
+  /* 목록 모드 카드가 화면 폭에 따라 지나치게 커지지 않게 — 폭 기준 자동 칸 수 */
+  #mapScreen.listMode #mapRailBot .mgrid{grid-template-columns:repeat(auto-fill,minmax(168px,1fr));gap:12px;}
+  #mapScreen.listMode #mapRailBot .mtile .cap .nm{font-size:12.5px;}
+  #mapScreen.listMode #mapRailBot .mtile .mp{font-size:10px;}
+  /* 챕터를 2열로 — 한 화면에 더 많은 미션이 보이게 */
+  #mapScreen.listMode #chapters{display:grid;grid-template-columns:repeat(2,1fr);
+    gap:0 22px;align-items:start;}
+  #mapScreen.listMode #perfBlock,#mapScreen.listMode #arcBlock{max-width:none;}
+}
+
+/* 교실 TV · 빔프로젝터 (멀리서 보는 큰 화면) — 글자와 조작부를 키운다 */
+@media(min-width:1700px){
+  #mapScreen{grid-template-columns:minmax(400px,23vw) 1fr;padding:20px 26px 0;column-gap:24px;}
+  #mapScreen .gh-title{font-size:23px;}
+  #mapScreen .gh-sub{font-size:14px;}
+  #mapScreen .gh-c{font-size:15px;padding:5px 13px;}
+  #mapScreen #questBarTxt,#mapScreen .qnext{font-size:14px;}
+  #mapScreen #nowGo{font-size:16px;}
+  #mapScreen .gbar button{font-size:13.5px;padding:11px 4px;}
+  #mapScreen .gbar button em{font-size:24px;}
+  #mapTip{font-size:15px;}
+  #mapHere{font-size:18px;padding:10px 18px;}
+  #mapPad{grid-template-columns:repeat(3,62px);grid-template-rows:repeat(3,62px);}
+  #mapPad button{width:62px;height:62px;font-size:22px;}
+  #mapPad button.pe{font-size:17px;}
+  #mapScreen.listMode{grid-template-columns:1fr;}
+  #mapRailBot .mtile .cap .nm{font-size:13.5px;}
+  #mapRailBot .mtile .mp{font-size:11px;}
+  #mapRailBot .chapter h3{font-size:16px;}
+  #mapRailBot .note{font-size:13.5px;}
+}
+
+/* 태블릿 가로 (1180px 미만이라 2단은 아니지만, 1단으로 두기엔 넓은 구간) */
+@media(min-width:760px) and (max-width:1179px){
+  .screen{max-width:820px;}
+  #mapPad{grid-template-columns:repeat(3,48px);grid-template-rows:repeat(3,48px);}
+  #mapPad button{width:48px;height:48px;font-size:17px;}
+  #mapHere{font-size:14.5px;}
+}
+
 </style>
 </head>
 <body>
@@ -844,6 +991,9 @@ input::placeholder,textarea::placeholder{color:var(--mut2);}
 
 <!-- ══════ 미션 맵 ══════ -->
 <div id="mapScreen" class="screen hidden">
+  <!-- mapRailTop / mapRailBot : PC(2단) 전용 묶음. 모바일에서는 display:contents 라
+       DOM 이 없는 것처럼 동작하므로 기존 세로 순서가 그대로 유지된다. -->
+  <div id="mapRailTop">
   <div class="ghud">
     <div class="gh-av" id="hudAv"><b>Lv.<span id="uiLv">1</span></b></div>
     <div class="gh-mid">
@@ -866,6 +1016,7 @@ input::placeholder,textarea::placeholder{color:var(--mut2);}
   <div id="coachTag" class="hidden"></div>
   <button id="nowGo" type="button" class="hidden"></button>
   <button id="idBadge" type="button" class="hidden"></button>
+  </div><!-- /#mapRailTop -->
 
   <!-- ══════ 세계 지도 (PART 18) ══════
        배경은 Canva로 새로 생성한 원본 그림. 참고 화면의 픽셀아트는 복제하지 않음. -->
@@ -883,6 +1034,7 @@ input::placeholder,textarea::placeholder{color:var(--mut2);}
     </div>
     <div id="mapTip" class="note">🕹️ <b>화살표</b>로 이동하고 <b>GO</b>(또는 Enter)로 들어가요. 지도를 손으로 밀어서 둘러볼 수도 있어요.</div>
   </div>
+  <div id="mapRailBot">
   <button id="btnMapMode" type="button">📋 목록으로 보기</button>
 
   <div id="chapters"></div>
@@ -901,6 +1053,7 @@ input::placeholder,textarea::placeholder{color:var(--mut2);}
     <div class="mgrid" id="arcadeGrid"></div>
   </div>
   <div class="note" style="margin-top:10px">✅ 미션을 순서대로 완료하면 다음 미션이 열립니다. 모든 미션을 완료하면 <b>기록 코드 + 학습 리포트</b>가 발급됩니다.</div>
+  </div><!-- /#mapRailBot -->
 
   <div class="gbar">
     <button id="btnDress"><em>🧍</em>캐릭터</button>
@@ -1008,6 +1161,8 @@ input::placeholder,textarea::placeholder{color:var(--mut2);}
     <button class="back" id="btnDress2" title="캐릭터 선택">🧍</button>
     <span class="principle" id="mPrinciple">원리</span>
   </div>
+  <!-- PC 2단: 왼쪽=무대, 오른쪽=카드/전송 (모바일에서는 display:contents 라 무시된다) -->
+  <div id="misLeft">
   <div class="mgoal" id="mGoal"></div>
   <!-- 관찰 → 프롬프트 → 비교 3단계 띠 (선수 시범 영상이 있을 때만 보인다) -->
   <div class="vsteps hidden" id="vSteps">
@@ -1045,6 +1200,8 @@ input::placeholder,textarea::placeholder{color:var(--mut2);}
     <span class="pbchap" id="pbChap"></span>
     <span class="pbnote">← 영상과 나란히 비교해 보세요</span>
   </div>
+  </div><!-- /#misLeft -->
+  <div id="misRight">
   <div class="term" id="term"></div>
 
   <!-- 카드 조립 입력 -->
@@ -1068,6 +1225,7 @@ input::placeholder,textarea::placeholder{color:var(--mut2);}
     <button class="hintbtn" id="btnHint">💡 힌트 (-20점)</button>
     <span class="tries" id="mTries">시도 0회</span>
   </div>
+  </div><!-- /#misRight -->
 </div>
 
 <!-- ══════ 스카이 특훈 (보너스 슈팅) ══════ -->
@@ -8894,7 +9052,7 @@ document.addEventListener("keydown",e=>{
       b.classList.add("art");
       b.style.backgroundImage=`linear-gradient(rgba(10,14,32,.5),rgba(10,14,32,.78)),url("data:image/webp;base64,${BG_DATA[bgk].b64}")`;
     }
-    b.innerHTML=`<span class="mi">${icon}</span>${t}<span class="mp">${p}</span>`;
+    b.innerHTML=`<span class="mi">${icon}</span><span class="cap"><span class="nm">${t}</span><span class="mp">${p}</span></span>`;
     b.addEventListener("click",()=>startArcade(k));
     grid.appendChild(b);
   });
@@ -10058,8 +10216,8 @@ function renderPerf(){
       b.classList.add("art");
       b.style.backgroundImage=`linear-gradient(rgba(10,14,32,${got?".38":".68"}),rgba(10,14,32,${got?".66":".86"})),url("data:image/webp;base64,${MTILE_DATA[a.tile].b64}")`;
     }
-    b.innerHTML=`<span class="mi">${got?"✅":a.icon}</span>${a.t}
-      <span class="mp">${a.when} · ${a.pt}점 ${got?"— 인증 완료!":(a.needLic&&!S.lic?"— 🔒 라이선스 필요":"— 미인증")}</span>`;
+    b.innerHTML=`<span class="mi">${got?"✅":a.icon}</span><span class="cap"><span class="nm">${a.t}</span>`
+      +`<span class="mp">${a.when} · ${a.pt}점 ${got?"— 인증 완료!":(a.needLic&&!S.lic?"— 🔒 라이선스 필요":"— 미인증")}</span></span>`;
     b.addEventListener("click",()=>perfSay(
       `<b>${a.icon} ${a.t}</b> (${a.when} · ${a.pt}점)<br>${a.how}<br>
        ${got?"<b style='color:#8ee6a8'>✅ 이미 인증 완료했어요!</b>":"수업에서 직접 해낸 뒤 선생님께 인증 코드를 받아 아래에 입력하세요."}`,got?"ok":"info"));
@@ -11888,7 +12046,7 @@ const QUEST_TILES=[
       b.classList.add("art");
       b.style.backgroundImage=`linear-gradient(rgba(10,14,32,.5),rgba(10,14,32,.78)),url("data:image/webp;base64,${BG_DATA[d.art].b64}")`;
     }
-    b.innerHTML=`<span class="mi">${d.icon}</span>${d.t}<span class="mp">${d.p}</span>`;
+    b.innerHTML=`<span class="mi">${d.icon}</span><span class="cap"><span class="nm">${d.t}</span><span class="mp">${d.p}</span></span>`;
     b.addEventListener("click",()=>{
       if(typeof ARC_GAMES!=="undefined"&&ARC_GAMES[d.k])startArcade(d.k);
       else if(typeof toast==="function")toast("이 코스는 아직 준비 중이에요!");
@@ -12485,8 +12643,14 @@ function mapResize(){
   const cw=wrap.clientWidth;
   if(cw<40)return;
   const w=Math.max(240,cw);
-  const h=Math.round(Math.min(Math.max(w*0.72,285),440));
+  /* PC 2단 레이아웃(1180px 이상)에서는 오른쪽 칸 높이를 그대로 쓴다.
+     그래야 지도가 화면 높이를 꽉 채우고, 440px 로 굳어 버리지 않는다. */
+  const two=!!(window.matchMedia&&window.matchMedia("(min-width:1180px)").matches);
+  const ch0=wrap.clientHeight;
+  const h=(two&&ch0>240)?Math.round(ch0):Math.round(Math.min(Math.max(w*0.72,285),440));
+  /* 큰 화면(교실 TV)에서 캔버스 픽셀이 너무 많아지면 프레임이 떨어진다 — 총 픽셀 수로 제한 */
   MP.dpr=Math.min(2,window.devicePixelRatio||1);
+  if(w*h*MP.dpr*MP.dpr>3.2e6)MP.dpr=Math.max(1,Math.sqrt(3.2e6/(w*h)));
   MP.cw=w;MP.ch=h;
   cv.style.width=w+"px";cv.style.height=h+"px";
   cv.width=Math.round(w*MP.dpr);cv.height=Math.round(h*MP.dpr);
@@ -12495,9 +12659,11 @@ function mapResize(){
 
 /* 배율 — 화면이 좁을수록 더 당겨서 노드가 겹쳐 보이지 않게 한다 */
 function mapScale(){
-  const shown=MP.cw<430?0.40:(MP.cw<700?0.42:0.44);   // 가로로 보이는 맵 비율
+  /* 캔버스가 커질수록 세상을 더 넓게 보여 준다(확대율 고정 X) */
+  const shown=MP.cw<430?0.40:(MP.cw<700?0.42:(MP.cw<1000?0.44:0.60));   // 가로로 보이는 맵 비율
+  const tall =MP.ch>560?0.68:0.50;                                      // 세로로 보이는 맵 비율
   const sx=MP.cw/(MAPW*shown);
-  const sy=MP.ch/(MAPH*0.50);
+  const sy=MP.ch/(MAPH*tall);
   return Math.max(sx,sy);
 }
 function mapClampCam(){
@@ -12881,9 +13047,9 @@ function mapSetup(){
   /* 지도가 화면에 나타나는 순간(=폭이 0에서 실제 값으로 바뀌는 순간)에 다시 맞춘다 */
   if(typeof ResizeObserver!=="undefined"&&!MP.ro&&MP.cv.parentElement){
     MP.ro=new ResizeObserver(()=>{
-      const before=MP.cw;
+      const bw=MP.cw, bh=MP.ch;
       mapResize();
-      if(MP.cw!==before){mapClampCam();}
+      if(MP.cw!==bw||MP.ch!==bh){mapClampCam();}
     });
     MP.ro.observe(MP.cv.parentElement);
   }
@@ -12910,6 +13076,9 @@ function mapMode(on){
   if(ch)ch.classList.toggle("hidden",MAP_ON);
   if(ab)ab.classList.toggle("hidden",MAP_ON);
   if(b)b.textContent=MAP_ON?"📋 목록으로 보기":"🗺️ 지도로 보기";
+  /* PC 2단 레이아웃에서 목록 모드일 땐 오른쪽 칸이 비어 버린다 — 왼쪽 패널을 전체 폭으로 */
+  const sc=$("mapScreen");
+  if(sc)sc.classList.toggle("listMode",!MAP_ON);
   if(MAP_ON)mapRefresh();
 }
 
@@ -13759,7 +13928,7 @@ document.addEventListener("DOMContentLoaded",()=>{
     b.classList.add("art");
     b.style.backgroundImage=`linear-gradient(rgba(10,14,32,.5),rgba(10,14,32,.78)),url("data:image/webp;base64,${BG_DATA.arc_night.b64}")`;
   }
-  b.innerHTML=`<span class="mi">🚪</span>체육관 탈출<span class="mp">${ESC_TIME}초 안에 문 5개</span>`;
+  b.innerHTML=`<span class="mi">🚪</span><span class="cap"><span class="nm">체육관 탈출</span><span class="mp">${ESC_TIME}초 안에 문 5개</span></span>`;
   b.addEventListener("click",()=>startArcade("escape"));
   const sec=$("questSection");
   if(sec)grid.insertBefore(b,sec); else grid.appendChild(b);

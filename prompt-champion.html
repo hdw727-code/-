@@ -340,9 +340,51 @@ input::placeholder,textarea::placeholder{color:var(--mut2);}
 
 /* ═══ UI v3 — 모바일게임 아트 타일·등급 프레임 ═══ */
 .mtile.art{background-size:cover;background-position:center;overflow:hidden;
-  text-shadow:0 2px 5px rgba(0,0,0,.85);color:#fff;border:1.5px solid rgba(231,197,101,.4);}
-.mtile.art .mp{color:#e8ddba;text-shadow:0 1px 3px rgba(0,0,0,.9);}
+  text-shadow:0 2px 5px rgba(0,0,0,.85);color:#fff;border:1.5px solid rgba(231,197,101,.4);
+  filter:saturate(1.22) contrast(1.07);}
+.mtile.art .mp{color:#2a1a05;text-shadow:none;}
 .mtile.art .mi{filter:drop-shadow(0 3px 7px rgba(0,0,0,.75));}
+/* ══════ 캐릭터 도감 — 큰 카드 격자 + 등급 테두리 ══════
+   30종 가까운 캐릭터를 44px 썸네일 목록으로 보여 주던 것을
+   가챠 게임식 수집 도감으로 바꾼다. 그림은 이미 다 있고 배치만 바꾼다. */
+#dressModal .mbox{width:min(880px,100%);}
+#skinRow .dressrow{display:grid;grid-template-columns:repeat(3,1fr);gap:9px;}
+@media(min-width:520px){#skinRow .dressrow{grid-template-columns:repeat(4,1fr);gap:10px;}}
+@media(min-width:820px){#skinRow .dressrow{grid-template-columns:repeat(5,1fr);gap:11px;}}
+#skinRow .dressopt{position:relative;padding:0;overflow:hidden;aspect-ratio:3/4;
+  border-radius:14px;display:flex;flex-direction:column;justify-content:flex-end;
+  background-color:#141b36;background-repeat:no-repeat;
+  border:2px solid rgba(231,197,101,.3);
+  box-shadow:0 6px 18px rgba(0,0,0,.45),inset 0 1px 0 rgba(255,255,255,.08);}
+#skinRow .dressopt .cn{position:relative;z-index:3;display:block;width:100%;
+  padding:16px 5px 6px;font-size:10.5px;font-weight:900;line-height:1.2;letter-spacing:-.3px;
+  color:#fff;text-shadow:0 2px 5px rgba(0,0,0,.95);
+  background:linear-gradient(180deg,rgba(6,9,22,0) 0%,rgba(6,9,22,.55) 40%,rgba(6,9,22,.95) 78%,rgba(6,9,22,.99) 100%);}
+@media(min-width:820px){#skinRow .dressopt .cn{font-size:11.5px;padding:18px 6px 7px;}}
+/* 잠긴 캐릭터 — 그림을 지우지 않고 실루엣처럼 어둡게 (모으고 싶어지도록) */
+#skinRow .dressopt.locked{opacity:1;border-style:solid;border-color:rgba(255,255,255,.18);}
+#skinRow .dressopt.locked::before{content:"";position:absolute;inset:0;z-index:2;
+  background:rgba(6,9,22,.55);backdrop-filter:grayscale(1) brightness(.55);
+  -webkit-backdrop-filter:grayscale(1) brightness(.55);}
+#skinRow .dressopt.locked .cn{color:#c3cee8;}
+/* 등급 테두리 — 초록 / 보라 / 파랑 / 금색(전설) */
+#skinRow .dressopt.rar300{border-color:rgba(126,226,168,.8);}
+#skinRow .dressopt.rar400{border-color:rgba(190,140,255,.85);}
+#skinRow .dressopt.rar500{border-color:rgba(77,163,255,.9);}
+#skinRow .dressopt.rar800{border-color:#ffd76e;
+  box-shadow:0 6px 18px rgba(0,0,0,.45),0 0 18px rgba(255,215,110,.45);}
+#skinRow .dressopt.rar800::after{content:"✦";position:absolute;top:4px;right:6px;z-index:4;
+  font-size:13px;color:#ffd76e;text-shadow:0 2px 5px rgba(0,0,0,.95);}
+/* 선택된 캐릭터 */
+#skinRow .dressopt.sel{border-color:#fff0b8;background-color:#1b2140;
+  box-shadow:0 0 0 3px rgba(255,215,110,.35),0 0 26px rgba(255,215,110,.55),0 6px 18px rgba(0,0,0,.45);}
+#skinRow .dressopt.sel .cn{background:linear-gradient(180deg,rgba(60,42,6,0) 0%,rgba(70,50,8,.7) 40%,rgba(28,20,2,.97) 80%,rgba(20,14,0,1) 100%);
+  color:#ffefb0;}
+/* 그룹 제목을 도감 섹션 머리처럼 */
+#skinRow > .note{display:flex;align-items:center;gap:8px;font-size:12.5px;color:var(--gold);
+  letter-spacing:.6px;margin:14px 0 7px;}
+#skinRow > .note::after{content:"";flex:1;height:1px;
+  background:linear-gradient(90deg,rgba(231,197,101,.45),transparent);}
 .mtile{transition:transform .15s,box-shadow .15s,border-color .15s;}
 .mtile.open:hover,.mtile.open:active{transform:translateY(-3px) scale(1.02);
   box-shadow:0 8px 22px rgba(0,0,0,.45),0 0 14px rgba(231,197,101,.28);}
@@ -442,9 +484,9 @@ input::placeholder,textarea::placeholder{color:var(--mut2);}
 .mtile .cap .nm{display:block;font-size:10.5px;font-weight:900;line-height:1.22;letter-spacing:-.4px;
   color:#fff;text-shadow:0 2px 6px rgba(0,0,0,.95);
   display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;}
-.mtile .mp{display:inline-block;font-size:8px;font-weight:900;margin-top:3px;
-  color:#2a1a05;background:linear-gradient(180deg,#f7e08b,#d4af37);
-  border-radius:999px;padding:1.5px 6px;text-shadow:none;letter-spacing:-.2px;}
+.mtile .mp{display:inline-block;font-size:9.5px;font-weight:900;margin-top:3px;
+  color:#1e1200;background:linear-gradient(180deg,#ffefb0,#e9c765);
+  border-radius:999px;padding:2px 7px;text-shadow:none;letter-spacing:-.2px;}
 .mtile .stars{display:block;font-size:9.5px;margin-top:2px;color:#ffd75e;letter-spacing:1.5px;
   text-shadow:0 1px 3px rgba(0,0,0,.9);}
 /* 상태별 */
@@ -462,12 +504,12 @@ input::placeholder,textarea::placeholder{color:var(--mut2);}
   letter-spacing:.5px;color:#06301c;background:linear-gradient(180deg,#a9f5cf,#37d67f);
   padding:2px 6px;border-radius:7px;box-shadow:0 2px 6px rgba(0,0,0,.55);}
 /* 잠금: 아트를 지우지 않고 어둡게 + 자물쇠 */
-.mtile.lock{opacity:1;cursor:default;border-color:rgba(255,255,255,.12);
-  filter:saturate(.55) brightness(.85);box-shadow:0 4px 14px rgba(0,0,0,.4);}
+.mtile.lock{opacity:1;cursor:default;border-color:rgba(255,255,255,.22);
+  filter:saturate(.72) brightness(.86);box-shadow:0 4px 14px rgba(0,0,0,.4);}
 .mtile.lock .lockic{position:absolute;top:6px;left:6px;z-index:4;font-size:11px;
   background:rgba(8,11,26,.78);border:1px solid rgba(231,197,101,.35);border-radius:999px;
   padding:3px 7px;line-height:1;box-shadow:0 2px 6px rgba(0,0,0,.4);}
-.mtile.soon{opacity:.85;cursor:default;border-style:dashed;filter:saturate(.4) brightness(.8);}
+.mtile.soon{opacity:.95;cursor:default;border-style:dashed;filter:saturate(.7) brightness(.9);}
 .mtile.soon .lockic{position:absolute;top:6px;left:6px;z-index:4;font-size:8.5px;font-weight:800;color:#cfe0ff;
   background:rgba(8,11,26,.78);border:1px solid rgba(255,255,255,.2);border-radius:999px;padding:3px 7px;line-height:1;}
 .mtile.bonus{border-color:var(--gold);}
@@ -483,11 +525,26 @@ input::placeholder,textarea::placeholder{color:var(--mut2);}
   padding:calc(26px + env(safe-area-inset-top,0px)) 18px calc(26px + env(safe-area-inset-bottom,0px));}
 #startScreen::before{background:none !important;opacity:1 !important;}
 #startScreen::after{background:none !important;}
+/* 배경 키아트는 '분위기'만 담당한다 — 흐리게 + 어둡게 깔아 뒤로 물리고,
+   또렷한 주인공(#heroChar)이 그 앞에 선다. 파스텔 그림이 남색 화면과
+   부딪히던 문제도 이걸로 같이 가라앉는다. */
 #heroArt{position:fixed;inset:0;z-index:0;pointer-events:none;background-position:center top;
-  background-size:cover;background-repeat:no-repeat;}
+  background-size:cover;background-repeat:no-repeat;
+  filter:blur(5px) saturate(.72) brightness(.62);transform:scale(1.08);}
 #heroArt::after{content:"";position:absolute;inset:0;
-  background:linear-gradient(180deg,rgba(8,11,26,.30) 0%,rgba(8,11,26,0) 22%,
-    rgba(8,11,26,0) 58%,rgba(8,11,26,.55) 82%,rgba(8,11,26,.92) 100%);}
+  background:
+    radial-gradient(ellipse 70% 55% at 50% 55%,rgba(8,11,26,.34),rgba(8,11,26,.72) 100%),
+    linear-gradient(180deg,rgba(8,11,26,.62) 0%,rgba(8,11,26,.30) 24%,
+    rgba(8,11,26,.34) 58%,rgba(8,11,26,.74) 82%,rgba(8,11,26,.96) 100%);}
+/* ── 타이틀 주인공 ── */
+#heroChar{position:relative;z-index:2;width:min(320px,64vw);height:100%;min-height:140px;
+  background-repeat:no-repeat;background-position:center bottom;background-size:contain;
+  filter:drop-shadow(0 12px 28px rgba(0,0,0,.72)) drop-shadow(0 0 26px rgba(140,190,255,.3));
+  animation:heroFloat 3.6s ease-in-out infinite;}
+@keyframes heroFloat{0%,100%{transform:translateY(0)}50%{transform:translateY(-9px)}}
+#heroChar::before{content:"";position:absolute;left:50%;bottom:-8px;transform:translateX(-50%);
+  width:82%;height:30px;border-radius:50%;z-index:-1;
+  background:radial-gradient(ellipse at center,rgba(255,215,110,.5),rgba(255,215,110,0) 72%);}
 #startScreen .logo{font-size:clamp(40px,12.5vw,68px);letter-spacing:-2.5px;margin-bottom:8px;line-height:1.02;
   filter:drop-shadow(0 4px 24px rgba(212,175,55,.7)) drop-shadow(0 2px 4px rgba(0,0,0,.95));}
 #startScreen .logo .bot{font-size:.62em;vertical-align:.16em;}
@@ -503,7 +560,8 @@ input::placeholder,textarea::placeholder{color:var(--mut2);}
 .splashsub{font-size:13.5px;line-height:1.7;color:#e2d8bf;text-align:center;font-weight:700;
   text-shadow:0 2px 10px rgba(0,0,0,.95);max-width:420px;margin:0 auto 22px;}
 .splashsub b{color:var(--goldL);}
-.splash-spacer{flex:1 1 auto;min-height:110px;max-height:none;}
+.splash-spacer{flex:1 1 auto;min-height:150px;max-height:none;width:100%;
+  display:flex;align-items:flex-end;justify-content:center;}
 .bigstart{width:min(420px,100%);padding:19px;font-size:20px;border-radius:19px;letter-spacing:-.5px;
   animation:ctaPulse 2.4s ease-in-out infinite;}
 @keyframes ctaPulse{0%,100%{box-shadow:0 8px 26px rgba(212,175,55,.4),inset 0 1px 0 rgba(255,255,255,.8);}
@@ -659,10 +717,21 @@ input::placeholder,textarea::placeholder{color:var(--mut2);}
 #coachTag{display:inline-block;margin:0 0 8px;padding:6px 12px;border-radius:999px;
   background:rgba(77,216,255,.13);border:1px solid rgba(77,216,255,.35);font-size:13.5px;font-weight:800;color:var(--ink);}
 .dexgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:9px;margin-top:10px;}
-.dexcard{padding:11px 12px;border-radius:13px;background:var(--panel2);border:2px dashed rgba(255,255,255,.12);}
+.dexcard{padding:11px 12px;border-radius:13px;background:var(--panel2);border:2px dashed rgba(255,255,255,.12);
+  text-align:center;}
 .dexcard.got{border-style:solid;border-color:rgba(247,224,139,.55);background:rgba(247,224,139,.09);}
 .dexcap{font-size:14px;font-weight:800;line-height:1.45;}
 .dextip{font-size:12px;line-height:1.55;color:var(--mut);margin-top:6px;}
+.dexcap.dim{color:#8fa0c4;}
+.dextip.dim{opacity:.55;}
+.dexno{font-size:11px;font-weight:800;color:#6f80a6;letter-spacing:.5px;}
+/* 실루엣 — 미수집 칸은 새까만 그림자 + 물음표, 수집하면 원래 색으로 */
+.dexsil{position:relative;display:flex;align-items:center;justify-content:center;
+  height:62px;margin:2px 0 8px;font-size:38px;line-height:1;}
+.dexsil span{filter:brightness(0) saturate(0) drop-shadow(0 0 8px rgba(120,150,220,.35));opacity:.85;}
+.dexsil b{position:absolute;right:2px;top:0;font-size:17px;font-weight:900;color:#8fa6d8;
+  text-shadow:0 2px 6px rgba(0,0,0,.9);opacity:.85;}
+.dexsil.got{filter:drop-shadow(0 3px 8px rgba(0,0,0,.5));}
 /* 교사용 모달 위에서 열리므로 한 단계 더 위로 */
 #lbModal{z-index:140;}
 #lbBoard{margin-top:12px;}
@@ -935,7 +1004,9 @@ input::placeholder,textarea::placeholder{color:var(--mut2);}
   <div class="logo-kicker">AI 코치봇 스포츠 아카데미</div>
   <div class="logo">프롬프트<br>챔피언 <span class="bot">🏆</span></div>
   <div class="splashsub">우리 반에 전학 온 AI 로봇 — 몸은 최강, 말귀는 최악!<br><b>네가 감독이 되어 반 대표 선수로 키워라.</b></div>
-  <div class="splash-spacer"></div>
+  <!-- 타이틀 한가운데에 주인공을 세운다. 배경 키아트는 흐려서 뒤로 물러나고
+       지금 고른 캐릭터가 또렷하게 앞에 선다. (a27_portraits.js 가 그림을 넣는다) -->
+  <div class="splash-spacer"><div id="heroChar"></div></div>
 
   <button class="bigstart" id="btnNew">🎮 게임 시작</button>
 
@@ -5428,7 +5499,13 @@ const MTILE_KEY=[
 /* 카드 배경 = 종목 배경(어둡게) + 캐릭터 아트(위에 겹침) */
 function paintTile(el,key,scene){
   const layers=[],pos=[],size=[],rep=[];
+  /* 카드 그림이 파스텔이라 남색·금색 화면 위에서 혼자 튄다.
+     맨 위에 남색+금빛 얇은 막을 한 겹 깔아 화면 전체와 색을 맞춘다.
+     (가리는 게 목적이 아니라 '색을 맞추는' 것이므로 아주 옅게) */
+  const GRADE="linear-gradient(180deg,rgba(22,32,74,.30) 0%,rgba(14,20,50,.16) 38%,"
+             +"rgba(9,13,32,.34) 72%,rgba(7,10,26,.62) 100%)";
   if(typeof MTILE_DATA!=="undefined"&&MTILE_DATA[key]){
+    layers.push(GRADE);pos.push("center");size.push("cover");rep.push("no-repeat");
     layers.push(`url("data:image/webp;base64,${MTILE_DATA[key].b64}")`);
     pos.push("center top");size.push("cover");rep.push("no-repeat");
   }
@@ -6087,7 +6164,9 @@ const ACC_KEYS=["none","cap","crown","glasses","frog","headphone"];
       b.className="dressopt"+(k===SKIN?" sel":"");
       if(!["robot","avatar","girl","tkd"].includes(k))b.classList.add("rar"+unlockCost(k));
       b.dataset.skin=k;b.dataset.label=lab;
-      b.textContent=lab;
+      /* 도감 카드 — 이름은 반드시 .cn 안에 넣는다(카드 하단 캡션이 된다). */
+      b.innerHTML='<span class="cn"></span>';
+      b.querySelector(".cn").textContent=lab;
       r.appendChild(b);
     });
     row.appendChild(r);
@@ -6114,9 +6193,12 @@ $("btnDressClose").addEventListener("click",()=>$("dressModal").classList.add("h
 function refreshSkinLocks(){
   document.querySelectorAll("#skinRow .dressopt").forEach(b=>{
     const k=b.dataset.skin, lab=b.dataset.label;
-    if(isUnlocked(k)){b.classList.remove("locked");b.textContent=lab;}
-    else if(EVENT_SKINS[k]){b.classList.add("locked");b.textContent="❓ ???";}
-    else{b.classList.add("locked");b.textContent=lab+" 🔒"+unlockCost(k);}
+    /* 카드 구조(.cn)를 지우지 않도록 textContent 대신 캡션만 바꾼다 */
+    let cn=b.querySelector(".cn");
+    if(!cn){b.innerHTML='<span class="cn"></span>';cn=b.querySelector(".cn");}
+    if(isUnlocked(k)){b.classList.remove("locked");cn.textContent=lab;}
+    else if(EVENT_SKINS[k]){b.classList.add("locked");cn.textContent="❓ ???";}
+    else{b.classList.add("locked");cn.textContent=lab+" 🔒"+unlockCost(k);}
   });
 }
 /* ── 캐릭터 선택 / 해금 (실수로 코인이 빠지지 않도록 반드시 확인) ── */
@@ -10179,11 +10261,14 @@ if(typeof ARC_GAMES!=="undefined")ARC_GAMES.judge=judgeGame;
 const PERF_ACTS=[
   {i:0,icon:"🪢",t:"줄넘기 7미션",when:"9월 1주",pt:20,tile:"rope",
    how:"앞흔들어뛰기 → 번갈아뛰기 → 모아뛰기 → 옆흔들어뛰기 → 가위뛰기 → 십자뛰기 → 이단뛰기까지, 단계별로 <b>연속 30회</b>를 직접 성공해야 합니다."},
-  {i:1,icon:"🤾",t:"추크볼 스킬",when:"9월 5주",pt:20,tile:"handball",
+  /* 카드 그림 주의: handball 타일은 '축구 골대 + 축구공' 그림이라 추크볼과 맞지 않는다.
+     추크볼 프레임 그림이 아직 없으므로 '던지는 공'으로 읽히는 dodge 타일을 쓴다. */
+  {i:1,icon:"🤾",t:"추크볼 스킬",when:"9월 5주",pt:20,tile:"dodge",
    how:"점프 캐치 → 3스텝 → 점프 슈팅을 프레임에 <b>실제로 성공</b>시켜야 합니다. 던진 공이 프레임에 맞고 튀어나와 땅에 닿으면 득점!"},
   {i:2,icon:"⚾",t:"티볼 타격",when:"10월 2주",pt:20,tile:"bat",
    how:"티에 올린 공을 <b>수평 스윙</b>으로 정확히 때려 페어 지역으로 보내야 합니다."},
-  {i:3,icon:"🧤",t:"티볼 수비 — 포구·송구",when:"10월 4주",pt:20,tile:"archery",
+  /* archery 타일은 '양궁 과녁 + 활' 그림이었다. 포구·송구에는 글러브 그림(glove)이 맞다. */
+  {i:3,icon:"🧤",t:"티볼 수비 — 포구·송구",when:"10월 4주",pt:20,tile:"glove",
    how:"굴러오는 공을 <b>글러브로 포구</b>한 뒤 스텝을 밟아 1루로 정확히 송구해야 합니다."},
   {i:4,icon:"📝",t:"티볼 경기 분석 — 논술형",when:"10월 30일",pt:20,tile:"trophy",needLic:true,essay:true,
    how:"5개 영역 중 <b>유일한 논술형 평가</b>입니다(학기 성적의 20% 이상 필수). 제시된 <b>6문항</b>으로 ① 경기장 규격 ② 수비수 포지션 ③ 포스 아웃·태그 아웃 ④ 공격·수비 전략 ⑤ 심판 수신호를 <b>경기 상황과 연결해</b> 근거 있는 문장으로 서술합니다.<br>사전 연습은 아케이드의 <b>📝 티볼 논술 빌더</b>에서! ⚖️ 판정관 라이선스 또는 🎓 논술 대비 수료증이 있어야 인증됩니다."},
@@ -10214,7 +10299,7 @@ function renderPerf(){
     b.className="mtile "+(got?"open":"lock");
     if(typeof MTILE_DATA!=="undefined"&&MTILE_DATA[a.tile]){
       b.classList.add("art");
-      b.style.backgroundImage=`linear-gradient(rgba(10,14,32,${got?".38":".68"}),rgba(10,14,32,${got?".66":".86"})),url("data:image/webp;base64,${MTILE_DATA[a.tile].b64}")`;
+      b.style.backgroundImage=`linear-gradient(rgba(10,14,32,${got?".14":".26"}),rgba(10,14,32,${got?".42":".56"})),url("data:image/webp;base64,${MTILE_DATA[a.tile].b64}")`;
     }
     b.innerHTML=`<span class="mi">${got?"✅":a.icon}</span><span class="cap"><span class="nm">${a.t}</span>`
       +`<span class="mp">${a.when} · ${a.pt}점 ${got?"— 인증 완료!":(a.needLic&&!S.lic?"— 🔒 라이선스 필요":"— 미인증")}</span></span>`;
@@ -10426,6 +10511,14 @@ const FAILDEX_TIP={
   kickWrong:"목표(골대 구석 등)를 정해주세요.",
   rollWrong:"동사를 정확히! <b>차다/굴리다/던지다</b>는 완전히 다른 동작입니다.",
 };
+/* 도감 실루엣 — 미수집 칸에 검은 그림자로 띄울 대표 그림.
+   cap 의 이모지는 🌀·⬆️처럼 검게 칠하면 동그라미/네모가 되어 버려서
+   실루엣이 안 되므로, 사람·사물 모양이 또렷한 것으로 따로 고른다. */
+const FAILDEX_SIL={
+  spin:"🤸",sit:"🪑",moonwalk:"🕺",throwBack:"🤾",throwUp:"🤹",
+  headball:"🙇",tangle:"🪢",jumpNoRope:"🦘",falseStart:"🏃",
+  zigzag:"🚶",kickWrong:"🦵",rollWrong:"🎳",
+};
 S.dex=0;   // 비트마스크
 function dexGot(i){return ((S.dex>>i)&1)===1;}
 function dexAdd(key){
@@ -10462,11 +10555,16 @@ function renderDex(){
     const got=dexGot(i);
     const d=document.createElement("div");
     d.className="dexcard"+(got?" got":"");
+    /* 미수집 칸도 '검은 실루엣'을 보여 준다 — 12칸이 전부 똑같은 회색 상자면
+       모으고 싶은 마음이 안 생긴다. 실루엣은 각 실패 클립의 대표 그림이다. */
+    const sil=FAILDEX_SIL[k]||(CLIP_META[k].cap||"❔").trim().split(" ")[0];
     d.innerHTML=got
-      ? `<div class="dexcap">${CLIP_META[k].cap}</div>
+      ? `<div class="dexsil got">${sil}</div>
+         <div class="dexcap">${CLIP_META[k].cap}</div>
          <div class="dextip">💡 ${FAILDEX_TIP[k]||"프롬프트를 더 구체적으로 써보세요."}</div>`
-      : `<div class="dexcap" style="opacity:.45">❔ ???</div>
-         <div class="dextip" style="opacity:.4">아직 만나지 못한 실패입니다.</div>`;
+      : `<div class="dexsil"><span>${sil}</span><b>?</b></div>
+         <div class="dexcap dim">??? <span class="dexno">No.${String(i+1).padStart(2,"0")}</span></div>
+         <div class="dextip dim">아직 만나지 못한 실패입니다.</div>`;
     g.appendChild(d);
   });
   const n=dexCount(), N=FAILDEX.length;
@@ -15008,21 +15106,35 @@ function abClose(){
       const k=b.dataset&&b.dataset.skin;
       if(!k||!portB64[k]||b.classList.contains("hasport"))return;
       b.classList.add("hasport");
+      /* 도감 카드 — 초상을 카드 전체에 크게 (예전엔 40px 썸네일이었다) */
       b.style.backgroundImage='url("data:image/webp;base64,'+portB64[k]+'")';
       b.style.backgroundRepeat="no-repeat";
-      b.style.backgroundPosition="7px center";
-      b.style.backgroundSize="auto 40px";
-      b.style.paddingLeft="52px";
-      b.style.minHeight="48px";
+      b.style.backgroundPosition="center 8%";
+      b.style.backgroundSize="cover";
     });
   }
   document.addEventListener("DOMContentLoaded",decorate);
   setTimeout(decorate,1500);
 
+  /* 시작 화면 한가운데 주인공 — 지금 고른 캐릭터를 타이틀에 세운다 */
+  function paintHeroChar(){
+    const el=document.getElementById("heroChar");if(!el)return;
+    let k=(typeof SKIN!=="undefined"&&portB64[SKIN])?SKIN:"avatar";
+    if(!portB64[k])k="robot";
+    if(!portB64[k]||el.dataset.k===k)return;
+    el.dataset.k=k;
+    el.style.backgroundImage='url("data:image/webp;base64,'+portB64[k]+'")';
+  }
+  window.paintHeroChar=paintHeroChar;
+  document.addEventListener("DOMContentLoaded",paintHeroChar);
+  setTimeout(paintHeroChar,300);
+  setTimeout(paintHeroChar,1500);
+
   /* 캐릭터 미리보기 — 새 초상이 있으면 그걸 크게 */
   if(typeof renderDressPreview==="function"){
     const _rdp=renderDressPreview;
     renderDressPreview=function(){
+      try{paintHeroChar();}catch(e){}
       const im=port[SKIN];
       if(!im||!im.complete||!im.naturalWidth)return _rdp.apply(this,arguments);
       const c=document.getElementById("dressPrev");if(!c)return;

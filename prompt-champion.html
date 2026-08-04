@@ -690,6 +690,65 @@ input::placeholder,textarea::placeholder{color:var(--mut2);}
   #mapPad{grid-template-columns:repeat(3,38px);grid-template-rows:repeat(3,38px);gap:4px;}
   #mapPad button{width:38px;height:38px;font-size:14px;}
 }
+/* ── 지도 안내 두 칸 (PART 18) ────────────────────────────────────────
+   ① .mapinfo  : 지금 고른 곳 — 전체 이름 / 무엇을 하는 곳 / 열리는 조건
+   ② .mapguide : 색 범례 + 8개 구역이 언제 열리는지 (접이식, 기본 접힘)
+   지도 그림 안이 아니라 밖에 두는 이유 — 캔버스 높이를 뺏지 않고,
+   이름표처럼 잘릴 걱정 없이 전체 이름을 그대로 보여 줄 수 있어서. */
+.mapinfo{margin:8px 0 0;padding:11px 13px;border-radius:14px;
+  background:var(--panel2);border:1px solid rgba(255,255,255,.14);}
+.mapinfo .mi-top{display:flex;align-items:center;gap:9px;}
+.mapinfo .mi-ic{font-size:22px;line-height:1;flex:0 0 auto;}
+.mapinfo .mi-name{flex:1 1 auto;min-width:0;}
+.mapinfo .mi-name b{display:block;font-size:14.5px;font-weight:900;color:var(--ink);
+  line-height:1.25;word-break:keep-all;}
+.mapinfo .mi-reg{display:block;font-size:11.5px;color:var(--mut);margin-top:1px;}
+.mapinfo .mi-kind{flex:0 0 auto;padding:3px 9px;border-radius:999px;
+  font-size:10.5px;font-weight:900;white-space:nowrap;}
+.mapinfo .k-m{background:rgba(245,195,63,.22);color:#ffd97a;border:1px solid rgba(245,195,63,.4);}
+.mapinfo .k-a{background:rgba(61,127,214,.24);color:#a9cdff;border:1px solid rgba(61,127,214,.45);}
+.mapinfo .k-h{background:rgba(255,255,255,.1);color:#e2e8f8;border:1px solid rgba(255,255,255,.24);}
+.mapinfo .mi-do{margin:8px 0 0;font-size:12.5px;color:var(--mut);line-height:1.5;}
+.mapinfo .mi-do b{color:#cfe4ff;}
+.mapinfo .mi-why{margin:6px 0 0;font-size:12.5px;line-height:1.5;
+  padding:7px 10px;border-radius:10px;background:rgba(255,255,255,.05);}
+.mapinfo .mi-why i{font-style:normal;opacity:.8;}
+.mapinfo .w-ok{color:#8ee9b4;}
+.mapinfo .w-go{color:#ffd97a;background:rgba(245,195,63,.13);}
+.mapinfo .w-lk{color:#c8cfe0;}
+.mapinfo .mi-go{width:100%;margin:9px 0 0;padding:10px;border-radius:11px;
+  border:1px solid rgba(255,255,255,.2);background:rgba(247,193,77,.9);
+  color:#1b1204;font-size:13.5px;font-weight:900;cursor:pointer;}
+.mapinfo .mi-go[disabled]{background:rgba(255,255,255,.08);color:var(--mut);
+  cursor:default;border-color:rgba(255,255,255,.12);}
+.mapguide{margin:8px 0 0;}
+.mapguide .mg-tog{width:100%;margin:0;padding:9px 12px;border-radius:12px;
+  display:flex;justify-content:space-between;align-items:center;gap:8px;
+  background:var(--panel2);border:1px solid rgba(255,255,255,.14);
+  color:var(--ink);font-size:12.5px;font-weight:800;cursor:pointer;text-align:left;}
+.mapguide .mg-body{margin:7px 0 0;padding:11px 12px;border-radius:12px;
+  background:rgba(255,255,255,.045);border:1px solid rgba(255,255,255,.1);}
+.mapguide .mg-leg{margin:0;display:flex;flex-wrap:wrap;gap:5px 12px;
+  font-size:11.5px;color:var(--mut);}
+.mapguide .mg-leg .lg{margin-right:3px;}
+.mapguide .mg-hint{margin:7px 0 0;font-size:11.5px;color:var(--mut);line-height:1.5;}
+.mapguide .mg-list{margin:9px 0 0;}
+.mapguide .mg-row{padding:7px 0;border-top:1px solid rgba(255,255,255,.09);}
+.mapguide .mg-row.lk{opacity:.66;}
+.mapguide .mg-h{display:flex;flex-wrap:wrap;align-items:baseline;gap:4px 8px;}
+.mapguide .mg-h b{font-size:12.5px;font-weight:900;color:var(--ink);white-space:nowrap;}
+.mapguide .mg-lk{font-size:11px;font-weight:800;color:#ffd97a;white-space:nowrap;}
+.mapguide .mg-lk.ok{color:#8ee9b4;}
+.mapguide .mg-d{margin:2px 0 0;font-size:11.5px;color:var(--mut);line-height:1.45;
+  word-break:keep-all;}
+.mapguide .mg-cnt{margin:1px 0 0;font-size:10.5px;color:var(--mut);opacity:.72;}
+@media(min-width:900px){
+  .mapinfo .mi-name b{font-size:15.5px;}
+  .mapinfo .mi-do,.mapinfo .mi-why{font-size:13px;}
+  .mapguide .mg-h b{font-size:13.5px;}
+  .mapguide .mg-d{font-size:12.5px;}
+  .mapguide .mg-leg,.mapguide .mg-hint{font-size:12.5px;}
+}
 /* ── 감독 온보딩 · 실패 도감 · 조별 리더보드 ── */
 .dressopt.on{border-color:var(--cyan);background:rgba(77,216,255,.18);box-shadow:0 0 12px rgba(77,216,255,.3);}
 #coachTag{display:inline-block;margin:0 0 8px;padding:6px 12px;border-radius:999px;
@@ -909,7 +968,10 @@ input::placeholder,textarea::placeholder{color:var(--mut2);}
   /* 왼쪽 패널은 화면이 넓어도 폭이 좁다 — 카드가 5칸으로 쪼그라들지 않게 2칸 고정 */
   #mapRailBot .mgrid{grid-template-columns:repeat(2,1fr);gap:10px;}
   #mapRailBot .chapter{margin-bottom:12px;}
-  #mapRailBot #btnMapMode{margin-top:0;}
+  /* 안내 두 칸은 왼쪽 칸 맨 위에 고정 — 눌러도 접혀서 카드 목록을 오래 가리지 않는다 */
+  #mapRailBot #mapInfo,#mapRailBot #mapGuide{flex:0 0 auto;margin-top:0;}
+  #mapRailBot #mapGuide{margin-top:8px;}
+  #mapRailBot #btnMapMode{margin-top:10px;}
   #mapRailBot .mtile .cap .nm{font-size:12px;}
   #mapRailBot .mtile .mp{font-size:9.5px;padding:2px 7px;}
   #mapRailBot .mtile .stars{font-size:11px;}
@@ -1071,6 +1133,10 @@ input::placeholder,textarea::placeholder{color:var(--mut2);}
     <div id="mapTip" class="note">🕹️ <b>화살표</b>로 이동하고 <b>GO</b>(또는 Enter)로 들어가요. 지도를 손으로 밀어서 둘러볼 수도 있어요.</div>
   </div>
   <div id="mapRailBot">
+  <!-- 지도 위에는 글자를 길게 쓸 자리가 없다(이름표가 잘린다).
+       그래서 "여기서 뭘 하나 / 왜 잠겼나"는 지도 밖 두 칸으로 뺀다. -->
+  <div id="mapInfo" class="mapinfo"></div>
+  <div id="mapGuide" class="mapguide"></div>
   <button id="btnMapMode" type="button">📋 목록으로 보기</button>
 
   <div id="chapters"></div>
@@ -12570,14 +12636,22 @@ let MAP_IMG=null, MAP_READY=false;
 /* ── 구역 ──────────────────────────────────────────────────────────────
    need = 이만큼 미션을 깨야 열린다. 그림 속 실제 장소에 맞춰 잡은 좌표(0~1). */
 const MAP_REGIONS=[
- {k:"gym",  n:"체육관",     ic:"🏫", need:0, cx:.145,cy:.44},
- {k:"track",n:"대운동장",   ic:"🏃", need:3, cx:.410,cy:.42},
- {k:"court",n:"경기장",     ic:"🏟️", need:7, cx:.745,cy:.29},
- {k:"field",n:"티볼 구장",  ic:"⚾", need:10,cx:.690,cy:.57},
- {k:"plaza",n:"야외 광장",   ic:"🌙", need:15,cx:.645,cy:.815},
- {k:"trail",n:"숲속 산책로", ic:"🥾", need:18,cx:.350,cy:.812},
- {k:"park", n:"건강 공원",   ic:"💚", need:23,cx:.100,cy:.838},
- {k:"wood", n:"비밀의 숲",  ic:"🌲", need:-1,cx:.872,cy:.61, secret:true},
+ {k:"gym",  n:"체육관",     ic:"🏫", need:0, cx:.145,cy:.44,
+  d:"프롬프트 첫걸음 — 구체적으로·순서대로 말하기"},
+ {k:"track",n:"대운동장",   ic:"🏃", need:3, cx:.410,cy:.42,
+  d:"달리기와 공놀이 — 조건 붙이기·기준 정하기"},
+ {k:"court",n:"경기장",     ic:"🏟️", need:7, cx:.745,cy:.29,
+  d:"경기 규칙과 안전 — 심판·응급처치"},
+ {k:"field",n:"티볼 구장",  ic:"⚾", need:10,cx:.690,cy:.57,
+  d:"티볼 실전 — 작전 지시와 역할 정해주기"},
+ {k:"plaza",n:"야외 광장",   ic:"🌙", need:15,cx:.645,cy:.815,
+  d:"판정과 안전 — 기준을 말로 정하기"},
+ {k:"trail",n:"숲속 산책로", ic:"🥾", need:18,cx:.350,cy:.812,
+  d:"2학기 수행평가 코스 — 줄넘기·추크볼·티볼"},
+ {k:"park", n:"건강 공원",   ic:"💚", need:23,cx:.100,cy:.838,
+  d:"건강 체력 관리 — 측정·계획·역도"},
+ {k:"wood", n:"비밀의 숲",  ic:"🌲", need:-1,cx:.872,cy:.61, secret:true,
+  d:"칭호를 모은 사람만 길이 보이는 히든 코스"},
 ];
 function mapRegion(k){return MAP_REGIONS.find(r=>r.k===k)||MAP_REGIONS[0];}
 function mapRegionOpen(k){
@@ -12588,16 +12662,23 @@ function mapRegionOpen(k){
   return S.cleared>=r.need;
 }
 
-/* ── 아케이드 노드 표시 정보 ── */
+/* ── 아케이드 노드 표시 정보 — [아이콘, 이름, 여기서 무엇을 하는가 한 줄] ── */
 const MAP_ARC={
- rope:["➰","줄넘기 서바이벌"], tkd:["🥋","태권도 격파"],
- mafia:["🕵️","마피아 수사"],   mafiaP:["🎭","다같이 마피아"],
- run:["🏃","100m 달리기"],      pk:["⚽","승부차기"],
- bb:["⚾","프롬프트 야구"],      land:["🗺️","프롬프트 땅따먹기"],
- judge:["⚖️","판정관 챌린지"],  cpr:["🚑","응급처치 119"],
- essay:["📝","티볼 논술 빌더"], duel:["⚔️","규칙 대결 (2인)"],
- master:["🔥","찐 고수 격파"],  speed:["⚡","스피드 판정"],
- escape:["🚪","체육관 탈출"],
+ rope:["➰","줄넘기 서바이벌","박자에 맞춰 타이밍 지시하기"],
+ tkd:["🥋","태권도 격파","발차기 순서를 정확히 지시하기"],
+ mafia:["🕵️","마피아 수사","단서를 모아 범인 추리하기 (혼자)"],
+ mafiaP:["🎭","다같이 마피아","교실에서 4~15명이 함께"],
+ run:["🏃","100m 달리기","조건을 붙여 더 빠르게"],
+ pk:["⚽","승부차기","목표 지점을 콕 집어 말하기"],
+ bb:["⚾","프롬프트 야구","코스 수읽기 + 타이밍"],
+ land:["🗺️","프롬프트 땅따먹기","방향과 세기를 숫자로"],
+ judge:["⚖️","판정관 챌린지","경기 상황 판정 10문제 → ⚖️ 라이선스"],
+ cpr:["🚑","응급처치 119","심폐소생술 + AED 순서 익히기"],
+ essay:["📝","티볼 논술 빌더","논술형 수행평가 연습 → 🎓 수료증"],
+ duel:["⚔️","규칙 대결 (2인)","기기 1대로 둘이 맞붙기"],
+ master:["🔥","찐 고수 격파","히든 — 최고 난도 대결"],
+ speed:["⚡","스피드 판정","히든 — 순간 판단 훈련"],
+ escape:["🚪","체육관 탈출","방 탈출식 규칙 퀴즈"],
 };
 
 /* ── 노드 배치 ────────────────────────────────────────────────────────
@@ -12695,7 +12776,7 @@ const MP={cv:null,g:null,cw:0,ch:0,dpr:1,
      pan     : [목표x, 목표y, 남은초] — 새 구역이 열리면 카메라가 한 번 비춰 준다
      bounce  : 노드에 막 도착했을 때 통통 튀는 값(1 → 0)
      booted  : 첫 로딩에서는 연출을 건너뛴다 (이어하기로 들어와도 안 시끄럽게) */
-  fog:{}, regSeen:{}, pan:null, bounce:0, booted:0, tags:[], occ:[]};
+  fog:{}, regSeen:{}, pan:null, bounce:0, booted:0, tags:[], occ:[], nodeBox:[], infoSig:""};
 
 function mapNodePx(n){return [n.x*MAPW, n.y*MAPH];}
 
@@ -12709,10 +12790,13 @@ function mapRegionBox(k){
   return [x0-pad,y0-pad,x1+pad,y1+pad];
 }
 
-/* 이름표용 짧은 이름 — 괄호 설명은 통째로 빼고, 길면 잘라 준다 */
+/* 이름표용 짧은 이름 — 괄호 설명은 통째로 빼고, 길면 잘라 준다.
+   화면이 넓으면 더 길게 보여 준다("탁구 랠리 …"처럼 잘려서 뭔지 모르는 일이 없게).
+   그래도 잘린 이름은 아래 '고른 곳' 카드에 항상 전체가 나온다. */
 function mapShortName(nm){
   const base=(nm||"").replace(/\s*[（(].*$/,"").trim()||nm||"";
-  return base.length>7?base.slice(0,6)+"…":base;
+  const lim=MP.cw<430?7:(MP.cw<760?9:12);
+  return base.length>lim?base.slice(0,lim-1)+"…":base;
 }
 
 /* 노드 이름표 — 항상 켜 둔다.
@@ -12733,15 +12817,20 @@ function mapFlushTags(g,s){
   g.textAlign="center";g.textBaseline="top";
   const list=MP.tags.slice().sort((a,b)=>(TAG_PRI[a.st]-TAG_PRI[b.st])||(a.y-b.y));
   const put=MP.occ;put.length=0;
+  /* 동그라미 자리부터 먼저 '찜'해 둔다 — 이름표·간판이 다른 노드를 덮지 않게.
+     (야외 광장 간판이 피구 노드 위에 겹쳐 보이던 문제) */
+  MP.nodeBox.forEach(b=>put.push(b));
   list.forEach(o=>{
     const w=g.measureText(o.t).width+11;
-    const bx=o.x-w/2, by=o.y;
+    /* 화면 밖으로 삐져나가 '핸드…'처럼 잘리지 않게 좌우로 밀어 넣는다 */
+    const bx=Math.max(3,Math.min(MP.cw-w-3,o.x-w/2)), by=o.y;
     /* 이미 자리 잡은 이름표와 겹치면 그냥 안 그린다 — 겹쳐 읽히느니 하나만 */
     for(let i=0;i<put.length;i++){
       const p=put[i];
       if(bx<p[0]+p[2]+3&&bx+w+3>p[0]&&by<p[1]+p[3]+2&&by+h+2>p[1])return;
     }
     put.push([bx,by,w,h]);
+    o.x=bx+w/2;
     g.fillStyle = o.st==="open" ? "rgba(46,31,4,.88)" : "rgba(10,14,30,.78)";
     g.beginPath();g.roundRect(bx,by,w,h,h/2);g.fill();
     g.fillStyle = (o.st==="lock"||o.st==="hide") ? "rgba(226,232,248,.70)"
@@ -12766,20 +12855,33 @@ function mapDrawSigns(g,s){
     g.font="800 "+fs.toFixed(1)+"px system-ui, 'Apple Color Emoji', sans-serif";
     g.textAlign="center";g.textBaseline="middle";
     const w=g.measureText(txt).width+18, h=fs+12;
-    const bx=sx-w/2, by=sy-h;
-    for(let i=0;i<MP.occ.length;i++){
-      const p=MP.occ[i];
-      if(bx<p[0]+p[2]+3&&bx+w+3>p[0]&&by<p[1]+p[3]+3&&by+h+3>p[1]){g.restore();return;}
+    /* \uC790\uB9AC \uCC3E\uAE30 \u2014 \uC6D0\uB798 \uC790\uB9AC\uAC00 \uB9C9\uD600 \uC788\uC73C\uBA74 \uC704\uB85C \uD55C \uCE78\uC529 \uC62C\uB824 \uBCF8\uB2E4.
+       (\uC608\uC804\uC5D0\uB294 \uBC14\uB85C \uD3EC\uAE30\uD574\uC11C \uAC04\uD310\uC774 \uC0AC\uB77C\uC9C0\uAC70\uB098, \uB178\uB4DC \uC704\uC5D0 \uACB9\uCCD0 \uADF8\uB824\uC84C\uB2E4) */
+    let bx=Math.max(3,Math.min(MP.cw-w-3,sx-w/2)), by=sy-h, okPos=false;
+    /* 위로 세 칸 × 좌우 세 자리를 훑는다 — 가운데가 막혔다고 간판을 통째로
+       버리면 "여기가 어느 구역이지?"가 다시 안 풀리기 때문 */
+    const KOFF=[0,1,2,-1,-2];            /* 위로 두 칸 → 그래도 막히면 구역 안쪽으로 */
+    for(let k=0;k<KOFF.length&&!okPos;k++)for(let j=0;j<3&&!okPos;j++){
+      const ty=sy-h-KOFF[k]*(h+5);
+      const tx0=Math.max(3,Math.min(MP.cw-w-3,sx-w/2+[0,-w*0.85,w*0.85][j]));
+      let hit=false;
+      for(let i=0;i<MP.occ.length;i++){
+        const p=MP.occ[i];
+        if(tx0<p[0]+p[2]+3&&tx0+w+3>p[0]&&ty<p[1]+p[3]+3&&ty+h+3>p[1]){hit=true;break;}
+      }
+      if(!hit){by=ty;bx=tx0;okPos=true;}
     }
+    if(!okPos){g.restore();return;}       /* \uC138 \uC790\uB9AC \uB2E4 \uB9C9\uD614\uC73C\uBA74 \uAC04\uD310\uC740 \uC591\uBCF4 */
+    const tx=bx+w/2;                      /* \uD654\uBA74 \uBC16\u00B7\uB178\uB4DC \uC704\uB97C \uD53C\uD574 \uC62E\uACA8 \uC7A1\uC740 \uAC04\uD310 \uAC00\uC6B4\uB370 */
     MP.occ.push([bx,by,w,h]);
     g.fillStyle=open?"#6d4a28":"#3a3e4d";
-    g.fillRect(sx-2*s,sy,Math.max(3,4*s),Math.max(6,10*s));
+    g.fillRect(tx-2*s,by+h,Math.max(3,4*s),Math.max(6,10*s));   /* 기둥은 간판 바로 아래 */
     g.fillStyle=open?"#8b5e34":"#4a4f63";
     g.beginPath();g.roundRect(bx,by,w,h,5*s);g.fill();
     g.strokeStyle=open?"rgba(255,232,190,.55)":"rgba(226,232,248,.32)";
     g.lineWidth=Math.max(1,1.6*s);g.stroke();
     g.fillStyle=open?"#ffeccb":"rgba(226,232,248,.72)";
-    g.fillText(txt,sx,by+h/2+0.5);
+    g.fillText(txt,tx,by+h/2+0.5);
     g.restore();
   });
 }
@@ -12863,6 +12965,7 @@ function mapDraw(dt){
   const s=mapScale();
   g.setTransform(MP.dpr,0,0,MP.dpr,0,0);
   g.clearRect(0,0,MP.cw,MP.ch);
+  MP.nodeBox.length=0;   /* 이번 프레임의 동그라미 자리 — 이름표·간판이 피해 갈 곳 */
 
   /* 배경 */
   if(MAP_READY){
@@ -12924,6 +13027,7 @@ function mapDraw(dt){
     const [x,y]=w2s(wx,wy);
     const R=Math.max(15,(n.t==="m"?23:19)*s);
     if(x<-60||x>MP.cw+60||y<-60||y>MP.ch+60)return;
+    MP.nodeBox.push([x-R,y-R,2*R,2*R]);   /* 이름표·간판이 이 자리를 덮지 않도록 미리 찜 */
 
     /* 숨겨진 곳은 없는 척하지 않는다 — 물음표 실루엣으로 "여기 뭔가 있다"를 알려 준다.
        완전히 안 보이면 학생이 찾아볼 생각을 아예 안 하기 때문 */
@@ -13008,6 +13112,7 @@ function mapDraw(dt){
       +(st==="open"?`<em class="mh-go">GO</em>`:"")
       +(st==="lock"?`<em class="mh-lk">🔒</em>`:"");
   }
+  mapRenderInfo();   /* 고른 곳 설명 카드 (바뀔 때만 다시 그린다) */
 }
 
 /* 캐릭터 — 기존 아바타 부품(a3_anim.js)을 그대로 써서 스킨이 맵에도 반영된다 */
@@ -13089,6 +13194,130 @@ function mapMoveDir(d){
   if(best<0)return;
   MP.camFree=false;
   mapGoto(best);
+}
+
+/* ── 지도 아래 안내 카드 ───────────────────────────────────────────────
+   선생님 피드백: "저기서 무엇을 할 수 있고 어떻게 열리는지 설명이 없어서
+   왜 잠겼는지도 모르겠다."
+   지도 그림 위에는 글자를 길게 쓸 자리가 없다(그래서 이름표가 잘렸다).
+   그래서 설명은 지도 밖으로 빼서 두 칸으로 정리한다 —
+     ① #mapInfo  : 지금 고른 한 곳의 전체 이름 · 무엇을 하는 곳인지 ·
+                   상태 · (잠겼다면) 어떻게 열리는지 + 들어가기 단추
+     ② #mapGuide : 동그라미 색이 무슨 뜻인지 + 8개 구역이 각각 언제 열리는지
+   ※ 펼침 여부는 아래 모듈 변수에만 둔다. S(저장코드)는 절대 건드리지 않는다. */
+let MAP_GUIDE_OPEN=false;
+
+/* 이 노드가 어떤 종류인지 — 배지 글자와 색 */
+function mapKind(n){
+  if(n.t==="m")return["학습 미션","k-m"];
+  return mapRegion(n.r).secret?["히든 코스","k-h"]:["아케이드 게임","k-a"];
+}
+/* 여기서 무엇을 하는가 — 한 줄 */
+function mapDoing(n){
+  if(n.t==="m"){
+    const m=MISSIONS[n.i]||{};
+    const p=(typeof PRINCIPLES!=="undefined"&&PRINCIPLES[m.principle])||"프롬프트 연습";
+    return `배우는 것 · <b>${p}</b> — ${m.free?"직접 입력해서 지시하기":"카드를 골라 문장 만들기"}`;
+  }
+  const a=MAP_ARC[n.g];
+  return (a&&a[2])?a[2]:"미니 게임";
+}
+/* 상태 한 줄 + (잠겼다면) 열리는 방법. [색깔 클래스, 문장] */
+function mapWhy(n,st){
+  const q=(()=>{try{return questCount();}catch(e){return 0;}})();
+  if(st==="done")return["w-ok","✅ 이미 깼어요 — 다시 들어가서 연습해도 됩니다."];
+  if(st==="hide"){
+    if(n.g==="master")return["w-lk",`❓ 숨겨진 곳이에요 — <b>⚖️ 공정한 심판</b> 칭호를 받으면 나타나요. (판정관 챌린지에서 받을 수 있어요)`];
+    if(n.g==="speed") return["w-lk",`❓ 숨겨진 곳이에요 — 칭호 <b>5개</b>를 모으면 나타나요. <i>지금 ${q}/5</i>`];
+    return["w-lk","❓ 아직 숨겨져 있어요."];
+  }
+  if(st==="open")return["w-go","👉 지금 바로 들어갈 수 있어요."];
+  /* 잠김 */
+  if(n.t==="m"){
+    const need=n.i;                        /* 앞 미션을 다 깨야 이 미션이 열린다 */
+    const left=Math.max(0,need-S.cleared);
+    return["w-lk",`🔒 미션은 순서대로 열려요 — <b>${left}개</b>만 더 깨면 여기예요. <i>지금 ${S.cleared}/${need}</i>`];
+  }
+  const r=mapRegion(n.r);
+  if(r.secret)return["w-lk",`🔒 <b>${r.n}</b>은 칭호 <b>3개</b>를 모으면 길이 보여요. <i>지금 ${q}/3</i>`];
+  return["w-lk",`🔒 <b>${r.n}</b>이 열려야 해요 — 미션 <b>${r.need}개</b> 클리어. <i>지금 ${S.cleared}/${r.need}</i>`];
+}
+/* 구역이 언제 열리는지 — 한 줄 */
+function mapRegWhy(r){
+  const q=(()=>{try{return questCount();}catch(e){return 0;}})();
+  if(r.secret)return mapRegionOpen(r.k)?"열림"
+    :`🔒 칭호 3개 (지금 ${q}/3)`;
+  if(mapRegionOpen(r.k))return "열림";
+  return `🔒 미션 ${r.need}개 (지금 ${S.cleared}/${r.need})`;
+}
+
+function mapRenderInfo(){
+  const el=$("mapInfo");if(!el)return;
+  const n=MAP_NODES[MP.cur];if(!n)return;
+  const st=mapNodeState(n);
+  const sig=[MP.cur,st,S.cleared,(()=>{try{return questCount();}catch(e){return 0;}})()].join("|");
+  if(MP.infoSig===sig)return;              /* 매 프레임 innerHTML을 다시 쓰지 않는다 */
+  MP.infoSig=sig;
+  const [ic,nm]=mapNodeLabel(n);
+  const r=mapRegion(n.r);
+  const [kd,kc]=mapKind(n);
+  const [wc,wt]=mapWhy(n,st);
+  const canGo=(st==="done"||st==="open");
+  el.innerHTML=
+    `<div class="mi-top"><span class="mi-ic">${st==="hide"?"❓":ic}</span>`
+    +`<div class="mi-name"><b>${st==="hide"?"??? 숨겨진 코스":nm}</b>`
+    +`<span class="mi-reg">${r.ic} ${r.n}</span></div>`
+    +`<span class="mi-kind ${kc}">${kd}</span></div>`
+    +(st==="hide"?"":`<p class="mi-do">${mapDoing(n)}</p>`)
+    +`<p class="mi-why ${wc}">${wt}</p>`
+    +`<button type="button" id="miGo" class="mi-go"${canGo?"":" disabled"}>`
+    +(canGo?"▶ 여기 들어가기":"🔒 아직 못 들어가요")+`</button>`;
+}
+
+function mapRenderGuide(){
+  const el=$("mapGuide");if(!el)return;
+  /* 표(3칸)로 두면 왼쪽 칸이 좁은 PC에서 글자가 한 글자씩 줄바꿈된다.
+     그래서 한 구역 = 한 덩어리로 쌓는다 — 이름/상태 한 줄, 설명 한 줄, 개수 한 줄. */
+  const rows=MAP_REGIONS.map(r=>{
+    const ns=MAP_NODES.filter(n=>n.r===r.k);
+    const nm=ns.filter(n=>n.t==="m").length, na=ns.length-nm;
+    const open=mapRegionOpen(r.k);
+    return `<div class="mg-row${open?"":" lk"}">`
+      +`<div class="mg-h"><b>${r.ic} ${r.n}</b>`
+      +`<span class="mg-lk${open?" ok":""}">${mapRegWhy(r)}</span></div>`
+      +`<p class="mg-d">${r.d||""}</p>`
+      +`<p class="mg-cnt">${nm?`미션 ${nm}개`:""}${nm&&na?" · ":""}${na?`게임 ${na}개`:""}</p>`
+      +`</div>`;
+  }).join("");
+  el.innerHTML=
+    `<button type="button" id="mgTog" class="mg-tog" aria-expanded="${MAP_GUIDE_OPEN}">`
+    +`❔ 지도 보는 법 · 어디가 언제 열리나 <span>${MAP_GUIDE_OPEN?"▲":"▼"}</span></button>`
+    +`<div class="mg-body${MAP_GUIDE_OPEN?"":" hidden"}">`
+    +`<p class="mg-leg"><span class="lg lg-go">🟡</span>지금 할 곳`
+    +`<span class="lg lg-ok">🟢</span>깬 곳`
+    +`<span class="lg lg-ar">🔵</span>아케이드 게임`
+    +`<span class="lg lg-lk">⚪</span>잠김`
+    +`<span class="lg lg-hd">❓</span>숨은 곳</p>`
+    +`<p class="mg-hint">동그라미를 누르면 캐릭터가 걸어가고, 아래 카드에 그곳 설명이 나와요. 한 번 더 누르면 들어갑니다.</p>`
+    +`<div class="mg-list">${rows}</div></div>`;
+}
+
+/* 안내 카드의 단추 — 한 번만 묶어 둔다(내용은 계속 새로 그려지므로 위임으로) */
+function mapBindInfo(){
+  const wrap=$("mapRailBot")||document.body;
+  if(!wrap._miBound){
+    wrap._miBound=true;
+    wrap.addEventListener("click",e=>{
+      if(e.target.closest("#mgTog")){MAP_GUIDE_OPEN=!MAP_GUIDE_OPEN;mapRenderGuide();}
+    });
+  }
+  const inf=$("mapInfo");
+  if(inf&&!inf._miBound){
+    inf._miBound=true;
+    inf.addEventListener("click",e=>{
+      if(e.target.closest("#miGo"))mapEnter();
+    });
+  }
 }
 
 /* ── 들어가기 ── */
@@ -13239,6 +13468,9 @@ function mapRefresh(){
   }
   mapClampCam();
   try{mapCheckUnlock();}catch(e){}   /* 새로 열린 구역이 있으면 안개 걷기 + 카메라 */
+  /* 미션을 깨고 돌아왔으면 열림 조건 숫자도 같이 갱신 */
+  MP.infoSig="";
+  try{mapBindInfo();mapRenderGuide();mapRenderInfo();}catch(e){}
 }
 function mapMode(on){
   MAP_ON=!!on;
@@ -13250,6 +13482,8 @@ function mapMode(on){
   /* PC 2단 레이아웃에서 목록 모드일 땐 오른쪽 칸이 비어 버린다 — 왼쪽 패널을 전체 폭으로 */
   const sc=$("mapScreen");
   if(sc)sc.classList.toggle("listMode",!MAP_ON);
+  const gd=$("mapGuide");
+  if(gd)gd.classList.toggle("hidden",!MAP_ON);   /* 목록 모드에선 지도 안내는 접어 둔다 */
   if(MAP_ON)mapRefresh();
 }
 

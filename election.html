@@ -86,8 +86,9 @@
   <div class="card step on" data-step="0">
     <span class="big-emoji">🗳️</span>
     <h1>2학기 반장·부반장 선거<br>후보를 찾습니다!</h1>
-    <p class="desc">우리 반을 이끌 리더에 도전해 보세요.<br>딱 <b>2분</b>이면 후보 등록 끝!</p>
-    <button class="btn" onclick="go(1)">🚀 후보 등록 시작하기</button>
+    <p class="desc">직접 출마해도 좋고,<br>어울리는 친구를 추천해도 좋아요. 딱 <b>2분</b>!</p>
+    <button class="btn" onclick="go(1)">🙋 내가 출마할래요</button>
+    <button class="btn" style="background:linear-gradient(160deg,#059669,#0ea5e9)" onclick="rStart()">👍 친구를 추천할래요</button>
     <div class="notice">🔒 여기에 쓴 내용은 <b>담임 선생님만</b> 확인해요.<br>친구들에게는 보이지 않아요.</div>
   </div>
 
@@ -145,6 +146,9 @@
     <button class="btn ghost" onclick="go(4)">← 고치러 가기</button>
   </div>
 
+  <!-- STEP 7: 친구 추천 (JS 렌더링) -->
+  <div class="card step" data-step="7"><div id="rBox"></div></div>
+
   <!-- STEP 6: 완료 -->
   <div class="card step" data-step="6">
     <div class="done-wrap">
@@ -183,9 +187,10 @@ const esc = s => String(s??'').replace(/[&<>"']/g, c=>({'&':'&amp;','<':'&lt;','
   for(let i=0;i<TOTAL;i++) d.insertAdjacentHTML('beforeend','<span></span>');
 })();
 
-function go(n){
+function go(n, dotIdx){
   document.querySelectorAll('.step').forEach(s=>s.classList.toggle('on', +s.dataset.step===n));
-  document.querySelectorAll('#dots span').forEach((sp,i)=>sp.classList.toggle('on', i===n));
+  const d = dotIdx!==undefined ? dotIdx : Math.min(n, TOTAL-1);
+  document.querySelectorAll('#dots span').forEach((sp,i)=>sp.classList.toggle('on', i===d));
   window.scrollTo({top:0, behavior:'smooth'});
 }
 
@@ -230,9 +235,17 @@ function buildPoster(){
       ${$('fMotto').value.trim() ? `<div class="p-motto">“${esc($('fMotto').value.trim())}”</div>` : ''}
     </div>`;
 }
-function submitForm(){
+function doSubmit(onDone){
   if(submitted) return;
   submitted = true;
+  let finished = false;
+  const finish = ()=>{ if(finished) return; finished=true; onDone(); confetti(); };
+  $('gframe').addEventListener('load', finish, {once:true});
+  setTimeout(finish, 2500);          // 응답이 늦어도 완료 화면으로
+  $('gform').submit();
+}
+function submitForm(){
+  if(submitted) return;
   $('submitBtn').disabled = true;
   $('submitBtn').textContent = '제출 중...';
   $('g_num').value = $('fNum').value.trim();
@@ -240,12 +253,103 @@ function submitForm(){
   $('g_pos').value = pos;
   $('g_pledge').value = pledges().map((p,i)=>(i+1)+'. '+p).join('\n');
   $('g_motto').value = $('fMotto').value.trim();
+  doSubmit(()=>{ $('doneName').textContent = $('fName').value.trim(); go(6); });
+}
 
-  let finished = false;
-  const finish = ()=>{ if(finished) return; finished=true; $('doneName').textContent = $('fName').value.trim(); go(6); confetti(); };
-  $('gframe').addEventListener('load', finish, {once:true});
-  setTimeout(finish, 2500);          // 응답이 늦어도 완료 화면으로
-  $('gform').submit();
+/* ---------- 친구 추천 ---------- */
+let rd = null;
+function rStart(){ rd = {step:0, pos:'반장', fnum:'', fname:'', reason:'', me:''}; go(7,1); rRender(); }
+function rRender(){
+  const b = $('rBox');
+  if(rd.step===0){
+    go(7,1);
+    b.innerHTML = `
+      <h2>어떤 직책으로 추천할까? 👍</h2>
+      <div class="pos-cards">
+        <button class="pos-card ${rd.pos==='반장'?'sel':''}" onclick="rd.pos='반장';rRender()"><span class="pe">🎖️</span>반장</button>
+        <button class="pos-card ${rd.pos==='부반장'?'sel':''}" onclick="rd.pos='부반장';rRender()"><span class="pe">🤝</span>부반장</button>
+      </div>
+      <button class="btn" onclick="rd.step=1;rRender()">다음 →</button>
+      <button class="btn ghost" onclick="go(0)">← 처음으로</button>`;
+  }
+  else if(rd.step===1){
+    go(7,2);
+    b.innerHTML = `
+      <h2>추천할 친구는 누구야? 😊</h2>
+      <div class="field"><label>친구 번호</label><input id="rNum" type="number" inputmode="numeric" min="1" max="99" value="${rd.fnum}" placeholder="예: 12"></div>
+      <div class="field"><label>친구 이름</label><input id="rName" type="text" maxlength="15" value="${rd.fname}" placeholder="이름을 입력하세요"></div>
+      <div class="err" id="rErr1"></div>
+      <button class="btn" onclick="rNext1()">다음 →</button>
+      <button class="btn ghost" onclick="rd.step=0;rRender()">← 이전</button>`;
+  }
+  else if(rd.step===2){
+    go(7,3);
+    b.innerHTML = `
+      <h2>추천하는 이유 💌</h2>
+      <p class="hint">왜 이 친구가 ${rd.pos}에 어울리는지 알려줘. 선생님이 읽고 살짝 출마를 권해볼게!</p>
+      <div class="field"><textarea id="rReason" rows="3" maxlength="120" placeholder="예: 친구들 이야기를 잘 들어주고 책임감이 강해서">${rd.reason}</textarea></div>
+      <div class="field"><label>내 이름 (밝히기 싫으면 비워도 돼)</label><input id="rMe" type="text" maxlength="15" value="${rd.me}" placeholder="선택 사항"></div>
+      <div class="err" id="rErr2"></div>
+      <button class="btn" onclick="rNext2()">추천 카드 보기 →</button>
+      <button class="btn ghost" onclick="rSave();rd.step=1;rRender()">← 이전</button>`;
+  }
+  else if(rd.step===3){
+    go(7,4);
+    b.innerHTML = `
+      <h2>추천 카드 확인 ✅</h2>
+      <div class="poster">
+        <div class="p-head" style="background:linear-gradient(160deg,#059669,#0ea5e9)">
+          <div class="p-pos">${esc(rd.pos)} 추천</div>
+          <div class="p-name">${esc(rd.fname)}</div>
+          <div class="p-num">${esc(rd.fnum)}번</div>
+        </div>
+        <div class="p-body">
+          <div class="p-title" style="color:#059669">추천 이유</div>
+          <div style="font-size:14.5px; line-height:1.7; font-weight:600">${esc(rd.reason)}</div>
+          <div class="p-motto">${rd.me?`추천한 사람: ${esc(rd.me)}`:'익명 추천'}</div>
+        </div>
+      </div>
+      <button class="btn" id="rSubmitBtn" onclick="submitReco()">💝 추천 제출하기</button>
+      <button class="btn ghost" onclick="rd.step=2;rRender()">← 고치러 가기</button>`;
+  }
+  else if(rd.step===4){
+    go(7,6);
+    b.innerHTML = `
+      <div class="done-wrap">
+        <span class="big-emoji">💝</span>
+        <h2 style="text-align:center">추천 완료!</h2>
+        <p class="desc"><b>${esc(rd.fnum)}번 ${esc(rd.fname)}</b> ${esc(rd.pos)} 추천이 전달됐어요.<br>친구를 생각하는 따뜻한 마음, 고마워요!</p>
+        <button class="btn ghost" onclick="location.reload()">처음 화면으로</button>
+      </div>`;
+  }
+}
+function rSave(){
+  const g=id=>{const el=$(id);return el?el.value.trim():'';};
+  if($('rNum')){ rd.fnum=g('rNum'); rd.fname=g('rName'); }
+  if($('rReason')){ rd.reason=g('rReason'); rd.me=g('rMe'); }
+}
+function rNext1(){
+  rd.fnum=$('rNum').value.trim(); rd.fname=$('rName').value.trim();
+  if(!rd.fnum||!rd.fname){ $('rErr1').textContent='친구의 번호와 이름을 입력해줘!'; return; }
+  const n=Number(rd.fnum);
+  if(!Number.isInteger(n)||n<1||n>99){ $('rErr1').textContent='번호는 1~99 사이 숫자로 입력해줘!'; return; }
+  rd.step=2; rRender();
+}
+function rNext2(){
+  rSave();
+  if(!rd.reason){ $('rErr2').textContent='추천하는 이유를 적어줘!'; return; }
+  rd.step=3; rRender();
+}
+function submitReco(){
+  if(submitted) return;
+  $('rSubmitBtn').disabled = true;
+  $('rSubmitBtn').textContent = '제출 중...';
+  $('g_num').value = rd.fnum;
+  $('g_name').value = '(추천) ' + rd.fname;
+  $('g_pos').value = rd.pos;
+  $('g_pledge').value = '[친구 추천] 이유: ' + rd.reason;
+  $('g_motto').value = rd.me ? '추천한 사람: ' + rd.me : '익명 추천';
+  doSubmit(()=>{ rd.step=4; rRender(); });
 }
 function confetti(){
   const emo = ['🎉','🎊','⭐','🗳️','💜','🏅'];

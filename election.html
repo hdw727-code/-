@@ -1,0 +1,262 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+<title>🗳 반장·부반장 선거 후보 등록</title>
+<style>
+  :root{
+    --grad: linear-gradient(160deg,#4f46e5,#7c3aed 55%,#db2777);
+    --ink:#1e1b3a; --sub:#6b7280; --card:#ffffff; --line:#e5e7eb;
+    --blue:#4f46e5; --pink:#db2777; --green:#059669;
+  }
+  *{box-sizing:border-box; margin:0; padding:0; -webkit-tap-highlight-color:transparent;}
+  html,body{height:100%;}
+  body{font-family:"Pretendard","Malgun Gothic","맑은 고딕",-apple-system,sans-serif; background:var(--grad); color:var(--ink); display:flex; flex-direction:column; align-items:center; padding:20px 16px 40px;}
+  .app{width:100%; max-width:440px;}
+
+  /* 진행 표시 */
+  .dots{display:flex; justify-content:center; gap:8px; margin-bottom:16px;}
+  .dots span{width:10px; height:10px; border-radius:50%; background:rgba(255,255,255,.35); transition:all .25s;}
+  .dots span.on{background:#fff; width:26px; border-radius:6px;}
+
+  .card{background:var(--card); border-radius:22px; padding:26px 22px; box-shadow:0 14px 40px rgba(20,10,60,.35); animation:pop .3s ease;}
+  @keyframes pop{from{transform:translateY(14px) scale(.98); opacity:0;} to{transform:none; opacity:1;}}
+
+  h1{font-size:22px; line-height:1.35; text-align:center;}
+  h2{font-size:19px; margin-bottom:6px;}
+  .big-emoji{font-size:54px; text-align:center; display:block; margin-bottom:10px;}
+  .desc{font-size:14px; color:var(--sub); line-height:1.6; text-align:center; margin-top:10px;}
+  .notice{margin-top:14px; background:#f5f3ff; color:#5b21b6; font-size:12.5px; border-radius:12px; padding:10px 12px; line-height:1.55; text-align:center;}
+
+  button{font-family:inherit; cursor:pointer; border:none;}
+  .btn{display:block; width:100%; padding:16px; border-radius:16px; font-size:17px; font-weight:800; margin-top:18px; background:var(--grad); color:#fff; box-shadow:0 6px 18px rgba(79,70,229,.4); transition:transform .1s;}
+  .btn:active{transform:scale(.97);}
+  .btn.ghost{background:#f3f4f6; color:var(--sub); box-shadow:none; font-weight:600; font-size:14px; padding:12px; margin-top:10px;}
+  .btn:disabled{opacity:.45; box-shadow:none;}
+
+  /* 직책 선택 */
+  .pos-cards{display:grid; grid-template-columns:1fr 1fr; gap:12px; margin-top:16px;}
+  .pos-card{background:#f8f7ff; border:3px solid transparent; border-radius:18px; padding:22px 10px; text-align:center; font-size:16px; font-weight:800; color:var(--ink); transition:all .15s;}
+  .pos-card .pe{font-size:42px; display:block; margin-bottom:8px;}
+  .pos-card.sel{border-color:var(--blue); background:#eef2ff; transform:scale(1.03);}
+
+  /* 입력 */
+  .field{margin-top:14px;}
+  .field label{display:block; font-size:13px; font-weight:700; color:var(--sub); margin-bottom:6px;}
+  .field input, .field textarea{width:100%; font-family:inherit; font-size:16px; padding:13px 14px; border:2px solid var(--line); border-radius:14px; background:#fafafa; transition:border .15s;}
+  .field input:focus, .field textarea:focus{outline:none; border-color:var(--blue); background:#fff;}
+  .hint{font-size:12px; color:#9ca3af; margin-top:6px; line-height:1.5;}
+  .pledge-row{display:flex; align-items:center; gap:8px; margin-top:10px;}
+  .pledge-row .no{font-size:18px; flex-shrink:0;}
+  .pledge-row input{flex:1; font-family:inherit; font-size:15px; padding:12px 13px; border:2px solid var(--line); border-radius:12px; background:#fafafa;}
+  .pledge-row input:focus{outline:none; border-color:var(--pink); background:#fff;}
+  .err{color:#dc2626; font-size:13px; margin-top:8px; min-height:18px; font-weight:600;}
+
+  /* 포스터 미리보기 */
+  .poster{border:4px solid var(--ink); border-radius:16px; overflow:hidden; margin-top:14px;}
+  .poster .p-head{background:var(--grad); color:#fff; text-align:center; padding:16px 10px;}
+  .poster .p-head .p-pos{font-size:13px; font-weight:700; letter-spacing:4px; opacity:.9;}
+  .poster .p-head .p-name{font-size:26px; font-weight:900; margin-top:4px;}
+  .poster .p-head .p-num{font-size:12px; opacity:.85; margin-top:2px;}
+  .poster .p-body{padding:14px 16px; background:#fffdf5;}
+  .poster .p-title{font-size:12px; font-weight:800; color:var(--pink); letter-spacing:2px; margin-bottom:8px;}
+  .poster ol{padding-left:20px; font-size:14.5px; line-height:1.7; font-weight:600;}
+  .poster .p-motto{margin-top:12px; font-size:14px; font-style:italic; color:#374151; border-top:1px dashed #d1d5db; padding-top:10px; text-align:center;}
+
+  /* 완료 */
+  .done-wrap{text-align:center; padding:10px 0;}
+  .done-wrap .big-emoji{font-size:64px; animation:bounce .6s ease infinite alternate;}
+  @keyframes bounce{from{transform:translateY(0);} to{transform:translateY(-8px);}}
+
+  /* 콘페티 */
+  .confetti{position:fixed; top:-20px; font-size:22px; animation:fall linear forwards; z-index:99; pointer-events:none;}
+  @keyframes fall{to{transform:translateY(110vh) rotate(720deg);}}
+
+  .step{display:none;}
+  .step.on{display:block;}
+  .foot{margin-top:14px; text-align:center; font-size:11.5px; color:rgba(255,255,255,.75); line-height:1.6;}
+</style>
+</head>
+<body>
+<div class="app">
+  <div class="dots" id="dots"></div>
+
+  <!-- STEP 0: 인트로 -->
+  <div class="card step on" data-step="0">
+    <span class="big-emoji">🗳️</span>
+    <h1>2학기 반장·부반장 선거<br>후보를 찾습니다!</h1>
+    <p class="desc">우리 반을 이끌 리더에 도전해 보세요.<br>딱 <b>2분</b>이면 후보 등록 끝!</p>
+    <button class="btn" onclick="go(1)">🚀 후보 등록 시작하기</button>
+    <div class="notice">🔒 여기에 쓴 내용은 <b>담임 선생님만</b> 확인해요.<br>친구들에게는 보이지 않아요.</div>
+  </div>
+
+  <!-- STEP 1: 직책 -->
+  <div class="card step" data-step="1">
+    <h2>어디에 도전할까요?</h2>
+    <p class="hint">출마할 직책을 골라주세요.</p>
+    <div class="pos-cards">
+      <button class="pos-card" id="posA" onclick="pickPos('반장')"><span class="pe">🎖️</span>반장</button>
+      <button class="pos-card" id="posB" onclick="pickPos('부반장')"><span class="pe">🤝</span>부반장</button>
+    </div>
+    <div class="err" id="err1"></div>
+    <button class="btn" onclick="next1()">다음 →</button>
+    <button class="btn ghost" onclick="go(0)">← 처음으로</button>
+  </div>
+
+  <!-- STEP 2: 번호/이름 -->
+  <div class="card step" data-step="2">
+    <h2>후보님, 누구신가요? 😎</h2>
+    <div class="field"><label>번호</label><input id="fNum" type="number" inputmode="numeric" placeholder="예: 7"></div>
+    <div class="field"><label>이름</label><input id="fName" type="text" placeholder="이름을 입력하세요"></div>
+    <div class="err" id="err2"></div>
+    <button class="btn" onclick="next2()">다음 →</button>
+    <button class="btn ghost" onclick="go(1)">← 이전</button>
+  </div>
+
+  <!-- STEP 3: 공약 -->
+  <div class="card step" data-step="3">
+    <h2>나의 공약 📢</h2>
+    <p class="hint">당선되면 하고 싶은 일을 1~3가지 적어주세요. 구체적일수록 표가 모여요!</p>
+    <div class="pledge-row"><span class="no">1️⃣</span><input id="p1" placeholder="예: 아침마다 알림장 정리해서 공지하기"></div>
+    <div class="pledge-row"><span class="no">2️⃣</span><input id="p2" placeholder="예: 건의함 만들어서 매주 확인하기"></div>
+    <div class="pledge-row"><span class="no">3️⃣</span><input id="p3" placeholder="예: 한 달에 한 번 학급 놀이 시간 만들기"></div>
+    <div class="err" id="err3"></div>
+    <button class="btn" onclick="next3()">다음 →</button>
+    <button class="btn ghost" onclick="go(2)">← 이전</button>
+  </div>
+
+  <!-- STEP 4: 각오 -->
+  <div class="card step" data-step="4">
+    <h2>각오 한마디 🔥</h2>
+    <p class="hint">한 문장으로 마음을 보여주세요. (건너뛰어도 괜찮아요)</p>
+    <div class="field"><textarea id="fMotto" rows="2" placeholder="예: 한 명 한 명의 목소리를 듣는 반장이 되겠습니다!"></textarea></div>
+    <button class="btn" onclick="buildPoster();go(5)">내 선거 포스터 보기 →</button>
+    <button class="btn ghost" onclick="go(3)">← 이전</button>
+  </div>
+
+  <!-- STEP 5: 포스터 + 제출 -->
+  <div class="card step" data-step="5">
+    <h2>나의 선거 포스터 🖼️</h2>
+    <p class="hint">이대로 제출할까요? 고칠 게 있으면 이전으로 돌아가세요.</p>
+    <div class="poster" id="poster"></div>
+    <div class="err" id="err5"></div>
+    <button class="btn" id="submitBtn" onclick="submitForm()">✅ 제출하기</button>
+    <button class="btn ghost" onclick="go(4)">← 고치러 가기</button>
+  </div>
+
+  <!-- STEP 6: 완료 -->
+  <div class="card step" data-step="6">
+    <div class="done-wrap">
+      <span class="big-emoji">🎉</span>
+      <h2 style="text-align:center">후보 등록 완료!</h2>
+      <p class="desc"><b id="doneName"></b>님, 용기 있는 도전을 응원합니다!<br>선거일에 만나요 🗳️</p>
+    </div>
+  </div>
+
+  <div class="foot">우리 반 선거 후보 등록 · 제출 내용은 담임 선생님만 확인합니다</div>
+</div>
+
+<!-- 구글 폼 전송용 (숨김) -->
+<iframe name="gform_frame" id="gframe" style="display:none"></iframe>
+<form id="gform" action="https://docs.google.com/forms/d/e/1FAIpQLSc-pAaF0yWWa6cR8dw4fwNmERVWcMxCT0xyv5zZ9T-PeErldw/formResponse"
+      method="POST" target="gform_frame" style="display:none">
+  <input name="entry.1133997056" id="g_num">
+  <input name="entry.799271606" id="g_name">
+  <input name="entry.1208240749" id="g_pos">
+  <textarea name="entry.1017716931" id="g_pledge"></textarea>
+  <input name="entry.1062155294" id="g_motto">
+</form>
+
+<script>
+'use strict';
+const TOTAL = 7;
+let pos = '';
+let submitted = false;
+
+const $ = id => document.getElementById(id);
+const esc = s => String(s??'').replace(/[&<>"']/g, c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+
+(function initDots(){
+  const d = $('dots');
+  for(let i=0;i<TOTAL;i++) d.insertAdjacentHTML('beforeend','<span></span>');
+})();
+
+function go(n){
+  document.querySelectorAll('.step').forEach(s=>s.classList.toggle('on', +s.dataset.step===n));
+  document.querySelectorAll('#dots span').forEach((sp,i)=>sp.classList.toggle('on', i===n));
+  window.scrollTo({top:0, behavior:'smooth'});
+}
+
+function pickPos(p){
+  pos = p;
+  $('posA').classList.toggle('sel', p==='반장');
+  $('posB').classList.toggle('sel', p==='부반장');
+  $('err1').textContent='';
+}
+function next1(){
+  if(!pos){ $('err1').textContent='직책을 골라주세요!'; return; }
+  go(2);
+}
+function next2(){
+  const n = $('fNum').value.trim(), name = $('fName').value.trim();
+  if(!n || !name){ $('err2').textContent='번호와 이름을 모두 입력해주세요!'; return; }
+  $('err2').textContent='';
+  go(3);
+}
+function pledges(){
+  return [$('p1').value.trim(), $('p2').value.trim(), $('p3').value.trim()].filter(Boolean);
+}
+function next3(){
+  if(!pledges().length){ $('err3').textContent='공약을 한 가지 이상 적어주세요!'; return; }
+  $('err3').textContent='';
+  go(4);
+}
+function buildPoster(){
+  const name = $('fName').value.trim(), num = $('fNum').value.trim();
+  const ps = pledges();
+  $('poster').innerHTML = `
+    <div class="p-head">
+      <div class="p-pos">${esc(pos)} 후보</div>
+      <div class="p-name">${esc(name)}</div>
+      <div class="p-num">${esc(num)}번</div>
+    </div>
+    <div class="p-body">
+      <div class="p-title">MY 공약</div>
+      <ol>${ps.map(p=>`<li>${esc(p)}</li>`).join('')}</ol>
+      ${$('fMotto').value.trim() ? `<div class="p-motto">“${esc($('fMotto').value.trim())}”</div>` : ''}
+    </div>`;
+}
+function submitForm(){
+  if(submitted) return;
+  submitted = true;
+  $('submitBtn').disabled = true;
+  $('submitBtn').textContent = '제출 중...';
+  $('g_num').value = $('fNum').value.trim();
+  $('g_name').value = $('fName').value.trim();
+  $('g_pos').value = pos;
+  $('g_pledge').value = pledges().map((p,i)=>(i+1)+'. '+p).join('\n');
+  $('g_motto').value = $('fMotto').value.trim();
+
+  let finished = false;
+  const finish = ()=>{ if(finished) return; finished=true; $('doneName').textContent = $('fName').value.trim(); go(6); confetti(); };
+  $('gframe').addEventListener('load', finish, {once:true});
+  setTimeout(finish, 2500);          // 응답이 늦어도 완료 화면으로
+  $('gform').submit();
+}
+function confetti(){
+  const emo = ['🎉','🎊','⭐','🗳️','💜','🏅'];
+  for(let i=0;i<36;i++){
+    const s = document.createElement('span');
+    s.className = 'confetti';
+    s.textContent = emo[i%emo.length];
+    s.style.left = Math.random()*100+'vw';
+    s.style.animationDuration = (2+Math.random()*2)+'s';
+    s.style.animationDelay = (Math.random()*0.8)+'s';
+    document.body.appendChild(s);
+    setTimeout(()=>s.remove(), 5000);
+  }
+}
+</script>
+</body>
+</html>

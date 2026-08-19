@@ -107,8 +107,8 @@
   <!-- STEP 2: 번호/이름 -->
   <div class="card step" data-step="2">
     <h2>후보님, 누구신가요? 😎</h2>
-    <div class="field"><label>번호</label><input id="fNum" type="number" inputmode="numeric" placeholder="예: 7"></div>
-    <div class="field"><label>이름</label><input id="fName" type="text" placeholder="이름을 입력하세요"></div>
+    <div class="field"><label>번호</label><input id="fNum" type="number" inputmode="numeric" min="1" max="99" placeholder="예: 7"></div>
+    <div class="field"><label>이름</label><input id="fName" type="text" maxlength="15" placeholder="이름을 입력하세요"></div>
     <div class="err" id="err2"></div>
     <button class="btn" onclick="next2()">다음 →</button>
     <button class="btn ghost" onclick="go(1)">← 이전</button>
@@ -118,9 +118,9 @@
   <div class="card step" data-step="3">
     <h2>나의 공약 📢</h2>
     <p class="hint">당선되면 하고 싶은 일을 1~3가지 적어주세요. 구체적일수록 표가 모여요!</p>
-    <div class="pledge-row"><span class="no">1️⃣</span><input id="p1" placeholder="예: 아침마다 알림장 정리해서 공지하기"></div>
-    <div class="pledge-row"><span class="no">2️⃣</span><input id="p2" placeholder="예: 건의함 만들어서 매주 확인하기"></div>
-    <div class="pledge-row"><span class="no">3️⃣</span><input id="p3" placeholder="예: 한 달에 한 번 학급 놀이 시간 만들기"></div>
+    <div class="pledge-row"><span class="no">1️⃣</span><input id="p1" maxlength="80" placeholder="예: 아침마다 알림장 정리해서 공지하기"></div>
+    <div class="pledge-row"><span class="no">2️⃣</span><input id="p2" maxlength="80" placeholder="예: 건의함 만들어서 매주 확인하기"></div>
+    <div class="pledge-row"><span class="no">3️⃣</span><input id="p3" maxlength="80" placeholder="예: 한 달에 한 번 학급 놀이 시간 만들기"></div>
     <div class="err" id="err3"></div>
     <button class="btn" onclick="next3()">다음 →</button>
     <button class="btn ghost" onclick="go(2)">← 이전</button>
@@ -130,7 +130,7 @@
   <div class="card step" data-step="4">
     <h2>각오 한마디 🔥</h2>
     <p class="hint">한 문장으로 마음을 보여주세요. (건너뛰어도 괜찮아요)</p>
-    <div class="field"><textarea id="fMotto" rows="2" placeholder="예: 한 명 한 명의 목소리를 듣는 반장이 되겠습니다!"></textarea></div>
+    <div class="field"><textarea id="fMotto" rows="2" maxlength="100" placeholder="예: 한 명 한 명의 목소리를 듣는 반장이 되겠습니다!"></textarea></div>
     <button class="btn" onclick="buildPoster();go(5)">내 선거 포스터 보기 →</button>
     <button class="btn ghost" onclick="go(3)">← 이전</button>
   </div>
@@ -151,6 +151,7 @@
       <span class="big-emoji">🎉</span>
       <h2 style="text-align:center">후보 등록 완료!</h2>
       <p class="desc"><b id="doneName"></b>님, 용기 있는 도전을 응원합니다!<br>선거일에 만나요 🗳️</p>
+      <button class="btn ghost" onclick="location.reload()">처음 화면으로</button>
     </div>
   </div>
 
@@ -201,6 +202,8 @@ function next1(){
 function next2(){
   const n = $('fNum').value.trim(), name = $('fName').value.trim();
   if(!n || !name){ $('err2').textContent='번호와 이름을 모두 입력해주세요!'; return; }
+  const num = Number(n);
+  if(!Number.isInteger(num) || num < 1 || num > 99){ $('err2').textContent='번호는 1~99 사이 숫자로 입력해주세요!'; return; }
   $('err2').textContent='';
   go(3);
 }

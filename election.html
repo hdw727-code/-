@@ -46,6 +46,10 @@
   .type-detail{background:#fffdf5; border:1.5px dashed #f0b95e; border-radius:12px; padding:12px 14px; margin-top:10px; font-size:13px; line-height:1.65; color:#6b4d10; min-height:60px;}
   .type-warn{background:#fef2f2; border:1.5px solid #fca5a5; border-radius:12px; padding:10px 12px; margin-top:10px; font-size:12.5px; line-height:1.6; color:#991b1b;}
   .reco-box{background:linear-gradient(120deg,#fff7e8,#fdeef5); border-radius:14px; padding:13px; margin-top:10px; text-align:center; line-height:1.65; font-size:13.5px;}
+  .senior-box{background:#eefdf4; border:1.5px solid #86efac; border-radius:12px; padding:10px 12px; margin-top:10px; font-size:12.5px; line-height:1.65; color:#14532d;}
+  .senior-box b{color:#166534;}
+  details.tip{background:#f5f3ff; border-radius:12px; padding:10px 12px; margin-top:10px; font-size:12.5px; line-height:1.7; color:#4c1d95;}
+  details.tip summary{cursor:pointer; font-weight:800; font-size:13px; list-style-position:inside;}
   .field{margin-top:12px;}
   .field label{display:block; font-size:12.5px; font-weight:700; color:var(--sub); margin-bottom:5px;}
   .field input, .field textarea, .field select{width:100%; font-family:inherit; font-size:15px; padding:12px 13px; border:2px solid var(--line); border-radius:12px; background:#fafafa;}
@@ -112,31 +116,31 @@ const LSE = 'unified_election_done';   // 선거 참여/노출 완료 플래그
 
 /* ---------- 고교 유형 데이터 (경기·시흥 비평준화 기준) ---------- */
 const TYPES = [
-  {name:'일반고', emoji:'🏫', period:'후기', hint:'후기 · 12월 초 원서 · 내신 200점 석차순(시흥 비평준화)',
+  {name:'일반고', emoji:'🏫', period:'후기', hint:'후기 · 원서 12.4~12.10 · 내신 200점 석차순(시흥 비평준화)',
    desc:'대학 진학을 목표로 공부하는 가장 일반적인 고등학교. 시흥의 서해고·함현고(자공고)도 같은 방식이야.',
    fit:'대학 진학을 목표로 차근차근 공부하고 싶은 친구',
    warn:'시흥은 비평준화! 일반고도 내신 200점 석차순으로 뽑고 후기에 딱 1개 학교만 지원할 수 있어. 내 내신으로 갈 수 있는지 꼭 확인하고 선생님과 상담하자!'},
-  {name:'특성화고', emoji:'🔧', period:'전기', hint:'전기 · 특별전형 11월 초 → 일반전형 11월 중순',
+  {name:'특성화고', emoji:'🔧', period:'전기', hint:'전기 · 특별전형 11.3~11.5 → 일반전형 11.12~11.13',
    desc:'요리·IT·디자인·회계 같은 전문 분야를 실습 중심으로 배워. 취업도, 특성화고 전형으로 대학도 갈 수 있어.',
    fit:'하고 싶은 분야가 있고 실습으로 배우는 게 좋은 친구',
    warn:'전기모집 1개교! 특별전형에서 떨어지면 일반전형에 다시 지원할 수 있어. 최종 불합격 시 후기 일반고 1개교 지원 — 그것도 내신순이라 2지망 계획 필수.'},
-  {name:'마이스터고', emoji:'⚙️', period:'전기', hint:'전기 · 10월 하순 원서 · 전국 모집·기숙사',
+  {name:'마이스터고', emoji:'⚙️', period:'전기', hint:'전기 · 원서 10.19~10.22 · 전국 모집·기숙사',
    desc:'산업 분야별 기술 명장을 키우는 학교. 전국 모집·기숙사 생활, 취업률이 아주 높아.',
    fit:'기술로 승부하고 빨리 사회에 나가고 싶은 친구',
    warn:'전기 1개교 원칙 — 합격하면 다른 학교 지원 불가. 불합격 확정 시 특성화고 재지원 가능. 10월 하순 원서!'},
-  {name:'과학고', emoji:'🔬', period:'전기', hint:'전기 · 8월 말 원서(경기북과학고)',
+  {name:'과학고', emoji:'🔬', period:'전기', hint:'전기 · 원서 8.24~8.28(경기북과학고)',
    desc:'수학·과학 심화 학교. 경기는 경기북과학고 — 원서가 8월 말!',
    fit:'수학·과학이 정말 좋고 성적이 뒷받침되는 친구',
    warn:'원서가 8월 말이라 지금 당장 결정해야 해! 합격하면 후기고(일반고 포함) 지원 불가. 오늘 선생님·부모님과 상의하자.'},
-  {name:'외고·국제고', emoji:'🌍', period:'후기', hint:'후기 · 12월 초 원서 · 자기주도학습전형(면접)',
+  {name:'외고·국제고', emoji:'🌍', period:'후기', hint:'후기 · 원서 12.4~12.10 · 자기주도학습전형(면접)',
    desc:'외국어·국제 분야 심화 학교. 영어 내신과 면접으로 선발해.',
    fit:'언어 배우는 게 즐겁고 영어에 자신 있는 친구',
    warn:'아주 중요: 경기도에서 외고·국제고 지원자는 시흥 같은 비평준화 일반고와 동시지원이 안 돼! 불합격하면 1월 추가모집으로 가야 해. 꼭 선생님과 전략 상의!'},
-  {name:'자사고', emoji:'🎓', period:'후기', hint:'후기 · 12월 초 원서 · 자기주도학습전형',
+  {name:'자사고', emoji:'🎓', period:'후기', hint:'후기 · 원서 12.4~12.10 · 자기주도학습전형',
    desc:'자율 교육과정 사립고. 프로그램이 다양하지만 학비가 더 들어.',
    fit:'공부 분위기 잡힌 곳에서 대입에 집중하고 싶은 친구',
    warn:'자사고도 시흥 비평준화 일반고와 동시지원 불가! 불합격 시 1월 추가모집. 학비도 더 들어. 선생님과 꼭 상의하자.'},
-  {name:'예술·체육고', emoji:'🎨', period:'전기', hint:'전기 · 10월 중순 원서 · 실기 필수',
+  {name:'예술·체육고', emoji:'🎨', period:'전기', hint:'전기 · 원서 10.12~10.15 · 실기 필수',
    desc:'예술·체육 전공 실기 중심 학교. 실기 준비가 필수야.',
    fit:'예체능 진로를 정하고 연습해 온 친구',
    warn:'전기모집(1개교) + 10월 중순 원서 + 실기시험. 준비 일정을 지금 확인하자. 합격하면 후기 지원 불가!'},
@@ -144,6 +148,21 @@ const TYPES = [
    desc:'아직 못 정해도 괜찮아! 오늘 생각을 남겨두고 선생님과 같이 찾아보자.', fit:'', warn:''},
 ];
 const tinfo = n => TYPES.find(t=>t.name===n) || TYPES[TYPES.length-1];
+
+/* 은계중 선배 진학 실적 (최근 3년 합계: 2024~2026학년도 고입, 학교 공식 자료) */
+const SENIORS = {
+  '일반고':'은행고 291명 · 신천고 209명 · 소래고 174명 · 시흥매화고 96명 (그 외 시흥고·능곡고·장곡고·서해고 등)',
+  '특성화고':'경기자동차과학고 21명 · 유한공업고 12명 · 근명고 8명 · 경기경영고 8명 · 예림디자인고 7명 · 부천공업고 7명 · 안양문화고 6명 · 경기스마트고 4명 등',
+  '마이스터고':'수원하이텍고 3명',
+  '예술·체육고':'경기예고 5명 · 인천예고 5명 · 서울공연예술고 2명 등',
+  '외고·국제고':'수원외고 2명 · 과천외고 1명',
+  '자사고':'안산동산고 1명',
+};
+const NAESIN_TIP = `💯 <b>내신 200점, 이렇게 계산돼!</b><br>
+교과 150점 <span style="font-size:11.5px">(1학년 2학기 12점 + 2학년 48점 + <b>3학년 60점!</b>)</span> + 출결 20점 + 봉사 20점 + 수상·임원 10점.<br>
+👉 <b>3학년 성적이 40%로 제일 크고, 지금 2학기도 들어가</b> — 역전 기회야!<br>
+👉 출결·봉사·수상은 <b>3학년 10월 말까지</b> 반영 (총 50점어치) — 아직 늦지 않았어.<br>
+<span style="font-size:11.5px">※ 일반고는 3-2 기말까지 · 특성화고는 3-2 중간(1차 정기시험)까지 반영 / 자유학기(1-1)는 미반영</span>`;
 
 const QUIZ = [
   {q:'공부는 어떤 방식이 제일 잘 맞아?', sub:'정답은 없어. 솔직하게 골라줘!',
@@ -288,6 +307,8 @@ function render(){
       <div class="hint">떠오르는 학교가 있으면 적어줘. 아직 없으면 비워도 돼.</div>
       ${st.type==='일반고'?`<div class="type-warn">⚠️ 시흥은 비평준화 — 일반고도 <b>내신 200점 석차순</b>, 실제 원서는 <b>후기 1개교</b>! 1지망은 "가고 싶고 갈 수 있는 학교", 2지망은 "만약을 대비한 학교"로.</div>`:''}
       ${t.period==='전기'?`<div class="type-warn">⚠️ ${esc(st.type)}는 <b>전기 — 딱 1개 학교</b>만 지원 가능! 2지망 칸에는 불합격 대비 후기(일반고) 계획을 적어줘.</div>`:''}
+      ${SENIORS[st.type]?`<div class="senior-box">🎓 <b>은계중 선배들이 간 ${esc(st.type)}</b> (최근 3년)<br>${SENIORS[st.type]}</div>`:''}
+      <details class="tip"><summary>💯 내신 200점은 어떻게 계산될까? (탭해서 보기)</summary><div style="margin-top:8px">${NAESIN_TIP}</div></details>
       <div class="field"><label>1지망 학교</label><input id="jS1" maxlength="20" value="${esc(st.s1)}" placeholder="예: ○○고등학교"></div>
       <div class="field"><label>1지망 학과 (특성화·마이스터고만)</label><input id="jM1" maxlength="20" value="${esc(st.m1)}"></div>
       <div class="field"><label>2지망 학교</label><input id="jS2" maxlength="20" value="${esc(st.s2)}"></div>

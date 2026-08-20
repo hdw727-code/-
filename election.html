@@ -158,6 +158,14 @@ const SENIORS = {
   '외고·국제고':'수원외고 2명 · 과천외고 1명',
   '자사고':'안산동산고 1명',
 };
+const SEORYU_TIP = `📄 <b>원서는 어떻게 내는 걸까?</b><br>
+우리는 <b>비평준화 지역</b>이라 가고 싶은 고등학교에 <b>직접 지원</b>하고, 그 학교가 내신 순서로 뽑아.<br>
+👉 원서는 <b>선생님이 학교에서 온라인으로 넣어줘</b> — 너희가 고등학교에 직접 갈 필요 없어!<br>
+👉 <b>전형료도 없고</b>, 주민등록등본 같은 서류도 안 내도 돼.<br>
+👉 네가 챙길 건 <b>개인정보활용동의서</b> 정도 (학교 안내를 따르면 돼).<br>
+👉 특성화고에 갈 거면 <b>자격증 사본</b>이 있으면 도움이 돼.<br>
+<span style="font-size:11.5px">🗓 후기 일반고 원서 12.4~12.10 → 합격 발표 12.14 · 미달이면 지원자 전원 합격 · 떨어지면 1월 추가모집<br>
+※ 학교별 최종 요강은 9월 초 각 고등학교 홈페이지에 공고돼</span>`;
 const NAESIN_TIP = `💯 <b>내신 200점, 이렇게 계산돼!</b><br>
 교과 150점 <span style="font-size:11.5px">(1학년 2학기 12점 + 2학년 48점 + <b>3학년 60점!</b>)</span> + 출결 20점 + 봉사 20점 + 수상·임원 10점.<br>
 👉 <b>3학년 성적이 40%로 제일 크고, 지금 2학기도 들어가</b> — 역전 기회야!<br>
@@ -309,6 +317,7 @@ function render(){
       ${t.period==='전기'?`<div class="type-warn">⚠️ ${esc(st.type)}는 <b>전기 — 딱 1개 학교</b>만 지원 가능! 2지망 칸에는 불합격 대비 후기(일반고) 계획을 적어줘.</div>`:''}
       ${SENIORS[st.type]?`<div class="senior-box">🎓 <b>은계중 선배들이 간 ${esc(st.type)}</b> (최근 3년)<br>${SENIORS[st.type]}</div>`:''}
       <details class="tip"><summary>💯 내신 200점은 어떻게 계산될까? (탭해서 보기)</summary><div style="margin-top:8px">${NAESIN_TIP}</div></details>
+      <details class="tip" style="background:#eff6ff; color:#1e3a8a"><summary>📄 원서·제출 서류는 어떻게? (탭해서 보기)</summary><div style="margin-top:8px">${SEORYU_TIP}</div></details>
       <div class="field"><label>1지망 학교</label><input id="jS1" maxlength="20" value="${esc(st.s1)}" placeholder="예: ○○고등학교"></div>
       <div class="field"><label>1지망 학과 (특성화·마이스터고만)</label><input id="jM1" maxlength="20" value="${esc(st.m1)}"></div>
       <div class="field"><label>2지망 학교</label><input id="jS2" maxlength="20" value="${esc(st.s2)}"></div>

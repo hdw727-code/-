@@ -479,6 +479,11 @@ button:not(:disabled):active{transform:scale(.96);}
   font-weight:900;font-size:13.5px;letter-spacing:.4px;}
 .arcmore:hover{border-style:solid;}
 #mapScreen:not(.listMode) #mapFootNote{display:none;}
+#btnCourseAll{display:none;width:100%;margin:10px 0 0;padding:11px;border-radius:14px;cursor:pointer;
+  background:linear-gradient(160deg,rgba(155,108,255,.20),rgba(155,108,255,.06));
+  border:1.5px dashed rgba(190,140,255,.6);color:#d9c2ff;font-weight:900;font-size:13.5px;}
+#btnCourseAll.on{display:block;}
+#btnCourseAll:hover{border-style:solid;}
 .dressopt{transition:transform .12s,box-shadow .12s;}
 .dressopt:active{transform:scale(.95);}
 .dressopt.rar300{border-color:rgba(126,226,168,.55);}
@@ -1561,6 +1566,7 @@ button:not(:disabled):active{transform:scale(.96);}
     <h3>🏟️ 체육관 아케이드 — 자유 이용 (쉬는 시간용!)</h3>
     <div class="mgrid" id="arcadeGrid"></div>
   </div>
+  <button id="btnCourseAll" type="button">🎁 보너스 미션 더 하기 <b>(전체 26개 코스)</b></button>
   <div class="note" id="mapFootNote" style="margin-top:10px">✅ 미션을 순서대로 완료하면 다음 미션이 열립니다. 모든 미션을 완료하면 <b>기록 코드 + 학습 리포트</b>가 발급됩니다.</div>
   </div><!-- /#mapRailBot -->
 
@@ -5609,7 +5615,13 @@ function drawSprFrames(pose,ox,oy,scale){
   return true;
 }
 function drawBot(pose,ox,oy,scale,tick){
-  if(drawSprFrames(pose,ox,oy,scale))return;
+  /* 고정 스프라이트(금발 코치봇)를 맨 앞에서 그리면 학생이 고른 캐릭터가
+     미션 화면에 절대 안 나온다 — 소녀를 골라도 금발 남자아이가 뛰었다.
+     그래서 파츠(=고른 캐릭터)가 준비돼 있으면 그쪽을 먼저 쓰고,
+     스프라이트는 파츠를 못 쓸 때만 쓰는 예비 수단으로 내린다. */
+  const _skinReady=(typeof partsReady==="function")&&partsReady()
+                   &&!(typeof VECBOT!=="undefined"&&VECBOT);
+  if(!_skinReady&&drawSprFrames(pose,ox,oy,scale))return;
   /* VECBOT=1 이면 이미지 스킨이 있어도 벡터 코치봇으로 그린다.
      관찰(①) 라이브 시범용 — 자동 리깅 아바타는 팔·다리 조각의 절단면이
      드러나 확대 화면에서 "찢어져" 보이므로, 시범은 관절이 매끈한 벡터
@@ -6842,6 +6854,31 @@ const S={cleared:0,score:0,attempts:0,hints:0,startTs:0,elapsedMin:0,
    그래서 시프트 대신 나눗셈으로 자리를 센다 — 2^53 까지 정확하고
    4진수 26자리가 2^52 라서 미션 26개까지 안전하다.
    미션이 27개를 넘어가면 저장 칸을 하나 더 늘려야 한다. */
+/* ════ 🎯 45분 수업 코스 (선택과 집중) ════════════════════════════
+   26개를 45분에 다 하는 건 물리적으로 불가능하다(미션당 2~4분).
+   그래서 '오늘 할 코스'를 8개로 못박는다 —
+     기초 4개(카드로 감 잡기 → 자유 입력 첫 도전)
+     실전 4개(줄넘기·추크볼·티볼 = 실제 수행평가 종목)
+   MISSIONS 배열은 절대 건드리지 않는다. 별 슬롯(getStars)과 저장 코드가
+   미션 번호에 묶여 있기 때문이다. 순서만 이 목록을 따라간다.
+   S.cleared 는 여전히 '깬 미션 수' 라서 업적·코드 호환이 유지된다.        */
+const COURSE_45=[0,1,2,4, 18,19,20,21];
+const COURSE_FULL=MISSIONS.map((_,i)=>i);
+let COURSE=COURSE_45;
+function coursePos(i){return COURSE.indexOf(i);}      // 코스 안 순번 (없으면 -1)
+function courseAt(p){return COURSE[p];}
+function courseLen(){return COURSE.length;}
+function courseDone(){return S.cleared>=COURSE.length;}
+/* 코스를 다 깬 학생에게는 나머지 미션도 열어 준다(보너스). 이어하기로 돌아온
+   학생도 자동으로 풀린다 — 저장 코드에 코스 모드를 새로 넣지 않아도 되도록. */
+function courseAutoExpand(){
+  if(COURSE===COURSE_FULL)return;
+  if(S.cleared>COURSE_45.length)courseSet(COURSE_FULL);
+}
+function courseSet(list){
+  COURSE=list;
+  try{$("uiTotal").textContent=COURSE.length;}catch(e){}
+}
 const STAR_MAX_SLOT=26;
 function starSlot(i){return Math.pow(4,i);}
 function getStars(i){
@@ -6881,7 +6918,7 @@ function paintTile(el,i){try{paintCard(el,i);}catch(e){}}
 function renderMap(){
   $("uiScore").textContent=S.score;
   $("uiDone").textContent=S.cleared;
-  $("uiTotal").textContent=MISSIONS.length;
+  $("uiTotal").textContent=courseLen();
   $("uiCoins").textContent=S.coins;
   const lv=Math.floor(S.score/150)+1;
   $("uiLv").textContent=lv;
@@ -6891,21 +6928,29 @@ function renderMap(){
   try{renderCoachTag();renderDexBadge();}catch(e){}  // a11_meta.js
   try{questRefresh();}catch(e){}                     // a16_quest.js (로드 전 방어)
   try{idBadge();}catch(e){}                          // a19_id.js — 학생증 알약 점수 갱신
-  try{const pb=$("pracBtn");if(pb)pb.classList.toggle("hidden",S.cleared>0);}catch(e){}  // 연습 버튼은 첫 미션 전까지만
+  try{const pb=$("pracBtn");if(pb)pb.classList.toggle("hidden",S.cleared>0);}catch(e){}
+  try{courseAllRender();}catch(e){}  // 연습 버튼은 첫 미션 전까지만
   try{if(typeof MAP_ON!=="undefined"&&MAP_ON)mapRefresh();}catch(e){}  // a18_map.js — 지도 진행 반영
   const box=$("chapters");box.innerHTML="";
   for(const ch of [1,2,3,4,5,6]){
+    /* 45분 코스에서는 챕터 3·4·6에 오늘 할 미션이 없다 —
+       제목만 덩그러니 남으면 "여기 왜 비었지?"가 되므로 아예 안 그린다.
+       (보너스 코스를 열면 다시 나타난다) */
+    const _has=MISSIONS.some((m,i)=>m.ch===ch&&coursePos(i)>=0);
+    if(!_has&&!(ch===6&&courseDone()))continue;
     const div=document.createElement("div");div.className="chapter";
     div.innerHTML=`<h3>${CH_NAMES[ch]}</h3>`;
     const grid=document.createElement("div");grid.className="mgrid";
     MISSIONS.forEach((m,i)=>{
       if(m.ch!==ch)return;
       const b=document.createElement("button");
-      const tileSt=i<S.cleared?"done":(i===S.cleared?"open":"lock");
+      const _p=coursePos(i);
+      if(_p<0)return;                       // 오늘 코스에 없는 미션은 목록에서 뺀다
+      const tileSt=_p<S.cleared?"done":(_p===S.cleared?"open":"lock");
       b.className="mtile art cardart "+tileSt;
-      if(i===S.cleared)b.classList.add("next");
+      if(_p===S.cleared)b.classList.add("next");
       paintTile(b,i);
-      const st=i<S.cleared?getStars(i):0;
+      const st=_p<S.cleared?getStars(i):0;
       const starTxt=st?("★".repeat(st)+"☆".repeat(3-st)):"";
       b.innerHTML=`<span class="mi">${m.icon}</span>`
         +(tileSt==="done"?`<span class="badge">✓ CLEAR</span>`:"")
@@ -6918,7 +6963,7 @@ function renderMap(){
       grid.appendChild(b);
     });
     if(ch===6){
-      if(S.cleared>=MISSIONS.length){
+      if(courseDone()){
         const b=document.createElement("button");
         b.className="mtile art cardart open bonus";
         paintTile(b,MCARD_BONUS);
@@ -7328,7 +7373,7 @@ function missionClear(m){
   /* 복습(이미 깬 미션 재도전)은 점수·코인을 다시 주지 않는다 — 종합점수가
      시상 기준이라, 쉬운 미션 반복으로 파밍이 되면 순위가 무의미해진다.
      별은 setStars 가 최고 기록만 남기므로 그대로 둔다. */
-  const replay=S.cur<S.cleared;
+  const replay=coursePos(S.cur)>=0&&coursePos(S.cur)<S.cleared;
   const base=100, penalty=Math.min(60,(S.tries-1)*10)+(S.hintUsed?20:0);
   const got=Math.max(30,base-penalty);
   if(!replay)S.score+=got;
@@ -7336,7 +7381,7 @@ function missionClear(m){
   setStars(S.cur,stars);
   const coin=20+stars*10;
   if(!replay)S.coins+=coin;
-  if(S.cur===S.cleared)S.cleared++;
+  if(coursePos(S.cur)===S.cleared)S.cleared++;
   $("clTitle").textContent=replay
     ?`🔁 복습 성공!`
     :(typeof S.coach!=="undefined"&&S.coach?`🎉 ${S.coach} 감독님, 미션 성공! +${got}점`:`🎉 미션 성공! +${got}점`);
@@ -7354,17 +7399,17 @@ function missionClear(m){
     const pcode=makeCode("P",[S.cleared,S.score,S.attempts,S.hints,minutes(),cosVal(),S.coins,S.starsPack,S.unlocked,(S.perfMask||0)|((S.lic||0)<<5),S.dex||0,S.quest||0,S.nick||0,S.cls||0,schPack(S.school)[0],schPack(S.school)[1]]);
     $("clLesson").insertAdjacentHTML("beforeend",`<div class="note" style="margin-top:9px;font-size:12px;word-break:break-all">💾 최신 이어하기 코드 (자동 저장 없음 — 캡처해 두세요!)<br><b style="letter-spacing:.5px">${pcode}</b></div>`);
   }catch(e){}
-  $("btnNext").classList.toggle("hidden",S.cleared>=MISSIONS.length);
+  $("btnNext").classList.toggle("hidden",courseDone());
   $("clearModal").classList.remove("hidden");
 }
 $("btnNext").addEventListener("click",()=>{
   $("clearModal").classList.add("hidden");
-  if(S.cleared<MISSIONS.length)openMission(S.cleared);
+  if(!courseDone())openMission(courseAt(S.cleared));
   else finish();
 });
 $("btnClearClose").addEventListener("click",()=>{
   $("clearModal").classList.add("hidden");
-  if(S.cleared>=MISSIONS.length)finish();
+  if(courseDone())finish();
   else {renderMap();show("mapScreen");}
 });
 
@@ -7375,7 +7420,7 @@ function finish(){
   $("finalTitleName")&&($("finalTitleName").textContent=(S.coach?S.coach+" 감독":""));
   $("finalStats").innerHTML=((typeof itemImg==="function"&&itemImg("trophy",92))?`<div style="text-align:center;margin-bottom:8px">${itemImg("trophy",92)}</div>`:"")+`<div class="report-stats">
     <div class="rs">총점<b>${S.score}</b></div>
-    <div class="rs">미션<b>${S.cleared}/${MISSIONS.length}</b></div>
+    <div class="rs">미션<b>${S.cleared}/${courseLen()}</b></div>
     <div class="rs">총 시도<b>${S.attempts}회</b></div>
     <div class="rs">소요<b>${minutes()}분</b></div></div>`;
   const weak=Object.entries(S.perPrin).sort((a,b)=>b[1]-a[1]);
@@ -7428,6 +7473,7 @@ $("btnResume").addEventListener("click",()=>{
   applyCos(r.f[5]); // 꾸미기 복원 (구버전 코드는 무시)
   if(!isUnlocked(SKIN))setSkin("avatar");
   renderMap();show("mapScreen");
+  try{courseAutoExpand();}catch(e){}
   toast(`💾 이어하기 완료! ${S.cleared}개 미션까지 진행된 상태입니다.`);
 });
 $("btnSaveExit").addEventListener("click",()=>{
@@ -11972,6 +12018,21 @@ function renderPerf(){
   const mini=$("perfMiniStat");
   if(mini)mini.textContent=`인증 ${done}/${PERF_ACTS.length} 영역 · 확정 ${perfPoints()}점 / 100점`;
 }
+/* 🎁 보너스 코스 — 오늘 코스(8개)를 끝낸 학생에게만 나머지 미션을 연다.
+   45분 안에 다 한 학생이 할 게 없어지는 걸 막으면서도, 처음 화면에는
+   8개만 보이게 유지한다. */
+function courseAllRender(){
+  const b=$("btnCourseAll");if(!b)return;
+  const on=(typeof courseDone==="function")&&courseDone()&&COURSE!==COURSE_FULL;
+  b.classList.toggle("on",!!on);
+}
+if($("btnCourseAll"))$("btnCourseAll").addEventListener("click",()=>{
+  courseSet(COURSE_FULL);
+  try{renderMap();}catch(e){}
+  try{if(typeof mapRefresh==="function")mapRefresh();}catch(e){}
+  toast("🎁 보너스 코스 개방! 남은 미션이 모두 열렸어요");
+});
+
 /* 수행평가 모달 열기/닫기 — 본체는 #perfModal 안에 산다 */
 if($("perfMini"))$("perfMini").addEventListener("click",()=>{try{renderPerf();}catch(e){}$("perfModal").classList.remove("hidden");});
 if($("btnPerfClose"))$("btnPerfClose").addEventListener("click",()=>$("perfModal").classList.add("hidden"));
@@ -14374,7 +14435,12 @@ function mapRegionOpen(k){
        노드가 하나도 없는 빈 숲이 보이는 일이 있었다 */
     try{return questGot(4)||questCount()>=5;}catch(e){return false;}
   }
-  return S.cleared>=r.need;
+  if(S.cleared>=r.need)return true;
+  /* 오늘 코스가 이 구역의 미션을 포함하면(예: 티볼=경기장) 구역도 같이 연다.
+     안 그러면 '오늘 할 일'이 잠긴 구역 안에 갇힌다. */
+  try{
+    return MAP_NODES.some(nd=>nd.t==="m"&&nd.r===k&&coursePos(nd.i)>=0&&coursePos(nd.i)<=S.cleared);
+  }catch(e){return false;}
 }
 
 /* ── 아케이드 노드 표시 정보 — [아이콘, 이름, 여기서 무엇을 하는가 한 줄] ── */
@@ -14461,8 +14527,10 @@ const MAP_NODES=[
 /* 노드 상태: done / open / lock / hide */
 function mapNodeState(n){
   if(n.t==="m"){
-    if(n.i< S.cleared)return "done";
-    if(n.i===S.cleared)return "open";
+    const p=coursePos(n.i);
+    if(p<0)return "off";               // 오늘 코스 밖 미션 — 지도에서 통째로 뺀다
+    if(p< S.cleared)return "done";
+    if(p===S.cleared)return "open";
     return "lock";
   }
   // 아케이드
@@ -14618,7 +14686,8 @@ function mapCheckUnlock(){
 
 /* 지금 서 있어야 할 노드 = 다음에 열려 있는 미션 */
 function mapHomeIdx(){
-  let idx=MAP_NODES.findIndex(n=>n.t==="m"&&n.i===Math.min(S.cleared,MISSIONS.length-1));
+  const _home=courseAt(Math.min(S.cleared,COURSE.length-1));
+  let idx=MAP_NODES.findIndex(n=>n.t==="m"&&n.i===_home);
   return idx<0?0:idx;
 }
 
@@ -14734,7 +14803,8 @@ function mapDraw(dt){
   g.lineCap="round";
   for(let i=0;i<mn.length-1;i++){
     const [ax,ay]=w2s(...mapNodePx(mn[i])), [bx,by]=w2s(...mapNodePx(mn[i+1]));
-    const passed=mn[i+1].i<=S.cleared;
+    const _pp=coursePos(mn[i+1].i);
+    const passed=_pp>=0&&_pp<=S.cleared;
     g.strokeStyle=passed?"rgba(255,214,102,.92)":"rgba(255,255,255,.46)";
     g.lineWidth=Math.max(2.5,4.5*s);
     g.setLineDash([2*s,7*s]);
@@ -14751,6 +14821,8 @@ function mapDraw(dt){
     const R=Math.max(15,(n.t==="m"?23:19)*s);
     if(x<-60||x>MP.cw+60||y<-60||y>MP.ch+60)return;
     MP.nodeBox.push([x-R,y-R,2*R,2*R]);   /* 이름표·간판이 이 자리를 덮지 않도록 미리 찜 */
+
+    if(st==="off")return;   /* 오늘 코스 밖 — 아예 안 그린다 */
 
     /* 숨겨진 곳은 없는 척하지 않는다 — 물음표 실루엣으로 "여기 뭔가 있다"를 알려 준다.
        완전히 안 보이면 학생이 찾아볼 생각을 아예 안 하기 때문 */
@@ -14918,7 +14990,7 @@ function mapMoveDir(d){
   let best=-1,bestC=1e9;
   MAP_NODES.forEach((n,i)=>{
     if(i===MP.cur)return;
-    if(mapNodeState(n)==="hide")return;
+    {const _s=mapNodeState(n); if(_s==="hide"||_s==="off")return;}
     const [px,py]=mapNodePx(n);
     const dx=px-cx, dy=py-cy;
     const along = d==="r"? dx : d==="l"? -dx : d==="d"? dy : -dy;
@@ -14961,6 +15033,7 @@ function mapDoing(n){
 /* 상태 한 줄 + (잠겼다면) 열리는 방법. [색깔 클래스, 문장] */
 function mapWhy(n,st){
   const q=(()=>{try{return questCount();}catch(e){return 0;}})();
+  if(st==="off")return["w-lk","🎁 오늘 코스에는 없는 미션이에요 — 코스를 마치면 열려요."];
   if(st==="done")return["w-ok","✅ 이미 깼어요 — 다시 들어가서 연습해도 됩니다."];
   if(st==="hide"){
     if(n.g==="master")return["w-lk",`❓ 숨겨진 곳이에요 — <b>⚖️ 공정한 심판</b> 칭호를 받으면 나타나요. (판정관 챌린지에서 받을 수 있어요)`];
@@ -15079,7 +15152,7 @@ function mapEnter(){
 function mapHit(sx,sy){
   let best=-1,bestD=1e9;
   MAP_NODES.forEach((n,i)=>{
-    if(mapNodeState(n)==="hide")return;
+    {const _s=mapNodeState(n); if(_s==="hide"||_s==="off")return;}
     const [x,y]=w2s(...mapNodePx(n));
     const d=Math.hypot(x-sx,y-sy);
     if(d<bestD){bestD=d;best=i;}
@@ -15703,13 +15776,13 @@ let OB_FLOW=0;                       // 1이면 지금 "처음 시작" 흐름 �
 function nowGoTarget(){
   /* 학생증이 없으면 그게 먼저다 — 랭킹에 못 올라가면 상을 못 받으니까 */
   if(!hasId())return {kind:"id", ic:"🪪", tag:"1단계", txt:"학생증 발급받기", go:"발급"};
-  const i=Math.min(S.cleared, MISSIONS.length-1);
-  if(S.cleared>=MISSIONS.length)
-    return {kind:"champ", ic:"🏆", tag:"모든 미션 완료!", txt:"챔피언십 도전하기", go:"도전"};
+  if(courseDone())
+    return {kind:"champ", ic:"🏆", tag:"오늘 코스 완주!", txt:"챔피언십 도전하기", go:"도전"};
+  const i=courseAt(S.cleared);
   const m=MISSIONS[i];
   const t=(m.title||"").replace(/\s*[（(].*$/,"").trim();
   return {kind:"mission", i:i, ic:m.icon||"🎯",
-          tag:(S.cleared===0?"지금 할 일":"다음 미션")+" · "+(i+1)+"/"+MISSIONS.length,
+          tag:(S.cleared===0?"지금 할 일":"다음 미션")+" · "+(S.cleared+1)+"/"+courseLen(),
           txt:t, go:"시작"};
 }
 function nowGoRender(){

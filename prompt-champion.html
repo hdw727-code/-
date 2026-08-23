@@ -4260,6 +4260,97 @@ function spriteOf(skin){
   try{dimShade(cv,1);}catch(e){}
   return (_sprCache[skin]={cv,ox:-x0+pad,oy:-y0+pad,w:W,h:H,footY:y1,topY:y0});
 }
+/* ════ 포즈별 통짜 프레임 굽기 ════════════════════════════════════════
+   통 한 장으로만 그리면 실패 동작이 전부 "가만히 선 그림"이 되고,
+   조각을 실시간으로 꺾으면 손목·어깨 절단면이 드러난다.
+   그래서 절충 — 다리 각도만 바꾼 그림을 미리 여러 장 구워 둔다.
+     · 굽는 순간 한 장으로 합쳐지므로 실행 중에는 이음매가 생길 수 없다
+     · 엉덩이 절단면은 몸통이 덮으므로 다리는 마음껏 돌려도 안전하다
+     · 팔은 mergeArmsInto 로 몸통에 붙어 있어 고정 (손목 이음매 원천 차단)
+   구운 그림들을 기존 프레임 재생기(drawSprFrames)에 그대로 물려서
+   달리기·점프·타격 타이밍 로직을 재사용한다.                              */
+const _poseCache={}, _poseOrder=[];
+function bakePose(skin,dL,dR){
+  const key=skin+"|"+dL.toFixed(2)+"|"+dR.toFixed(2);
+  if(_poseCache[key]!==undefined)return _poseCache[key];
+  try{ if(typeof mergeArmsInto==="function")mergeArmsInto(skin); }catch(e){}
+  const C=SKIN_CFG[skin], PS=(typeof PARTS_ALL!=="undefined")?PARTS_ALL[skin]:null;
+  if(!C||!PS||!PS.head||!PS.torso)return (_poseCache[key]=null);
+  for(const k in PS){const im=PS[k].img;
+    if(!im)return null;
+    if(im.tagName==="CANVAS")continue;
+    if(!im.complete||!im.naturalWidth)return null;}   // 아직 디코딩 전 — 캐시하지 않는다
+  const items=[]; const add=(q,px,py,th)=>{if(q&&q.w>4&&q.h>4)items.push([q,px,py,th]);};
+  add(PS.legL,C.hipL[0],C.hipL[1],(C.rot0.legL||0)+dL);
+  add(PS.legR,C.hipR[0],C.hipR[1],(C.rot0.legR||0)+dR);
+  if(C.shL)add(PS.armL,C.shL[0],C.shL[1],(C.rot0&&C.rot0.armL)||0);
+  if(C.shR)add(PS.armR,C.shR[0],C.shR[1],(C.rot0&&C.rot0.armR)||0);
+  add(PS.torso,0,0,0);
+  add(PS.head,C.neck[0],C.neck[1],0);
+  if(!items.length)return (_poseCache[key]=null);
+  let x0=1e9,y0=1e9,x1=-1e9,y1=-1e9;
+  for(const[q,px,py,th] of items)
+    for(const[qx,qy] of [[-q.ax,-q.ay],[q.w-q.ax,-q.ay],[-q.ax,q.h-q.ay],[q.w-q.ax,q.h-q.ay]]){
+      const[rx,ry]=rot2(qx,qy,th);
+      if(px+rx<x0)x0=px+rx; if(px+rx>x1)x1=px+rx;
+      if(py+ry<y0)y0=py+ry; if(py+ry>y1)y1=py+ry; }
+  const pad=8, W=Math.ceil(x1-x0)+pad*2, H=Math.ceil(y1-y0)+pad*2;
+  if(!(W>8&&H>8)||W>4096||H>4096)return (_poseCache[key]=null);
+  const k=Math.min(1,520/H);
+  const cv=document.createElement("canvas");
+  cv.width=Math.max(8,Math.round(W*k)); cv.height=Math.max(8,Math.round(H*k));
+  const g=cv.getContext("2d");
+  g.imageSmoothingEnabled=true; g.imageSmoothingQuality="high";
+  g.scale(k,k); g.translate(-x0+pad,-y0+pad);
+  for(const[q,px,py,th] of items){
+    g.save(); g.translate(px,py); g.rotate(th);
+    g.drawImage(q.img,-q.ax,-q.ay,q.w,q.h); g.restore(); }
+  try{dimShade(cv,1);}catch(e){}
+  _poseCache[key]=cv; _poseOrder.push(key);
+  /* 메모리 상한 — 캐릭터를 여러 번 바꿔도 캔버스가 무한히 쌓이지 않게 */
+  while(_poseOrder.length>36){const old=_poseOrder.shift(); delete _poseCache[old];}
+  return cv;
+}
+/* 스킨별 프레임 세트 — 기본 코치봇 세트와 같은 모양이라 재생기가 그대로 쓴다 */
+const _skinSpr={}, _skinSprOrder=[];
+function skinSprSet(skin){
+  /* 초상화만 있는 스킨(카툰 소년·소녀)은 몸을 avatar 에서 빌려 쓴다 */
+  if(typeof PARTS_ALL!=="undefined"&&!PARTS_ALL[skin])skin="avatar";
+  if(_skinSpr[skin])return _skinSpr[skin];
+  const idle=bakePose(skin,0,0);
+  if(!idle)return null;                                  // 이미지 아직 안 왔으면 다음 프레임에
+  const sA=bakePose(skin,-0.42,0.42), sB=bakePose(skin,0.42,-0.42),
+        wide=bakePose(skin,-0.62,0.62), split=bakePose(skin,-0.95,0.95),
+        tuck=bakePose(skin,0.20,-0.20);
+  if(!sA||!sB||!wide||!split||!tuck)return null;
+  const RUN={fr:[sA,sB],fps:9,loco:1};
+  const JUMP={fr:[tuck,sA,split,wide],mode:"jump",map:{ground:0,up:1,apex:2,fall:3}};
+  const STRIKE={fr:[idle,sA,wide,sB],mode:"strike",cut:[0.38,0.66,0.88]};
+  const set={
+    run:RUN, runDemo:RUN, falseStart:RUN, zigzag:RUN, moonwalk:RUN, relay:RUN,
+    jump:JUMP, umpire:JUMP, tbat:JUMP, analyze:JUMP, jumpNoRope:JUMP,
+    shoot:STRIKE, cpr:STRIKE, tthrow:STRIKE, zukshot:STRIKE,
+    throwUp:STRIKE, throwBack:STRIKE, headball:STRIKE,
+    rope:{fr:[tuck],mode:"hop1",rope:1,hx:[0.30,0.70],hy:0.58},
+    tangle:{fr:[split],mode:"hop1",rope:1,hx:[0.30,0.70],hy:0.58},
+    idle:{fr:[idle],mode:"idle"},
+    sit:{fr:[split],mode:"idle",sq:0.74},            // 주저앉음 — 납작하게
+    spin:{fr:[idle],mode:"spin"},
+    lift:{fr:[tuck,idle],mode:"lift"},
+    kick:{fr:[idle,sA,wide,wide],mode:"strike",cut:[0.45,0.71,0.73]},
+    kickWrong:{fr:[idle,sA,wide,wide],mode:"strike",cut:[0.45,0.71,0.73]},
+    rollWrong:{fr:[idle,sB,wide,wide],mode:"strike",cut:[0.45,0.71,0.73]},
+    serve:{fr:[idle,idle,wide,wide],mode:"strike",cut:[0.5,0.80,0.90],ballAll:1},
+    badserve:{fr:[idle,idle,split,split],mode:"strike",cut:[0.5,0.80,0.90],ballAll:1}
+  };
+  _skinSpr[skin]=set; _skinSprOrder.push(skin);
+  /* 캐릭터를 여러 번 갈아입어도 구운 그림이 무한히 쌓이지 않게 — 최근 3종만 */
+  while(_skinSprOrder.length>3){
+    const old=_skinSprOrder.shift();
+    if(old!==SKIN)delete _skinSpr[old];
+  }
+  return set;
+}
 /* ══════════ 본 가중 메시 변형 (Linear Blend Skinning) ══════════
    통 스프라이트는 몸이 한 장이라 팔다리가 어긋날 수 없지만, 그림 자체가 굳어 있어
    결국 "기울어지는 사진"으로 보였다. 그래서 스프라이트를 격자 메시로 덮고 각
@@ -5623,11 +5714,15 @@ function drawSprFrames(pose,ox,oy,scale){
   }else{
     im=sp.fr[Math.floor(performance.now()/1000*(sp.fps||10))%sp.fr.length];
   }
-  if(!im.complete||!im.naturalWidth)return false;   // 아직 로딩 전이면 리그로
+  if(!im)return false;
+  if(im.tagName!=="CANVAS"&&(!im.complete||!im.naturalWidth))return false;   // 아직 로딩 전이면 리그로
+  if(sp.sq)squash*=sp.sq;                                  // 주저앉기 등 눌린 자세
   COACH_PT=null;   // 프레임 그림엔 관절 좌표가 없다 — 묵은 코칭선이 떠다니는 것 방지
   const g=PREVIEW_CTX||ctx;
   const H=176*scale;                                // 리그 캐릭터와 비슷한 키 (실측 보정)
-  const W=H*im.naturalWidth/im.naturalHeight;
+  const _iw=im.naturalWidth||im.width, _ih=im.naturalHeight||im.height;   // 구운 프레임은 <canvas>
+  if(!_iw||!_ih)return false;
+  const W=H*_iw/_ih;
   const fx=ox+pose.x, fy=oy+pose.y+63*scale;        // 발끝 = 리그와 같은 접지선
   const H2=H*squash, W2=W*(2-squash);               // 부피 보존 스쿼시
   CAM_PT=camPtFromBox(fx,fy,W2,H2,scale);   // 카메라용 근사 관절 (코칭선은 안 씀)
@@ -5722,9 +5817,18 @@ function drawBot(pose,ox,oy,scale,tick){
      미션 화면에 절대 안 나온다 — 소녀를 골라도 금발 남자아이가 뛰었다.
      그래서 파츠(=고른 캐릭터)가 준비돼 있으면 그쪽을 먼저 쓰고,
      스프라이트는 파츠를 못 쓸 때만 쓰는 예비 수단으로 내린다. */
+  /* 고른 캐릭터의 '자기 그림'으로 구운 프레임을 먼저 쓴다.
+     예전에는 금발 코치봇 한 명의 그림이 고정으로 나왔다. */
+  if(!(typeof VECBOT!=="undefined"&&VECBOT)){
+    try{
+      const _ss=(typeof skinSprSet==="function")?skinSprSet(SKIN):null;
+      if(_ss)ANIM.spr=_ss;
+      else if(ANIM.sprDefault)ANIM.spr=ANIM.sprDefault;
+    }catch(e){}
+  }
   const _skinReady=(typeof partsReady==="function")&&partsReady()
                    &&!(typeof VECBOT!=="undefined"&&VECBOT);
-  if(!_skinReady&&drawSprFrames(pose,ox,oy,scale))return;
+  if(drawSprFrames(pose,ox,oy,scale))return;
   /* VECBOT=1 이면 이미지 스킨이 있어도 벡터 코치봇으로 그린다.
      관찰(①) 라이브 시범용 — 자동 리깅 아바타는 팔·다리 조각의 절단면이
      드러나 확대 화면에서 "찢어져" 보이므로, 시범은 관절이 매끈한 벡터
@@ -18327,7 +18431,7 @@ tourBindStart();
      실패 연출도 계열별로 배정: 회전(spin)은 그림 통돌리기, 이동 실수는 달리기,
      던지기 실수는 슛 프레임. strike 계열 별칭은 자기 클립 길이(dur)로 진행률을
      계산하므로 타이밍이 절로 맞는다. */
-  ANIM.spr={
+  ANIM.sprDefault=ANIM.spr={
     run:RUNSP, runDemo:RUNSP,
     falseStart:RUNSP, zigzag:RUNSP, moonwalk:RUNSP, relay:RUNSP,
     jump:JUMPSP, umpire:JUMPSP, tbat:JUMPSP, analyze:JUMPSP, jumpNoRope:JUMPSP,

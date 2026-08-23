@@ -1,0 +1,242 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>학생 조사 링크 만들기</title>
+<style>
+  :root{
+    --bg:#f5f7f9; --card:#fff; --ink:#16222e; --sub:#5b6b7b; --line:#dde3e9;
+    --accent:#1b5e9b; --accent-soft:#eef4fa; --ok:#166534; --warn:#8a5a12; --danger:#9b2c2c;
+    --radius:14px; --shadow:0 2px 10px rgba(20,40,60,.07);
+  }
+  *{box-sizing:border-box; margin:0; padding:0;}
+  body{font-family:"Pretendard","Malgun Gothic","맑은 고딕",-apple-system,sans-serif;
+    background:var(--bg); color:var(--ink); line-height:1.7; padding:26px 18px 70px;}
+  .wrap{max-width:760px; margin:0 auto;}
+  h1{font-size:24px; font-weight:800; letter-spacing:-.3px;}
+  .sub{color:var(--sub); font-size:14px; margin-top:5px; padding-bottom:16px;
+    border-bottom:2px solid var(--accent); margin-bottom:22px;}
+  .card{background:var(--card); border:1px solid var(--line); border-radius:var(--radius);
+    padding:18px 20px; box-shadow:var(--shadow); margin-bottom:16px;}
+  h2{font-size:16px; font-weight:750; margin-bottom:4px; display:flex; gap:8px; align-items:baseline;}
+  h2 .n{display:inline-flex; align-items:center; justify-content:center; width:23px; height:23px;
+    border-radius:50%; background:var(--accent); color:#fff; font-size:12.5px; flex:0 0 23px;}
+  .lead{color:var(--sub); font-size:13.5px; margin-bottom:12px;}
+  ol{margin:0 0 4px 19px;} ol li{margin-bottom:6px; font-size:14px;}
+  label{display:block; font-size:13px; font-weight:700; margin:12px 0 5px;}
+  input,select,textarea{width:100%; padding:10px 12px; border:1.5px solid var(--line);
+    border-radius:9px; font-size:14px; font-family:inherit; background:#fff; color:var(--ink);}
+  textarea{min-height:80px; resize:vertical; font-size:12.5px; line-height:1.6; word-break:break-all;}
+  input:focus,select:focus,textarea:focus{outline:none; border-color:var(--accent);}
+  .row{display:grid; grid-template-columns:repeat(auto-fit,minmax(190px,1fr)); gap:12px;}
+  .btn{display:inline-block; padding:9px 15px; border:1.5px solid var(--line); background:#fff;
+    color:var(--ink); border-radius:9px; font-size:13.5px; font-weight:650; cursor:pointer;
+    font-family:inherit; margin-top:12px;}
+  .btn:hover{border-color:var(--accent); color:var(--accent);}
+  .btn.solid{background:var(--accent); border-color:var(--accent); color:#fff;}
+  .btn.solid:hover{opacity:.9; color:#fff;}
+  .msg{font-size:13px; margin-top:9px; min-height:18px; font-weight:600;}
+  .msg.bad{color:var(--danger);} .msg.good{color:var(--ok);} .msg.warn{color:var(--warn);}
+  table{width:100%; border-collapse:collapse; margin-top:10px; font-size:13px;}
+  th,td{border:1px solid var(--line); padding:7px 9px; text-align:left; vertical-align:middle;}
+  th{background:var(--accent-soft); font-weight:700; font-size:12.5px;}
+  td code{font-size:12px; color:var(--sub);}
+  td select{padding:6px 8px; font-size:13px;}
+  .out{background:#0f2233; color:#dbe7f2; border-radius:10px; padding:12px 14px;
+    font-size:12.5px; word-break:break-all; line-height:1.65; margin-top:10px;
+    font-family:ui-monospace,Consolas,monospace;}
+  .tip{background:#fff8ec; border-left:4px solid var(--warn); color:#7a5010;
+    padding:11px 13px; border-radius:9px; font-size:13px; margin-top:12px;}
+  .danger{background:#fdf3f3; border-left:4px solid var(--danger); color:#7f2323;
+    padding:11px 13px; border-radius:9px; font-size:13px; margin-top:12px;}
+  .hidden{display:none;}
+  .foot{color:var(--sub); font-size:12px; margin-top:24px; padding-top:14px; border-top:1px solid var(--line);}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1>학생 조사 링크 만들기</h1>
+  <div class="sub">선생님 폼에 연결된 <b>내 반 전용 학생 링크</b>를 만듭니다 · 약 3분</div>
+
+  <div class="card">
+    <h2><span class="n">1</span>조사 폼 준비하기</h2>
+    <div class="lead">이미 폼이 있으면 2번으로 건너뛰세요.</div>
+    <ol>
+      <li>받으신 <b>사본 만들기 링크</b>를 열고 <b>[사본 만들기]</b>를 누릅니다.</li>
+      <li>문항 8개가 그대로 들어간 폼이 <b>내 드라이브</b>에 생깁니다.</li>
+      <li>응답은 <b>선생님에게만</b> 쌓입니다.</li>
+    </ol>
+    <div class="tip">문항 제목의 낱말(번호·이름·유형·1지망·학과·2지망·이유·선생님께)은 바꾸지 마세요.
+      상황판이 이 낱말로 열을 찾습니다.</div>
+  </div>
+
+  <div class="card">
+    <h2><span class="n">2</span>미리 채워진 링크 가져오기</h2>
+    <div class="lead">폼의 문항 번호를 알아내기 위해 필요합니다. 학생에게 보내는 링크가 아닙니다.</div>
+    <ol>
+      <li>폼 편집 화면 오른쪽 위 <b>⋮</b> → <b>[미리 채워진 링크 가져오기]</b></li>
+      <li>열린 화면에서 <b>모든 칸에 아무 글자나</b> 넣습니다. (예: 1, 2, 3 … / 객관식은 아무거나 선택)</li>
+      <li>맨 아래 <b>[링크 가져오기]</b> → <b>[링크 복사]</b></li>
+      <li>복사한 주소를 아래에 붙여 넣으세요.</li>
+    </ol>
+    <label for="pre">미리 채워진 링크 붙여넣기</label>
+    <textarea id="pre" placeholder="https://docs.google.com/forms/d/e/1FAIpQL.../viewform?usp=pp_url&entry.123456=1&entry.789012=2 ..."></textarea>
+    <button class="btn solid" id="read">읽어 들이기</button>
+    <div class="msg" id="m2"></div>
+  </div>
+
+  <div class="card hidden" id="c3">
+    <h2><span class="n">3</span>문항 짝 맞추기</h2>
+    <div class="lead">순서대로 자동으로 맞춰 두었습니다. <b>내가 넣은 값</b>을 보고 다르면 고쳐 주세요.</div>
+    <table id="map"></table>
+    <div class="msg" id="m3"></div>
+  </div>
+
+  <div class="card hidden" id="c4">
+    <h2><span class="n">4</span>우리 반 정보</h2>
+    <div class="row">
+      <div><label for="cls">학교·학년·반</label>
+        <input id="cls" placeholder="예: ○○중학교 3학년 1반"></div>
+      <div><label for="reg">우리 지역 일반고</label>
+        <select id="reg">
+          <option>비평준화</option>
+          <option>평준화</option>
+        </select></div>
+    </div>
+    <div class="tip"><b>비평준화</b>(시흥·화성·평택 등)는 학교 한 곳에 직접 지원,
+      <b>평준화</b>(안산·수원·안양권 등)는 지망 순위를 적어 배정받습니다.
+      학생에게 나가는 안내가 정반대라 꼭 맞게 고르세요.</div>
+    <button class="btn solid" id="make">링크 만들기</button>
+    <div class="msg" id="m4"></div>
+  </div>
+
+  <div class="card hidden" id="c5">
+    <h2><span class="n">5</span>완성 — 학생에게 보낼 링크</h2>
+    <div class="out" id="link"></div>
+    <button class="btn solid" id="copy">링크 복사</button>
+    <button class="btn" id="open">미리 보기(새 창)</button>
+
+    <div class="danger"><b>학생에게 보내기 전에 선생님이 먼저 한 번 제출해 보세요.</b>
+      미리 보기로 들어가 끝까지 제출한 뒤, 폼 <b>[응답]</b> 탭에 칸이 <b>제대로 들어갔는지</b> 확인하세요.
+      칸이 밀려 있으면 3번으로 돌아가 짝을 고치면 됩니다. (확인용 응답은 지우시면 됩니다.)</div>
+
+    <div class="tip">응답이 모이면 폼 <b>[응답]</b> 탭 → <b>⋮</b> → <b>[응답 다운로드(.csv)]</b> →
+      <b>진학 상황판</b>에 올리면 학생별 상담 카드가 만들어집니다.</div>
+  </div>
+
+  <div class="foot">이 페이지는 선생님 컴퓨터 안에서만 동작하며, 입력한 내용을 어디로도 보내지 않습니다.
+    만들어진 링크에는 폼 주소와 문항 번호만 들어 있고 학생 정보는 들어 있지 않습니다.</div>
+</div>
+
+<script>
+var FIELDS = ["번호","이름","희망 고교 유형","1지망 학교","1지망 학과","2지망 학교","지원 이유","선생님께 하고 싶은 말"];
+var $ = function(id){ return document.getElementById(id); };
+var esc = function(s){ return String(s==null?"":s).replace(/[&<>"']/g, function(c){
+  return {"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]; }); };
+var parsed = null;
+
+function b64enc(str){
+  var bytes = new TextEncoder().encode(str), bin = "";
+  for(var i=0;i<bytes.length;i++) bin += String.fromCharCode(bytes[i]);
+  return btoa(bin).replace(/\+/g,"-").replace(/\//g,"_").replace(/=+$/,"");
+}
+
+$("read").onclick = function(){
+  var raw = $("pre").value.trim();
+  var m = $("m2");
+  m.className = "msg bad";
+  if(!raw){ m.textContent = "링크를 붙여 넣어 주세요."; return; }
+
+  var fm = raw.match(/\/forms\/d\/e\/([A-Za-z0-9_-]+)\//);
+  if(!fm){ m.textContent = "구글 폼 주소가 아닙니다. '미리 채워진 링크 가져오기'에서 복사한 주소인지 확인해 주세요."; return; }
+
+  var entries = [], seen = {}, re = /entry\.(\d+)=([^&#]*)/g, x;
+  while((x = re.exec(raw)) !== null){
+    if(seen[x[1]]) continue;
+    seen[x[1]] = 1;
+    entries.push({ id:x[1], val:decodeURIComponent(x[2].replace(/\+/g," ")) });
+  }
+  if(!entries.length){ m.textContent = "문항 번호(entry)를 찾지 못했습니다. 모든 칸을 채운 뒤 링크를 다시 가져와 주세요."; return; }
+
+  parsed = { form:fm[1], entries:entries };
+  drawMap();
+  $("c3").classList.remove("hidden");
+  $("c4").classList.remove("hidden");
+
+  if(entries.length < FIELDS.length){
+    m.className = "msg warn";
+    m.textContent = "문항 " + entries.length + "개를 찾았습니다. 8개보다 적으면 빈칸으로 두고 링크를 만드셨을 수 있어요. 비어 있는 칸은 '사용 안 함'으로 두면 됩니다.";
+  }else{
+    m.className = "msg good";
+    m.textContent = "문항 " + entries.length + "개를 읽었습니다. 아래에서 짝이 맞는지만 확인해 주세요.";
+  }
+};
+
+function drawMap(){
+  var h = "<tr><th style='width:26%'>내가 넣은 값</th><th style='width:26%'>문항 번호</th><th>어떤 항목인가요</th></tr>";
+  parsed.entries.forEach(function(e, i){
+    var opts = '<option value="-1">— 사용 안 함 —</option>' + FIELDS.map(function(f, k){
+      return '<option value="' + k + '"' + (k === i ? " selected" : "") + ">" + esc(f) + "</option>";
+    }).join("");
+    h += "<tr><td>" + (e.val ? esc(e.val) : '<span style="color:#9ca3af">(빈칸)</span>')
+       + "</td><td><code>entry." + e.id + "</code></td>"
+       + '<td><select data-i="' + i + '">' + opts + "</select></td></tr>";
+  });
+  $("map").innerHTML = h;
+}
+
+$("make").onclick = function(){
+  var m = $("m4"); m.className = "msg bad";
+  var slots = new Array(FIELDS.length).fill("");
+  var used = {};
+  var sels = $("map").querySelectorAll("select");
+  for(var i=0;i<sels.length;i++){
+    var k = Number(sels[i].value);
+    if(k < 0) continue;
+    if(used[k]){ m.textContent = "‘" + FIELDS[k] + "’이(가) 두 번 지정되었습니다. 하나만 고르세요."; return; }
+    used[k] = 1;
+    slots[k] = parsed.entries[Number(sels[i].getAttribute("data-i"))].id;
+  }
+  if(!slots[0] || !slots[1]){ m.textContent = "‘번호’와 ‘이름’은 반드시 지정해야 합니다."; return; }
+
+  var missing = [];
+  for(var j=0;j<FIELDS.length;j++) if(!slots[j]) missing.push(FIELDS[j]);
+
+  var cfg = { f:parsed.form, e:slots, t:$("cls").value.trim(), r:$("reg").value };
+  // 지금 주소의 마지막 파일명만 학생 앱 파일명으로 바꾼다.
+  // (주소가 %EC%84%A4… 처럼 인코딩돼 있어도 되도록 디코딩해서 판별한다.)
+  var here = location.href.split("?")[0].split("#")[0];
+  var plain = here;
+  try{ plain = decodeURIComponent(here); }catch(e){}
+  var target = /setup\.html$/i.test(plain) ? "survey.html" : "조사.html";
+  var url = here.replace(/[^\/]*$/, encodeURIComponent(target)) + "?c=" + b64enc(JSON.stringify(cfg));
+
+  $("link").textContent = url;
+  $("c5").classList.remove("hidden");
+  $("open").onclick = function(){ window.open(url, "_blank"); };
+  $("c5").scrollIntoView({ behavior:"smooth", block:"start" });
+
+  if(missing.length){
+    m.className = "msg warn";
+    m.textContent = "만들었습니다. 다만 " + missing.join(", ") + " 항목은 지정되지 않아 그 내용은 수집되지 않습니다.";
+  }else{
+    m.className = "msg good";
+    m.textContent = "만들었습니다. 아래 링크를 복사해 쓰시면 됩니다.";
+  }
+};
+
+$("copy").onclick = function(){
+  var t = $("link").textContent, b = $("copy");
+  var ok = function(s){ b.textContent = s; setTimeout(function(){ b.textContent = "링크 복사"; }, 1800); };
+  if(navigator.clipboard && navigator.clipboard.writeText){
+    navigator.clipboard.writeText(t).then(function(){ ok("복사됨"); }).catch(function(){ sel(); ok("선택됨 · Ctrl+C"); });
+  } else { sel(); ok("선택됨 · Ctrl+C"); }
+};
+function sel(){
+  var r = document.createRange(); r.selectNodeContents($("link"));
+  var s = window.getSelection(); s.removeAllRanges(); s.addRange(r);
+}
+</script>
+</body>
+</html>

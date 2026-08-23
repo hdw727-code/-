@@ -4164,6 +4164,12 @@ function spriteOf(skin){
   const add=(p,px,py,th)=>{if(p&&p.w>4&&p.h>4)items.push([p,px,py,th]);};
   add(PS.legL,C.hipL[0],C.hipL[1],C.rot0.legL||0);
   add(PS.legR,C.hipR[0],C.hipR[1],C.rot0.legR||0);
+  /* 팔이 따로 잘려 있는 옛 스킨(소년·소녀·태권·호랑이)은 팔도 같이 구워야 한다.
+     안 그러면 소매가 몸통에서 뚝 끊긴 그림이 된다. 몸통보다 먼저 그려서
+     어깨 절단면을 몸통이 덮게 한다 — 이음매가 아예 안 보인다.
+     (자동 리깅 스킨은 armL/armR 이 2x2 더미라 add 가 알아서 건너뛴다) */
+  if(C.shL)add(PS.armL,C.shL[0],C.shL[1],(C.rot0&&C.rot0.armL)||0);
+  if(C.shR)add(PS.armR,C.shR[0],C.shR[1],(C.rot0&&C.rot0.armR)||0);
   add(PS.torso,0,0,0);
   add(PS.head,C.neck[0],C.neck[1],0);
   if(!items.length)return (_sprCache[skin]=null);
@@ -4204,7 +4210,11 @@ function spriteOf(skin){
    - 부모→자식 순으로 행렬을 누적하므로 어깨를 돌리면 팔꿈치·손이 따라온다.
    - 변형 후 가장 낮은 발끝을 지면에 되붙여서 무릎을 굽히면 골반이 내려간다.     */
 let MESH_NX=9, MESH_NY=16; const MESH_K=4;   // 격자 가로/세로 분할, 격자점당 본 개수
-let MESH_ON=1;                           // 0 이면 기존 통 스프라이트로 폴백
+/* 0 = 통 스프라이트(한 장) 로만 그린다.
+   1 로 두면 조각을 관절별로 변형하는데, 액트 미션처럼 크게 확대하는 화면에서
+   손목·어깨 절단면이 드러나 "캐릭터가 조각나 있다"는 인상을 준다.
+   움직임은 기울기·눌림·바운스로 충분히 전달되므로 통 한 장을 쓴다. */
+let MESH_ON=0;
 let MESH_R=1.6;                          // 가중치 완화 반경 (격자 간격 배수)
 let MESH_UNT=20;                         // 접힌 칸 펴기 반복 횟수 (0 이면 끈다)
 let MESH_SKIPNEG=1;                      // 펴도 안 펴진 칸은 그리지 않는다
@@ -4612,7 +4622,7 @@ function drawMeshBot(g,skin,pose,S,air){
      · 다리 조각: 골반 위 lgl*0.10 까지 — 엉덩이 덮개. 몸통이 위에 얹혀 가려 준다.
      · 머리 조각: 목 아래 tors*0.13 까지 — 목 덮개. 맨 위에 그린다.
    ══════════════════════════════════════════════════════════════════════════ */
-let RIG_ON=1;        // 0 이면 메시로 폴백한다
+let RIG_ON=0;        // 0 = 통 스프라이트 (위 MESH_ON 주석 참고)
 let RIG_AW=0.30;     // 팔 조각 폭 = 그 가로줄 실루엣 폭의 몇 배
 let RIG_A1=0.07;     // 팔 조각 아래 끝 = hipY + lgl*이값 (손을 포함시키는 깊이)
 let RIG_TT=0.55;     // 골반에서 휘는 상체 각도 배율 (바깥 lean 0.34 와 합쳐 ≈0.89)
@@ -4997,8 +5007,12 @@ function drawRigBot(g,skin,pose,S,air){
    회전은 반드시 "발(접지점)" 기준 — 엉덩이 기준으로 돌리면 발이 땅을 파고든다. */
 function drawSpriteBot(pose,ox,oy,scale){
   const g=PREVIEW_CTX||ctx;
-  const C=SKIN_CFG[SKIN]||SKIN_CFG.robot;
-  const spr=spriteOf(SKIN);
+  /* 초상화만 있는 스킨(카툰 소년·소녀)은 자기 조각이 없어 합성본도 못 만든다.
+     setSkin 이 이미 몸을 avatar 파츠로 빌려 쓰므로 합성본도 avatar 것을 쓴다 —
+     안 그러면 이 둘만 조각 그리기로 빠져서 팔다리가 어긋난다. */
+  const _sk=spriteOf(SKIN)?SKIN:"avatar";
+  const C=SKIN_CFG[_sk]||SKIN_CFG.robot;
+  const spr=spriteOf(_sk);
   if(!spr)return false;
   const S=C.S*scale, dy=(C.dy!=null?C.dy:34)*scale;
   // 메시 변형이 가능한 스킨이면 상체 기울기 일부를 메시(척추·가슴)에 넘긴다.
@@ -5189,10 +5203,17 @@ function drawSpriteBot(pose,ox,oy,scale){
 }
 function drawBotImg(pose,ox,oy,scale){
   const g=PREVIEW_CTX||ctx;
-  // 조각 리깅 스킨은 통 스프라이트로 그린다 (팔다리 어긋남 원천 차단)
+  /* ── 캐릭터는 '통짜'로 그린다 ────────────────────────────────────
+     예전에는 팔 조각이 있는 스킨(소년·소녀·태권·호랑이 등)만 조각을 하나씩
+     이어 붙여 그렸다. 그러면 손목·발목에 절단면이 그대로 드러나서
+     "캐릭터가 조각나 있다"는 말이 나온다 — 특히 점프·발차기처럼 팔다리가
+     크게 벌어지는 순간에 몸통과 다리가 떨어져 보인다.
+     그래서 스킨 종류를 가리지 않고 통 스프라이트(리깅·메시 변형) 를 먼저
+     쓴다. 통짜라 이음매가 아예 없고, 기울기·눌림·바운스로 움직임을 준다.
+     조각 그리기는 통 스프라이트를 못 만들 때만 쓰는 예비 수단으로 남긴다. */
   const _C=SKIN_CFG[SKIN]||SKIN_CFG.robot;
   COACH_PT=null;   // 이 프레임에서 뽑은 관절만 쓴다 (전 프레임 잔상 방지)
-  if((!!_C.noArms||!!(PARTS.armL&&PARTS.armL.w<=4))&&drawSpriteBot(pose,ox,oy,scale))return;
+  if(drawSpriteBot(pose,ox,oy,scale))return;
   const C=SKIN_CFG[SKIN]||SKIN_CFG.robot;
   const S=C.S*scale;
   g.save();

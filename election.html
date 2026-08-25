@@ -238,14 +238,16 @@ function recommend(){
   st.q.forEach((a,i)=>{ if(a===null) return; const w=QUIZ[i].opts[a].w; for(const k in w) score[k]=(score[k]||0)+w[k]; });
   return Object.entries(score).sort((a,b)=>b[1]-a[1]).filter(e=>e[1]>0).slice(0,2).map(e=>e[0]);
 }
-function doPost(values, onDone){
+function doPost(values, onDone, onFail){
   if(posting) return; posting = true;
   $('g_num').value=values.num; $('g_name').value=values.name; $('g_pos').value=values.pos;
   $('g_pledge').value=values.pledge; $('g_motto').value=values.motto;
   let finished=false;
-  const finish=()=>{ if(finished) return; finished=true; posting=false; onDone(); };
-  $('gframe').addEventListener('load', finish, {once:true});
-  setTimeout(finish, 2500);
+  // 숨은 창이 응답을 받아 load 가 뜨면 전송된 것. 시간만 지난 것은 실패로 본다.
+  const done=(ok)=>{ if(finished) return; finished=true; posting=false;
+    if(ok) onDone(); else (onFail||onDone)(); };
+  $('gframe').addEventListener('load', ()=>done(true), {once:true});
+  setTimeout(()=>done(false), 9000);
   $('gform').submit();
 }
 function confetti(){
@@ -390,8 +392,12 @@ function submitJinhak(){
   const pledge = `유형: ${st.type}\n1지망: ${st.s1||'미정'}${st.m1?'('+st.m1+')':''}\n2지망: ${st.s2||'-'}${st.m2?'('+st.m2+')':''}\n이유: ${st.reason||'-'}`;
   const motto = `자기진단: ${reco.join('/')||'-'} | 선생님께: ${st.ask||'-'}`;
   const btns=document.querySelectorAll('.jnav .next'); btns.forEach(b=>{b.disabled=true;b.textContent='제출 중...';});
+  const reset=()=>{ btns.forEach(b=>{b.disabled=false;b.textContent='다시 보내기';}); };
   doPost({num:st.num, name:'(진학) '+st.name, pos:'', pledge, motto}, ()=>{
     jinhakSubmitted=true; saveDraft(); st.step=10; render();
+  }, ()=>{
+    reset();
+    alert('아직 보내지 못했어 😢  인터넷 연결을 확인하고 [다시 보내기]를 눌러 줘. 계속 안 되면 선생님께 꼭 말해 줘!');
   });
 }
 

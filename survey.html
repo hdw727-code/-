@@ -259,6 +259,7 @@ function render(){
     v.innerHTML = '<span class="big">✅</span><h1>잘 받았어. 고마워!</h1>'
       + '<p class="desc">선생님이 네가 적어 준 내용을 읽고<br>상담 때 함께 이야기할 거야.<br><br>'
       + '<b>생각이 바뀌면 언제든 다시 제출해도 돼.</b><br>선생님은 가장 나중 것을 보게 돼.</p>'
+      + '<div class="note">혹시 선생님이 <b>“안 왔다”</b>고 하시면, 이 화면에서 <b>[처음으로]</b>를 눌러 한 번 더 보내 줘.</div>'
       + '<button class="btn ghost" onclick="st.step=0;render()">처음으로</button>';
   }
 }
@@ -294,12 +295,16 @@ function submitAll(){
   });
 
   let finished = false;
-  const done = () => {
+  const done = (ok) => {
     if(finished) return; finished = true;
-    st.done = true; st.step = 7; save(); render();
+    if(ok){ st.done = true; st.step = 7; save(); render(); return; }
+    // 시간만 지나고 응답이 없으면 전송되지 않은 것으로 본다
+    btns.forEach(b => { b.disabled = false; });
+    if(last) last.textContent = "다시 보내기";
+    alert("아직 보내지 못했어 😢  인터넷 연결을 확인하고 [다시 보내기]를 눌러 줘. 계속 안 되면 선생님께 꼭 말해 줘!");
   };
-  $("gf").onload = done;
-  setTimeout(done, 4000);   // 크로스도메인이라 응답을 읽을 수 없어 시간으로도 마무리한다
+  $("gf").onload = () => done(true);
+  setTimeout(() => done(false), 9000);
   f.submit();
 }
 

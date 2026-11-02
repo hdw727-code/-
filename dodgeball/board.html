@@ -1,0 +1,37 @@
+<!doctype html>
+<html lang="ko">
+<head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="referrer" content="no-referrer"><meta name="robots" content="noindex,nofollow"><meta name="theme-color" content="#124e48"><title>은계윙스 · 피구 전술판</title><link rel="stylesheet" href="style.css"><link rel="apple-touch-icon" href="assets/app-192.png"><meta name="apple-mobile-web-app-capable" content="yes"></head>
+<body>
+<header class="top"><div class="brand"><img src="assets/cover.png" alt=""><div><p class="eyebrow">EUNGYE WINGS · LINEUP BOARD</p><h1>우리 팀, 이렇게 나가자.</h1><p class="sub">이름표를 붙이고 떼며 만드는 피구 전술판</p></div></div><button id="export" class="primary">배치 이미지 저장 ↓</button></header>
+<main>
+<section class="learning-entry"><div><b>영상부터 전술까지, 학생 피구 수업실</b><p>던지기·잡기 영상을 보고 간격, 패스, 수비 전환, 내야·외야 신호 미션을 연습해요.</p></div><a href="learn.html">학생 수업실 열기 →</a></section>
+<div class="toolbar"><div class="slots" role="group" aria-label="배치 선택"><button data-slot="0" class="active">배치 1</button><button data-slot="1">배치 2</button><button data-slot="2">배치 3</button></div><div class="actions"><button id="undo">↶ 되돌리기</button><button id="arrange">내야 정렬</button><button id="clear">전원 후보로</button></div></div>
+<section class="formation-panel" aria-label="공격 수비 대형과 자동 이동">
+<div class="formation-main"><div><p class="eyebrow">ATTACK ⇄ DEFENSE</p><h2>공수 대형 <span id="modeLabel">직접 배치</span></h2></div><div class="formation-buttons"><button id="attack" class="attack-button">공격 대형 ↑</button><button id="defense" class="defense-button">수비 대형 ↓</button><button id="playMotion">▶ 공수 반복</button></div></div>
+<div class="formation-options"><label><input id="showPaths" type="checkbox" checked> 이동 동선 표시</label><label>이동 속도 <select id="motionSpeed"><option value="900">빠르게</option><option value="1800" selected>보통</option><option value="3000">천천히</option></select></label><span id="motionStatus" role="status">선수를 코트에 올린 뒤 공수 버튼을 누르세요.</span></div>
+<details class="formation-save"><summary>직접 만든 대형 저장</summary><p>이름표를 원하는 위치로 옮긴 뒤 저장하세요. 현재 배치의 주전과 후보를 유지하며 이동합니다.</p><div><button id="saveAttack">현재 위치를 공격으로 저장</button><button id="saveDefense">현재 위치를 수비로 저장</button></div><small id="formationSaved">저장된 대형이 없으면 기본 예시 대형을 사용합니다.</small></details>
+</section>
+<div class="layout">
+<section class="court-panel" aria-label="경기장 배치">
+<div class="section-head"><div><span class="eyebrow">STARTING LINEUP</span><h2>경기장 <span id="fieldCount">0 / 12명</span></h2></div><span id="ready" class="pill">12명을 골라 주세요</span></div>
+<p class="help" id="instruction">후보 이름표를 끌어 놓거나, 이름을 누른 뒤 코트의 원하는 곳을 누르세요.</p>
+<div id="board" class="board" aria-label="피구 코트. 아래는 우리 내야, 위쪽과 양옆은 우리 외야" tabindex="0">
+<svg id="courtArt" viewBox="0 0 800 900" aria-hidden="true" xmlns="http://www.w3.org/2000/svg">
+<defs><pattern id="grid" width="40" height="40" patternUnits="userSpaceOnUse"><path d="M40 0H0V40" fill="none" stroke="#ffffff" stroke-opacity=".04"/></pattern><linearGradient id="bg" x2="1" y2="1"><stop stop-color="#175f57"/><stop offset="1" stop-color="#103f3d"/></linearGradient></defs>
+<rect width="800" height="900" rx="24" fill="url(#bg)"/><rect width="800" height="900" fill="url(#grid)"/>
+<path d="M50 60H750V450H640V150H160V450H50Z" fill="#d99b4b" fill-opacity=".22" stroke="#e6ba76" stroke-width="2" stroke-dasharray="7 7"/>
+<rect x="160" y="150" width="480" height="300" fill="#102f31" fill-opacity=".55" stroke="#d5e4dc" stroke-width="3"/>
+<rect x="160" y="450" width="480" height="300" fill="#4f9c82" fill-opacity=".3" stroke="#f0e9cc" stroke-width="4"/>
+<path d="M160 450H640" stroke="#ffd28b" stroke-width="6"/>
+<g font-family="Malgun Gothic, sans-serif" text-anchor="middle"><text x="400" y="40" fill="#f1c88b" font-size="18" font-weight="700">우리 팀 외야</text><text x="400" y="300" fill="#9bb9b3" font-size="30" font-weight="700">상대 팀 내야</text><text x="400" y="335" fill="#799c95" font-size="16">이곳에는 우리 선수를 놓지 않아요</text><text x="400" y="792" fill="#fff4da" font-size="26" font-weight="700">은계윙스 · 우리 내야</text><text x="400" y="828" fill="#b2d0c1" font-size="16">주전 12명 안에서 내야 · 외야를 자유롭게 배치</text><text x="400" y="871" fill="#92b6a9" font-size="14">배치용 도식 · 실제 축척 아님</text></g>
+</svg><svg id="motionPaths" viewBox="0 0 800 900" aria-hidden="true"><defs><marker id="moveArrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0 0L10 5L0 10Z" fill="#ffcd87"/></marker></defs><g id="routeLines"></g></svg><div id="tokens"></div></div>
+<div class="legend"><span><i class="dot mint"></i>우리 내야 <b id="innerCount">0</b></span><span><i class="dot amber"></i>우리 외야 <b id="outerCount">0</b></span><span>이름표끼리 겹쳐 놓으면 서로 교체</span></div>
+</section>
+<aside>
+<section class="bench-panel"><div class="section-head"><div><span class="eyebrow">BENCH</span><h2>후보 <span id="benchCount">18명</span></h2></div><span class="small-pill">총 18명</span></div><p class="help">코트의 이름표를 이곳으로 옮기면 후보가 됩니다.</p><div id="bench" class="bench" aria-label="후보 선수"></div></section>
+<section class="selection-panel"><p class="eyebrow">SELECTED PLAYER</p><h2 id="selectedName">선수를 선택하세요</h2><p id="selectedInfo" class="help">이름표를 누르면 위치와 등번호를 확인할 수 있어요.</p><div class="edit-row"><label for="jersey">등번호</label><input id="jersey" type="number" min="1" max="99" inputmode="numeric" disabled><button id="numberSave" disabled>확정</button></div><div class="selection-actions"><button id="toBench" disabled>후보로 빼기</button><button id="deselect" disabled>선택 해제</button></div></section>
+<p class="note">이 화면은 번호 선수로 연습하는 전술판입니다. 실제 명단을 가져오지 않으며, 선생님용 옛 배치와 별도로 저장합니다. 번호는 연습용으로 바꿀 수 있습니다.</p>
+<p id="saveStatus" class="save-status" role="status">이 브라우저에 자동 저장 · 인터넷 없이 사용</p>
+</aside></div>
+</main><div id="toast" role="status" aria-live="polite"></div><script src="roster.js"></script><script src="app.js"></script>
+</body></html>
